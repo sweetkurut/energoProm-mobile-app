@@ -1,10 +1,11 @@
 import Colors from "@/constants/Colors";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function HomeScreen() {
+export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-      <Text>Главная</Text>
+      <Text>Профиль</Text>
     </View>
   );
 }

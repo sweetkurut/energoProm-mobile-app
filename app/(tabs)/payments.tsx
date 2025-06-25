@@ -1,10 +1,10 @@
 import Colors from "@/constants/Colors";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function HomeScreen() {
+export default function PaymentScreen() {
   return (
     <View style={styles.container}>
-      <Text>Главная</Text>
+      <Text>Платежи</Text>
     </View>
   );
 }
