@@ -7,20 +7,47 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginLayout = () => {
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: Colors.MAIN_BACKGROUND_COLOR }}
-      edges={["top", "bottom"]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.HEADER }} edges={["bottom"]}>
       <SystemBars style="dark" />
       <Stack
         screenOptions={{
-          headerShown: false,
+          headerShown: true,
           animationDuration: 0,
         }}
       >
-        <Stack.Screen name="welcome" options={{ title: "Добро пожаловать" }} />
-        <Stack.Screen name="service" options={{ title: "Заявки на услуги" }} />
-        <Stack.Screen name="createRequest" options={{ title: "Новая заявка" }} />
+        <Stack.Screen
+          name="welcome"
+          options={{
+            title: "Добро пожаловать",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="service"
+          options={{
+            title: "Заявки на услуги",
+            headerStyle: {
+              backgroundColor: Colors.HEADER,
+            },
+            headerTintColor: Colors.WHITE_COLOR,
+            headerTitleStyle: {
+              fontWeight: "500",
+            },
+          }}
+        />
+        <Stack.Screen
+          name="createRequest"
+          options={{
+            title: "Новая заявка",
+            headerStyle: {
+              backgroundColor: Colors.HEADER,
+            },
+            headerTintColor: Colors.WHITE_COLOR,
+            headerTitleStyle: {
+              fontWeight: "500",
+            },
+          }}
+        />
       </Stack>
     </SafeAreaView>
   );

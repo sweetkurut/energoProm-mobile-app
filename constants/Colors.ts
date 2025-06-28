@@ -8,4 +8,17 @@ export default {
 
   TITLE_AUTH: "#666360",
   SPAN_AUTH: "#6C7278",
+  // #FEA94B
+  // login
+  ORANGE_BACKGROUND: "#FFC281",
+  BUTTONSERVICE: "#FFA94B",
+  ICON: "#FFAA4D",
+  HEADER: "#FEA94B",
+
+  ICON_WRAP: "#FFF8F0",
+  // #FFA94A
 };
+
+// #FFAA4D
+// #666360
+// #747474
