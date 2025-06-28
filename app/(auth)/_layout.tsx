@@ -5,10 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthLayout() {
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: Colors.MAIN_BACKGROUND_COLOR }}
-      edges={["top", "bottom"]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.HEADER }} edges={["", "bottom"]}>
       <SystemBars style="dark" />
       <Stack
         screenOptions={{

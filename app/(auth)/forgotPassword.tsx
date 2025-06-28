@@ -1,13 +1,13 @@
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,9 +21,6 @@ interface ForgotPasswordForm {
 }
 
 export default function ForgotPassword() {
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
   const {
     control,
     handleSubmit,
@@ -35,106 +32,83 @@ export default function ForgotPassword() {
   });
 
   const handleBack = () => {
+    router.back();
     // router.back() при необходимости
   };
 
-  const handleSendCode = async (data: ForgotPasswordForm) => {
-    setValidationError(null);
-
-    if (!data.email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
-      setValidationError("Неверный формат email");
-      return;
-    }
-
-    setLoading(true);
-
-    // Заглушка
-    setTimeout(() => {
-      console.log("Отправка email:", data.email);
-      setLoading(false);
-    }, 1500);
+  const onSubmit = () => {
+    // console.log(data);
+    router.push("/(auth)/confirmCode");
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <LinearGradient
+      style={styles.container}
+      colors={["#ffc281", "#FFA94A"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <SystemBars style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
+        </TouchableOpacity>
 
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              {/* <Ionicons name="lock-open" size={40} color={Colors.ORANGE_COLOR} /> */}
-            </View>
-            <Text style={styles.title}>Восстановление пароля</Text>
-            <Text style={styles.subtitle}>
-              Укажите ваш email для восстановления пароля. Мы отправим вам код подтверждения.
-            </Text>
-          </View> 
-
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={20} color={Colors.SPAN_AUTH} style={styles.inputIcon} />
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Email обязателен",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Неверный формат email",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Введите ваш email"
-                      placeholderTextColor="#AAA"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                    />
-                  )}
-                  name="email"
-                />
-              </View>
-              {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-            </View>
-
-            {validationError && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorMessage}>{validationError}</Text>
-              </View>
-            )}
-
-            <TouchableOpacity
-              style={[styles.button, (Object.keys(errors).length > 0 || loading) && styles.buttonDisabled]}
-              onPress={handleSubmit(handleSendCode)}
-              disabled={Object.keys(errors).length > 0 || loading}
-              activeOpacity={0.7}
-            >
-              {loading ? (
-                <ActivityIndicator color={Colors.WHITE_COLOR} />
-              ) : (
-                <Text style={styles.buttonText}>Отправить код</Text>
-              )}
-            </TouchableOpacity>
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
           </View>
-        </ScrollView>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Забыли пароль ?</Text>
+          <Text style={styles.subtitle}>
+            Укажите свой номер телефона и ожидайте SMS с кодом подтверждения
+          </Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Номер телефона</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Номер телефона обязателен",
+                  pattern: {
+                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
+                    message: "Неверный формат номера",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="+996 XXX XXX XXX"
+                    placeholderTextColor="#AAA"
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                  />
+                )}
+                name="phone"
+              />
+            </View>
+            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+          </View>
+
+          <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={onSubmit}>
+            <Text style={styles.buttonText}>Отправить</Text>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
+    paddingTop: 30,
+    paddingHorizontal: 10,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -146,9 +120,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
   header: {
     alignItems: "center",
@@ -156,28 +135,36 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(245, 56, 62, 0.1)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    objectFit: "contain",
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: Colors.TITLE_AUTH,
-    marginBottom: 10,
+    marginBottom: 5,
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: "500",
     color: Colors.SPAN_AUTH,
     textAlign: "center",
-    lineHeight: 22,
+    marginBottom: 15,
   },
   formContainer: {
     width: "100%",
+    backgroundColor: Colors.WHITE_COLOR,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   inputContainer: {
     marginBottom: 24,
@@ -226,16 +213,16 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.ORANGE_COLOR,
   },
   button: {
-    backgroundColor: Colors.ORANGE_COLOR,
+    backgroundColor: Colors.BUTTONSERVICE,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
-    marginTop: 10,
+    marginBottom: 10,
   },
   buttonDisabled: {
     opacity: 0.7,

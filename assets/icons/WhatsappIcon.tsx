@@ -2,7 +2,7 @@ import React from "react";
 import Svg, { Path } from "react-native-svg";
 
 const WhatsappIcon = () => (
-  <Svg width={21} height={22} viewBox="0 0 21 22" fill="none">
+  <Svg width={35} height={35} viewBox="0 0 21 22" fill="none">
     <Path
       fillRule="evenodd"
       clipRule="evenodd"

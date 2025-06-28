@@ -1,5 +1,10 @@
+import InstaIcon from "@/assets/icons/InstaIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Checkbox } from "expo-checkbox";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -7,7 +12,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -18,6 +22,7 @@ import { SystemBars } from "react-native-edge-to-edge";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isChecked, setChecked] = useState(false);
 
   const {
     control,
@@ -39,110 +44,139 @@ export default function SignIn() {
     router.push("/(auth)/signUp");
   };
 
+  const goToForgotPassword = () => {
+    router.push("/(auth)/forgotPassword");
+  };
+
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      style={styles.container}
+      colors={["#ffc281", "#FFA94A"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <SystemBars style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+          </View>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Войти в личный кабинет</Text>
+          <Text style={styles.subtitle}>Введите данные для входа в систему</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Номер телефона</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Номер телефона обязателен",
+                  pattern: {
+                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
+                    message: "Неверный формат номера",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="+996 XXX XXX XXX"
+                    placeholderTextColor="#AAA"
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                  />
+                )}
+                name="phone"
+              />
             </View>
+            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
           </View>
 
-          <View style={styles.formContainer}>
-            <Text style={styles.title}>Войти в личный кабинет</Text>
-            <Text style={styles.subtitle}>Введите данные для входа в систему</Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Номер телефона</Text>
-              <View style={styles.inputWrapper}>
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Номер телефона обязателен",
-                    pattern: {
-                      value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
-                      message: "Неверный формат номера",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="+996 XXX XXX XXX"
-                      placeholderTextColor="#AAA"
-                      keyboardType="phone-pad"
-                      autoCapitalize="none"
-                    />
-                  )}
-                  name="phone"
-                />
-              </View>
-              {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Пароль</Text>
-              <View style={styles.inputWrapper}>
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Пароль обязателен",
-                    minLength: {
-                      value: 6,
-                      message: "Пароль должен содержать минимум 6 символов",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="******"
-                      placeholderTextColor="#AAA"
-                      secureTextEntry={!showPassword}
-                    />
-                  )}
-                  name="password"
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color={Colors.SPAN_AUTH}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Пароль</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Пароль обязателен",
+                  minLength: {
+                    value: 6,
+                    message: "Пароль должен содержать минимум 6 символов",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="******"
+                    placeholderTextColor="#AAA"
+                    secureTextEntry={!showPassword}
                   />
-                </TouchableOpacity>
-              </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-            </View>
-
-            <TouchableOpacity style={styles.forgotPasswordLink}>
-              <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} activeOpacity={0.7}>
-              <Text style={styles.buttonText}>Войти</Text>
-            </TouchableOpacity>
-
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Еще нет аккаунта?</Text>
-              <TouchableOpacity onPress={createAccount}>
-                <Text style={styles.signupLink}>Зарегистрироваться</Text>
+                )}
+                name="password"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={Colors.SPAN_AUTH}
+                />
               </TouchableOpacity>
             </View>
+            {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
           </View>
-          <View style={styles.supportContainer}>
-            <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
-            <TouchableOpacity>
-              <Text style={styles.supportLink}>+996 XXX XXX XXX</Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: -15,
+            }}
+          >
+            <View style={styles.checkboxContainer}>
+              <Checkbox style={styles.checkbox} value={isChecked} onValueChange={setChecked} />
+              <Text style={styles.label}>Запомнить меня</Text>
+            </View>
+
+            <TouchableOpacity style={styles.forgotPasswordLink} onPress={goToForgotPassword}>
+              <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+
+          <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} activeOpacity={0.7}>
+            <Text style={styles.buttonText}>Войти</Text>
+          </TouchableOpacity>
+
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Еще нет аккаунта?</Text>
+            <TouchableOpacity onPress={createAccount}>
+              <Text style={styles.signupLink}>Зарегистрироваться</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.supportContainer}>
+          <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <WhatsappIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <InstaIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <PhoneIcon />
+            </TouchableOpacity>
+          </View>
+        </View>
       </KeyboardAvoidingView>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -153,13 +187,13 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingTop: 50,
   },
 
   header: {
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 60,
     marginBottom: 40,
   },
   logoContainer: {
@@ -182,7 +216,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   formContainer: {
-    width: "100%",
+    width: "auto",
     backgroundColor: Colors.WHITE_COLOR,
     padding: 12,
     borderRadius: 16,
@@ -193,6 +227,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    marginHorizontal: 10,
   },
   inputContainer: {
     marginBottom: 20,
@@ -234,6 +269,7 @@ const styles = StyleSheet.create({
   forgotPasswordLink: {
     alignSelf: "flex-end",
     marginBottom: 30,
+    paddingTop: 10,
   },
   forgotPasswordText: {
     color: Colors.ORANGE_COLOR,
@@ -247,9 +283,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: Colors.ORANGE_BUTTON_COLOR,
+    backgroundColor: Colors.BUTTONSERVICE,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -269,7 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 15,
   },
   signupText: {
     color: Colors.SPAN_AUTH,
@@ -286,16 +322,40 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 35,
+    marginTop: "auto",
   },
   supportText: {
-    color: Colors.SPAN_AUTH,
-    fontSize: 12,
+    color: Colors.WHITE_COLOR,
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 10,
   },
-  supportLink: {
-    color: Colors.ORANGE_COLOR,
-    fontSize: 12,
-    fontWeight: "600",
-    marginLeft: 5,
+
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  iconWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    padding: 7,
+    marginBottom: 10,
+  },
+
+  icon: {
+    color: Colors.ICON,
+  },
+
+  checkboxContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  checkbox: {
+    alignSelf: "center",
+  },
+  label: {
+    margin: 8,
   },
 });

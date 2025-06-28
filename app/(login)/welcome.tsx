@@ -1,7 +1,9 @@
+import InstaIcon from "@/assets/icons/InstaIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Instagram, Phone } from "lucide-react-native";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -50,10 +52,13 @@ const WelcomeScreen = () => {
         <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
         <View style={styles.iconContainer}>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Instagram style={styles.icon} />
+            <WhatsappIcon />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Phone style={styles.icon} />
+            <InstaIcon />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconWrapper}>
+            <PhoneIcon />
           </TouchableOpacity>
         </View>
       </View>
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
   iconWrapper: {
     backgroundColor: "#fff",
     borderRadius: "50%",
-    padding: 8,
+    padding: 7,
     marginBottom: 10,
   },
 

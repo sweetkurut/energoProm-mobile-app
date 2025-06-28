@@ -1,14 +1,18 @@
+import InstaIcon from "@/assets/icons/InstaIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   NativeSyntheticEvent,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -88,6 +92,7 @@ export default function ConfirmCode() {
   const handleContinue = async (data: CodeFormData) => {
     const codeString = Object.values(data).join("");
     setLoading(true);
+    router.push("/(auth)/setPassword");
 
     // Заглушка
     setTimeout(() => {
@@ -104,97 +109,118 @@ export default function ConfirmCode() {
   const handleBack = () => {
     // Заглушка для возврата
     console.log("Назад");
+    router.push("/(auth)/signUp");
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <LinearGradient
+      style={styles.container}
+      colors={["#ffc281", "#FFA94A"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       {/* <SystemBars style="dark" /> */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
+        </TouchableOpacity>
+
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+          </View>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Подтверждение</Text>
+          <Text style={styles.subtitle}>
+            Код подверждения отправлен. Пожалуйста введите его ниже для продолжения
+          </Text>
+
+          <View style={styles.codeContainer}>
+            {codeValues.map((digit, index) => (
+              <View key={index} style={styles.inputWrapper}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true,
+                    pattern: /^[0-9]$/,
+                  }}
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.codeInput,
+                        value ? styles.filledInput : styles.emptyInput,
+                        errors[`digit${index}` as keyof CodeFormData] && styles.errorInput,
+                      ]}
+                      maxLength={1}
+                      keyboardType="number-pad"
+                      value={value}
+                      onChangeText={(text) => {
+                        onChange(text);
+                        handleCodeChange(text, index);
+                      }}
+                      onKeyPress={(e) => handleKeyPress(e, index)}
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                    />
+                  )}
+                  name={`digit${index}` as keyof CodeFormData}
+                />
+              </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={[styles.button, (!isCodeComplete || loading) && styles.buttonDisabled]}
+            onPress={handleSubmit(handleContinue)}
+            disabled={!isCodeComplete || loading}
+            activeOpacity={0.7}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE_COLOR} />
+            ) : (
+              <Text style={styles.buttonText}>Продолжить</Text>
+            )}
           </TouchableOpacity>
 
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              {/* <Ionicons name="mail-unread" size={40} color={Colors.ORANGE_COLOR} /> */}
-            </View>
-            <Text style={styles.title}>Подтвердите Email</Text>
-            <Text style={styles.subtitle}>
-              Мы отправили код подтверждения на {email}. Введите его ниже, чтобы продолжить.
-            </Text>
+          <View style={styles.resendContainer}>
+            <Text style={styles.resendText}>Не получили код?</Text>
+            {timer > 0 ? (
+              <Text style={styles.timerText}>Отправить повторно через {timer}с</Text>
+            ) : (
+              <TouchableOpacity onPress={resendCode}>
+                <Text style={styles.resendButton}>Отправить повторно</Text>
+              </TouchableOpacity>
+            )}
           </View>
-
-          <View style={styles.formContainer}>
-            <View style={styles.codeContainer}>
-              {codeValues.map((digit, index) => (
-                <View key={index} style={styles.inputWrapper}>
-                  <Controller
-                    control={control}
-                    rules={{
-                      required: true,
-                      pattern: /^[0-9]$/,
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        style={[
-                          styles.codeInput,
-                          value ? styles.filledInput : styles.emptyInput,
-                          errors[`digit${index}` as keyof CodeFormData] && styles.errorInput,
-                        ]}
-                        maxLength={1}
-                        keyboardType="number-pad"
-                        value={value}
-                        onChangeText={(text) => {
-                          onChange(text);
-                          handleCodeChange(text, index);
-                        }}
-                        onKeyPress={(e) => handleKeyPress(e, index)}
-                        ref={(el) => {
-                          inputRefs.current[index] = el;
-                        }}
-                      />
-                    )}
-                    name={`digit${index}` as keyof CodeFormData}
-                  />
-                </View>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, (!isCodeComplete || loading) && styles.buttonDisabled]}
-              onPress={handleSubmit(handleContinue)}
-              disabled={!isCodeComplete || loading}
-              activeOpacity={0.7}
-            >
-              {loading ? (
-                <ActivityIndicator color={Colors.WHITE_COLOR} />
-              ) : (
-                <Text style={styles.buttonText}>Продолжить</Text>
-              )}
+        </View>
+        <View style={styles.supportContainer}>
+          <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <WhatsappIcon />
             </TouchableOpacity>
-
-            <View style={styles.resendContainer}>
-              <Text style={styles.resendText}>Не получили код?</Text>
-              {timer > 0 ? (
-                <Text style={styles.timerText}>Отправить повторно через {timer}с</Text>
-              ) : (
-                <TouchableOpacity onPress={resendCode}>
-                  <Text style={styles.resendButton}>Отправить повторно</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <InstaIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <PhoneIcon />
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
+    paddingTop: 30,
+    paddingHorizontal: 10,
+    // backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -206,9 +232,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
   header: {
     alignItems: "center",
@@ -216,29 +247,36 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(245, 56, 62, 0.1)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    objectFit: "contain",
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: Colors.TITLE_AUTH,
-    marginBottom: 10,
+    marginBottom: 5,
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: "500",
     color: Colors.SPAN_AUTH,
     textAlign: "center",
-    lineHeight: 22,
+    marginBottom: 15,
   },
   formContainer: {
     width: "100%",
-    alignItems: "center",
+    backgroundColor: Colors.WHITE_COLOR,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   codeContainer: {
     flexDirection: "row",
@@ -288,7 +326,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   button: {
-    backgroundColor: Colors.ORANGE_COLOR,
+    backgroundColor: Colors.BUTTONSERVICE,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
@@ -324,5 +362,35 @@ const styles = StyleSheet.create({
     color: Colors.ORANGE_COLOR,
     fontSize: 15,
     fontWeight: "600",
+  },
+
+  supportContainer: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "auto",
+  },
+  supportText: {
+    color: Colors.WHITE_COLOR,
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 10,
+  },
+
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  iconWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    padding: 7,
+    marginBottom: 10,
+  },
+
+  icon: {
+    color: Colors.ICON,
   },
 });

@@ -1,12 +1,16 @@
+import InstaIcon from "@/assets/icons/InstaIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -40,159 +44,144 @@ export default function SetPassword() {
   const password = watch("password");
 
   const handleBack = () => {
-    // navigation.goBack() если понадобится
+    router.back();
   };
 
   const handleSetPassword = (data: PasswordForm) => {
     console.log("Форма установления пароля:", data);
+    router.push("/(auth)/signIn");
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <LinearGradient
+      style={styles.container}
+      colors={["#ffc281", "#FFA94A"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
+        </TouchableOpacity>
 
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              {/* <Ionicons name="lock-closed" size={40} color={Colors.ORANGE_COLOR} /> */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+          </View>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Придумайте пароль</Text>
+          <Text style={styles.subtitle}>Придумайте надёжный пароль для защиты вашего аккаунта</Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Пароль</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Пароль обязателен",
+                  minLength: {
+                    value: 6,
+                    message: "Пароль должен содержать минимум 6 символов",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Минимум 6 символов"
+                    placeholderTextColor="#AAA"
+                    secureTextEntry={!showPassword}
+                  />
+                )}
+                name="password"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={Colors.SPAN_AUTH}
+                />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.title}>Завершение регистрации</Text>
-            <Text style={styles.subtitle}>Укажите ваше имя и придумайте надежный пароль</Text>
+            {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Имя</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={20} color={Colors.SPAN_AUTH} style={styles.inputIcon} />
-                <Controller
-                  control={control}
-                  rules={{ required: "Имя обязательно" }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Введите ваше имя"
-                      placeholderTextColor="#AAA"
-                    />
-                  )}
-                  name="name"
-                />
-              </View>
-              {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Пароль</Text>
-              <View style={styles.inputWrapper}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Подтвердите пароль</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Необходимо подтвердить пароль",
+                  validate: (value) => value === password || "Пароли не совпадают",
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Повторите пароль"
+                    placeholderTextColor="#AAA"
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                )}
+                name="password_confirm"
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeIcon}
+              >
                 <Ionicons
-                  name="lock-closed-outline"
+                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
                   color={Colors.SPAN_AUTH}
-                  style={styles.inputIcon}
                 />
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Пароль обязателен",
-                    minLength: {
-                      value: 6,
-                      message: "Пароль должен содержать минимум 6 символов",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Минимум 6 символов"
-                      placeholderTextColor="#AAA"
-                      secureTextEntry={!showPassword}
-                    />
-                  )}
-                  name="password"
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color={Colors.SPAN_AUTH}
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+              </TouchableOpacity>
             </View>
+            {errors.password_confirm && (
+              <Text style={styles.errorText}>{errors.password_confirm.message}</Text>
+            )}
+          </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Подтвердите пароль</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="shield-checkmark-outline"
-                  size={20}
-                  color={Colors.SPAN_AUTH}
-                  style={styles.inputIcon}
-                />
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Необходимо подтвердить пароль",
-                    validate: (value) => value === password || "Пароли не совпадают",
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Повторите пароль"
-                      placeholderTextColor="#AAA"
-                      secureTextEntry={!showConfirmPassword}
-                    />
-                  )}
-                  name="password_confirm"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <Ionicons
-                    name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color={Colors.SPAN_AUTH}
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.password_confirm && (
-                <Text style={styles.errorText}>{errors.password_confirm.message}</Text>
-              )}
-            </View>
+          {/* Ошибки от сервера больше не отображаются */}
 
-            {/* Ошибки от сервера больше не отображаются */}
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleSubmit(handleSetPassword)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.buttonText}>Завершить регистрацию</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit(handleSetPassword)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.buttonText}>Подтвердить</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.supportContainer}>
+          <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <WhatsappIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <InstaIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <PhoneIcon />
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
+    paddingHorizontal: 10,
+    paddingTop: 30,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -204,9 +193,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
   header: {
     alignItems: "center",
@@ -223,19 +217,32 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: Colors.TITLE_AUTH,
-    marginBottom: 10,
+    marginBottom: 5,
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: "500",
     color: Colors.SPAN_AUTH,
     textAlign: "center",
-    lineHeight: 22,
+    marginBottom: 15,
   },
   formContainer: {
-    width: "100%",
+    width: "auto",
+    backgroundColor: Colors.WHITE_COLOR,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#00000067",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    // marginHorizontal: 10,
   },
   inputContainer: {
     marginBottom: 20,
@@ -285,9 +292,9 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.ORANGE_COLOR,
   },
   button: {
-    backgroundColor: Colors.ORANGE_COLOR,
+    backgroundColor: Colors.BUTTONSERVICE,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -303,5 +310,35 @@ const styles = StyleSheet.create({
     color: Colors.WHITE_COLOR,
     fontSize: 16,
     fontWeight: "600",
+  },
+
+  supportContainer: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "auto",
+  },
+  supportText: {
+    color: Colors.WHITE_COLOR,
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 10,
+  },
+
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  iconWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    padding: 7,
+    marginBottom: 10,
+  },
+
+  icon: {
+    color: Colors.ICON,
   },
 });

@@ -1,4 +1,8 @@
+import InstaIcon from "@/assets/icons/InstaIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -6,7 +10,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,18 +19,18 @@ import {
 import { SystemBars } from "react-native-edge-to-edge";
 
 interface ISignUpEmail {
-  email: string;
+  phone: string;
+  accountNumber: string;
 }
 
 export default function SignUp() {
   const {
     control,
-    handleSubmit,
+    // handleSubmit,
     formState: { errors },
   } = useForm<ISignUpEmail>({
     defaultValues: {
       phone: "",
-      name: "",
       accountNumber: "",
     },
   });
@@ -36,112 +39,123 @@ export default function SignUp() {
     router.push("/(auth)/signIn");
   };
 
-  const handleRegister = (data: ISignUpEmail) => {
-    console.log("Регистрация (заглушка):", data);
+  // const handleRegister = (data: ISignUpEmail) => {
+  //   console.log("Регистрация (заглушка):", data);
+  // };
+
+  const goToConfirm = () => {
+    router.push("/(auth)/confirmCode");
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      style={styles.container}
+      colors={["#ffc281", "#FFA94A"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <SystemBars style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+          </View>
+        </View>
+
+        <View style={styles.formContainer}>
           <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
+            <Text style={styles.title}>Создать аккаунт</Text>
+            <Text style={styles.subtitle}>Зарегистрируйтесь для доступа к личному кабинету</Text>
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Лицевой счёт</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Лицевой счёт обязателен",
+                  pattern: {
+                    value: /^[0-9]{6,12}$/, // Можно настроить под свой формат
+                    message: "Неверный формат лицевого счёта",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Введите лицевой счёт"
+                    placeholderTextColor="#AAA"
+                    keyboardType="number-pad"
+                    autoCapitalize="none"
+                  />
+                )}
+                name="accountNumber"
+              />
             </View>
+            {errors.accountNumber && <Text style={styles.errorText}>{errors.accountNumber.message}</Text>}
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Номер телефона</Text>
+            <View style={styles.inputWrapper}>
+              <Controller
+                control={control}
+                rules={{
+                  required: "Номер телефона обязателен",
+                  pattern: {
+                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
+                    message: "Неверный формат номера",
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="+996 XXX XXX XXX"
+                    placeholderTextColor="#AAA"
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                  />
+                )}
+                name="phone"
+              />
+            </View>
+            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.header}>
-              <Text style={styles.title}>Создать аккаунт</Text>
-              <Text style={styles.subtitle}>Зарегистрируйтесь для доступа к личному кабинету</Text>
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Лицевой счёт</Text>
-              <View style={styles.inputWrapper}>
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Лицевой счёт обязателен",
-                    pattern: {
-                      value: /^[0-9]{6,12}$/, // Можно настроить под свой формат
-                      message: "Неверный формат лицевого счёта",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Введите лицевой счёт"
-                      placeholderTextColor="#AAA"
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                    />
-                  )}
-                  name="accountNumber"
-                />
-              </View>
-              {errors.accountNumber && <Text style={styles.errorText}>{errors.accountNumber.message}</Text>}
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Номер телефона</Text>
-              <View style={styles.inputWrapper}>
-                <Controller
-                  control={control}
-                  rules={{
-                    required: "Номер телефона обязателен",
-                    pattern: {
-                      value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
-                      message: "Неверный формат номера",
-                    },
-                  }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="+996 XXX XXX XXX"
-                      placeholderTextColor="#AAA"
-                      keyboardType="phone-pad"
-                      autoCapitalize="none"
-                    />
-                  )}
-                  name="phone"
-                />
-              </View>
-              {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
-            </View>
+          {/* Здесь раньше выводилась ошибка с бэка */}
 
-            {/* Здесь раньше выводилась ошибка с бэка */}
+          <TouchableOpacity style={styles.button} onPress={goToConfirm} activeOpacity={0.7}>
+            <Text style={styles.buttonText}>Зарегистрироваться</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleSubmit(handleRegister)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.buttonText}>Зарегистрироваться</Text>
-            </TouchableOpacity>
-
-            <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Уже есть аккаунт?</Text>
-              <TouchableOpacity onPress={handleLogin}>
-                <Text style={styles.loginLink}>Войти</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.supportContainer}>
-            <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
-            <TouchableOpacity>
-              <Text style={styles.supportLink}>+996 XXX XXX XXX</Text>
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Уже есть аккаунт?</Text>
+            <TouchableOpacity onPress={handleLogin}>
+              <Text style={styles.loginLink}>Войти</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
+
+        <View style={styles.supportContainer}>
+          <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+          <View style={styles.iconContainer}>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <WhatsappIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <InstaIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconWrapper}>
+              <PhoneIcon />
+            </TouchableOpacity>
+          </View>
+        </View>
       </KeyboardAvoidingView>
-    </View>
+    </LinearGradient>
   );
 }
 const styles = StyleSheet.create({
@@ -198,7 +212,7 @@ const styles = StyleSheet.create({
     marginBottom: -15,
   },
   formContainer: {
-    width: "100%",
+    width: "auto",
     backgroundColor: Colors.WHITE_COLOR,
     padding: 12,
     borderRadius: 16,
@@ -209,6 +223,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    marginHorizontal: 10,
   },
   inputContainer: {
     marginBottom: 15,
@@ -255,9 +270,9 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.ORANGE_COLOR,
   },
   button: {
-    backgroundColor: Colors.ORANGE_BUTTON_COLOR,
+    backgroundColor: Colors.BUTTONSERVICE,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -278,15 +293,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 15,
   },
   loginText: {
     color: Colors.TITLE_AUTH,
-    fontSize: 14,
+    fontSize: 12,
   },
   loginLink: {
     color: Colors.ORANGE_COLOR,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
     marginLeft: 5,
   },
@@ -309,16 +324,29 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 35,
+    marginTop: "auto",
   },
   supportText: {
-    color: Colors.SPAN_AUTH,
-    fontSize: 12,
+    color: Colors.WHITE_COLOR,
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 10,
   },
-  supportLink: {
-    color: Colors.ORANGE_COLOR,
-    fontSize: 12,
-    fontWeight: "600",
-    marginLeft: 5,
+
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  iconWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    padding: 7,
+    marginBottom: 10,
+  },
+
+  icon: {
+    color: Colors.ICON,
   },
 });
