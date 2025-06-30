@@ -13,6 +13,9 @@ export default {
   ICON: "#FFAA4D",
   HEADER: "#FEA94B",
   ICON_WRAP: "#FFF8F0",
+
+  BADGE: "#E74C3D",
 };
 
+// #FEA94B
 // #FEA94B

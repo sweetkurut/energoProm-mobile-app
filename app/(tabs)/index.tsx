@@ -2,9 +2,14 @@ import NotificationIcon from "@/assets/icons/NotificationIcon";
 import CardServices from "@/components/CardServices";
 import Chart from "@/components/Chart";
 import Colors from "@/constants/Colors";
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function HomeScreen() {
+  const goToNotification = () => {
+    router.push("/(notification)/notification");
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* шапка главной страницы */}
@@ -27,7 +32,7 @@ export default function HomeScreen() {
               Ру
             </Text>
           </View>
-          <TouchableOpacity style={styles.iconWrapper}>
+          <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
             <NotificationIcon />
           </TouchableOpacity>
         </View>
