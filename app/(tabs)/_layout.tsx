@@ -13,6 +13,7 @@ export default function TabLayout() {
         lazy: true,
         tabBarActiveTintColor: Colors.ORANGE_COLOR,
         tabBarInactiveTintColor: Colors.GRAY_COLOR,
+        // headerShown: true,
       }}
     >
       <Tabs.Screen
