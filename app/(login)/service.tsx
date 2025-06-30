@@ -78,7 +78,7 @@ export default ServiceListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
   },
 
   title: {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
 
   cards: {
-    marginTop: 30,
+    marginTop: 15,
     flexDirection: "column",
     gap: 10,
   },

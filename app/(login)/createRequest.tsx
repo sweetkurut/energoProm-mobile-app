@@ -194,6 +194,8 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     marginHorizontal: 10,
+    borderLeftWidth: 4,
+    borderColor: "#8CAFBF",
   },
   infoHeader: {
     flexDirection: "row",

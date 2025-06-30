@@ -3,10 +3,23 @@ import EmailServicesIcon from "@/assets/icons/EmailServicesIcon";
 import NotificationEmailIcon from "@/assets/icons/NotificationEmailIcon";
 import UserCardIcon from "@/assets/icons/UserCardIcon";
 import Colors from "@/constants/Colors";
+import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const CardServices = () => {
+  const goToService = () => {
+    router.push("/(login)/service");
+  };
+
+  const goToNotification = () => {
+    router.push("/(notification)/notification");
+  };
+
+  const gotoProfile = () => {
+    router.push("/(tabs)/profile");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Сервисы</Text>
@@ -19,7 +32,7 @@ const CardServices = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={goToService}>
           <EmailServicesIcon />
           <View>
             <Text style={styles.card_title}>Заявки</Text>
@@ -27,7 +40,7 @@ const CardServices = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={goToNotification}>
           <NotificationEmailIcon />
           <View>
             <Text style={styles.card_title}>Уведомление</Text>
@@ -35,7 +48,7 @@ const CardServices = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={gotoProfile}>
           <UserCardIcon />
           <View>
             <Text style={styles.card_title}>Профиль</Text>

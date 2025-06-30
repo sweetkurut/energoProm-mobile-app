@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginLayout = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.HEADER }} edges={["bottom"]}>
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <SystemBars style="dark" />
       <Stack
         screenOptions={{

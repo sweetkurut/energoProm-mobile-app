@@ -29,6 +29,14 @@ const mockData = {
       color: "#3FAFCE",
       isNews: true,
     },
+    {
+      type: "Новости",
+      title: "Новости",
+      message: "С 10 мая будут проводится технические ремонты",
+      time: "22 июня 2025",
+      color: "#3FAFCE",
+      isNews: true,
+    },
   ],
 };
 
@@ -66,7 +74,7 @@ export default function NotificationsScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {notifications.map((item, idx) => (
-            <View key={idx} style={styles.card}>
+            <TouchableOpacity key={idx} style={styles.card}>
               <View style={[styles.label, { backgroundColor: item.color }]}>
                 <Text style={styles.labelText}>{item.title}</Text>
               </View>
@@ -75,7 +83,7 @@ export default function NotificationsScreen() {
                 {item.isNews && <Text style={styles.readMore}>Читать далее →</Text>}
                 <Text style={styles.time}>{item.time}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       )}
