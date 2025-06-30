@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -25,6 +26,20 @@ export default function RootLayout() {
         <Stack.Screen name="(notification)" options={{ headerShown: false }} />
         <Stack.Screen name="(login)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="listing/news/[id]"
+          options={{
+            title: "Узнать больше",
+            headerStyle: {
+              backgroundColor: Colors.HEADER,
+            },
+            headerTintColor: Colors.WHITE_COLOR,
+            headerTitleStyle: {
+              fontWeight: "500",
+            },
+          }}
+        />
+
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

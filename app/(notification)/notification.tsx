@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -48,6 +49,10 @@ export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState("Все");
   const notifications = mockData[activeTab];
 
+  const goToNews = () => {
+    router.push("/listing/news/[id]");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.tabs}>
@@ -74,7 +79,13 @@ export default function NotificationsScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {notifications.map((item, idx) => (
-            <TouchableOpacity key={idx} style={styles.card}>
+            <TouchableOpacity
+              key={idx}
+              style={styles.card}
+              onPress={() => {
+                if (item.isNews) goToNews();
+              }}
+            >
               <View style={[styles.label, { backgroundColor: item.color }]}>
                 <Text style={styles.labelText}>{item.title}</Text>
               </View>
