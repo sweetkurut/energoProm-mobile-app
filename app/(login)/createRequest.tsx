@@ -1,5 +1,6 @@
 import CheckCircleIcon from "@/assets/icons/CheckCircleIcon";
 import ExclamationIcon from "@/assets/icons/ExclamationIcon";
+import ConfirmModal from "@/components/Modal";
 import Colors from "@/constants/Colors";
 import { CalendarFold } from "lucide-react-native";
 import React, { useState } from "react";
@@ -15,6 +16,12 @@ const CreateRequestScreen = () => {
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleCancel = () => {
+    setModalVisible(false);
+  };
 
   const showDate = () => {
     setDatePickerVisibility(true);
@@ -101,9 +108,20 @@ const CreateRequestScreen = () => {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.submitButton}>
+      <TouchableOpacity style={styles.submitButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.submitButtonText}>Отправить заявку</Text>
       </TouchableOpacity>
+
+      <ConfirmModal
+        visible={modalVisible}
+        onConfirm={handleCancel}
+        onCancel={() => setModalVisible(false)}
+        title={"Заявка оформлена"}
+        message={"Ожидайте звонка — мы свяжемся с вами за день до визита для уточнения деталей."}
+        confirmColor="#4CAF50"
+        confirmText="Хорошо"
+        cancelText=""
+      />
     </ScrollView>
   );
 };
