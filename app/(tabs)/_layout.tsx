@@ -33,8 +33,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Профиль",
           tabBarIcon: ({ color, size, focused }) => <User color={color} size={size} />,
+          title: "Профиль",
+          // headerShown: true,
+          headerStyle: {
+            backgroundColor: Colors.HEADER,
+          },
+          headerTintColor: Colors.WHITE_COLOR,
+          headerTitleStyle: {
+            fontWeight: "500",
+          },
         }}
       />
     </Tabs>

@@ -66,11 +66,11 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: Colors.HEADER,
-    height: 120,
-    width: "auto",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    height: 120,
+    width: "auto",
     paddingHorizontal: 15,
     paddingTop: 40,
     position: "fixed",
