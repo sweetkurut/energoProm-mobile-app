@@ -20,11 +20,15 @@ const CardServices = () => {
     router.push("/(tabs)/profile");
   };
 
+  const goToPayment = () => {
+    router.push("/(payment)/payment");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Сервисы</Text>
       <View style={styles.cards}>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={goToPayment}>
           <CardBankIcon />
           <View>
             <Text style={styles.card_title}>Платежи</Text>

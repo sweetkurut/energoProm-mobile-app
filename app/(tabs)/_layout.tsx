@@ -24,10 +24,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments"
+        name="historyPayments"
         options={{
-          title: "Платежи",
+          title: "История платежей",
           tabBarIcon: ({ color, size, focused }) => <HistoryIcon color={color} size={size} />,
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: Colors.HEADER,
+          },
+          headerTintColor: Colors.WHITE_COLOR,
+          headerTitleStyle: {
+            fontWeight: "500",
+          },
         }}
       />
       <Tabs.Screen
