@@ -3,15 +3,29 @@ import CardServices from "@/components/CardServices";
 import Chart from "@/components/Chart";
 import Colors from "@/constants/Colors";
 import { router } from "expo-router";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
   const goToNotification = () => {
     router.push("/(notification)/notification");
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Здесь симулируем загрузку. Замените на реальный fetch/запрос.
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       {/* шапка главной страницы */}
       <View style={styles.header}>
         <View>
@@ -21,16 +35,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.headerIcons}>
           <View style={styles.iconWrapper}>
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "700",
-                color: "#666360",
-                textAlign: "center",
-              }}
-            >
-              Ру
-            </Text>
+            <Text style={styles.language}>Ру</Text>
           </View>
           <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
             <NotificationIcon />

@@ -2,42 +2,41 @@ import NotificationIcon from "@/assets/icons/NotificationIcon";
 import Colors from "@/constants/Colors";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const [isEnabled, setIsEnabled] = useState(true);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const toggleSwitch = () => setIsEnabled((prev) => !prev);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Имитируем загрузку данных
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
 
   const goToNotification = () => {
     router.push("/(notification)/notification");
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
+      {/* Шапка */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 21,
-          }}
-        >
+        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 21 }}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.headerTitle}>Профиль</Text>
         </TouchableOpacity>
+
         <View style={styles.headerIcons}>
           <View style={styles.iconWrapper}>
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "700",
-                color: "#666360",
-                textAlign: "center",
-              }}
-            >
-              Ру
-            </Text>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#666360" }}>Ру</Text>
           </View>
           <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
             <NotificationIcon />
@@ -45,6 +44,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      {/* Карточка профиля */}
       <View style={styles.content}>
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
@@ -54,6 +54,7 @@ export default function ProfileScreen() {
           <Text style={styles.account}>Лицевой счет: 563463465345345</Text>
         </View>
 
+        {/* Контактная информация */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Контактная информация</Text>
           <View style={styles.row}>
@@ -70,6 +71,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Настройки */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Другое</Text>
 
@@ -98,6 +100,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Выход */}
         <TouchableOpacity style={styles.logoutButton}>
           <Text style={styles.logoutText}>Выйти из приложения</Text>
           <Ionicons name="chevron-forward" size={20} color="#666360" />

@@ -21,11 +21,12 @@ export default function RootLayout() {
         flex: 1,
       }}
     >
+      {/* <ActivityIndicator /> */}
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(login)" options={{ headerShown: false }} />
         <Stack.Screen name="(payment)" options={{ headerShown: false }} />
         <Stack.Screen name="(notification)" options={{ headerShown: false }} />
-        <Stack.Screen name="(login)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen
           name="listing/news/[id]"
