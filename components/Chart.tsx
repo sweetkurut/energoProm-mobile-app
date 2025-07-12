@@ -67,7 +67,7 @@ export default function Chart() {
           <Text style={styles.total}>245</Text>
         </View>
         <View>
-          <Text style={styles.totalCounter}>кВт-ч</Text>
+          <Text style={styles.totalCounter}>кВт*ч</Text>
         </View>
       </View>
       <Text style={styles.increase}>↑ 35 кВт-ч (16.7%)</Text>

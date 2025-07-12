@@ -10,6 +10,7 @@ const LoginLayout = () => {
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <SystemBars style="dark" />
       <Stack
+        initialRouteName="welcome"
         screenOptions={{
           headerShown: true,
           animationDuration: 0,

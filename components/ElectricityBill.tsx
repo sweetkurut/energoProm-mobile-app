@@ -28,41 +28,41 @@ export default function FullElectricityBill() {
         <View style={styles.rowHeader}>
           <Text style={styles.cellHeader}>Дата</Text>
           <Text style={styles.cellHeader}>Показ.</Text>
-          <Text style={styles.cellHeader}>Расход</Text>
-          <Text style={styles.cellHeader}>Сумма</Text>
+          <Text style={styles.cellHeader}>Расход/Сумма</Text>
+          {/* <Text style={styles.cellHeader}>Сумма</Text> */}
         </View>
 
         <View style={styles.row}>
           <Text style={styles.cell}>28.05.25</Text>
           <Text style={styles.cell}>5166К</Text>
-          <Text style={styles.cell}>124</Text>
-          <Text style={styles.cell}>169.88</Text>
+          <Text style={styles.cell}>124/169.88</Text>
+          {/* <Text style={styles.cell}>169.88</Text> */}
         </View>
         <View style={styles.row}>
           <Text style={styles.cell}>27.06.25</Text>
           <Text style={styles.cell}>5290К</Text>
           <Text style={styles.cell}>–</Text>
-          <Text style={styles.cell}>–</Text>
+          {/* <Text style={styles.cell}>–</Text> */}
         </View>
 
         <View style={styles.rowHeader}>
           <Text style={styles.cellHeader}>Дни</Text>
           <Text style={styles.cellHeader}>Тариф</Text>
-          <Text style={styles.cellHeader}>Расход</Text>
-          <Text style={styles.cellHeader}>Сумма</Text>
+          <Text style={styles.cellHeader}>Расход/Сумма</Text>
+          {/* <Text style={styles.cellHeader}>Сумма</Text> */}
         </View>
 
         <View style={styles.row}>
           <Text style={styles.cell}>30</Text>
           <Text style={styles.cell}>1.37</Text>
-          <Text style={styles.cell}>124</Text>
-          <Text style={styles.cell}>169.88</Text>
+          <Text style={styles.cell}>124/169.88</Text>
+          {/* <Text style={styles.cell}>169.88</Text> */}
         </View>
       </View>
 
       <View style={styles.summary}>
         <Text style={styles.summaryText}>
-          Переплата / Унедолг: <Text style={styles.bold}>19.73 сом</Text>
+          Переплата(-)/Недоплата: <Text style={styles.bold}>19.73 сом</Text>
         </Text>
         <Text style={styles.summaryText}>
           К оплате за эл.эн.: <Text style={styles.bold}>189.61 сом</Text>
@@ -75,7 +75,7 @@ export default function FullElectricityBill() {
         </Text>
       </View>
 
-      <Text style={styles.footerText}>Счет выписан 30.06.2025. Счета хранятся — 3 года.</Text>
+      {/* <Text style={styles.footerText}>Счет выписан 30.06.2025. Счета хранятся — 3 года.</Text> */}
     </View>
   );
 }
