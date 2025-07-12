@@ -155,13 +155,13 @@ export default function Chart() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 16,
     marginHorizontal: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    // elevation: 2,
+    // shadowColor: "#000",
+    // shadowOpacity: 0.05,
+    // shadowRadius: 4,
     marginVertical: 10,
   },
   title: {

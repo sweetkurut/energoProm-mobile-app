@@ -1,6 +1,7 @@
 import NotificationIcon from "@/assets/icons/NotificationIcon";
 import CardServices from "@/components/CardServices";
 import Chart from "@/components/Chart";
+import ElectricityBill from "@/components/ElectricityBill";
 import Colors from "@/constants/Colors";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
@@ -43,6 +44,8 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* табличка */}
+      <ElectricityBill />
       {/* чарт */}
       <Chart />
 
