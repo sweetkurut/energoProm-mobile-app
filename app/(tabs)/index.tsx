@@ -22,6 +22,10 @@ export default function HomeScreen() {
     }, 1500);
   }, []);
 
+  const onPay = () => {
+    router.push("/(payment)/payment");
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -56,7 +60,7 @@ export default function HomeScreen() {
           <Text style={styles.check_balance}>1225 сом</Text>
           <Text style={styles.check_span}>Оплатить до 25 числа текущего месяца</Text>
         </View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={onPay}>
           <Text style={styles.button_text}>Оплатить</Text>
         </TouchableOpacity>
       </View>

@@ -25,27 +25,29 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   cancelColor = "#333",
 }) => {
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <TouchableWithoutFeedback onPress={onCancel}>
-        <View style={styles.backdrop}>
-          <TouchableWithoutFeedback>
-            <View style={styles.modalContainer}>
-              <Text style={[styles.title, { color: confirmColor }]}>{title}</Text>
-              <View style={styles.separator} />
-              <Text style={styles.message}>{message}</Text>
-              <View style={styles.buttonsContainer}>
-                <TouchableOpacity onPress={onConfirm}>
-                  <Text style={[styles.confirmText, { color: confirmColor }]}>{confirmText}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onCancel}>
-                  <Text style={[styles.cancelText, { color: cancelColor }]}>{cancelText}</Text>
-                </TouchableOpacity>
+    <View style={styles.container}>
+      <Modal visible={visible} transparent animationType="fade">
+        <TouchableWithoutFeedback onPress={onCancel}>
+          <View style={styles.backdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContainer}>
+                <Text style={[styles.title, { color: confirmColor }]}>{title}</Text>
+                <View style={styles.separator} />
+                <Text style={styles.message}>{message}</Text>
+                <View style={styles.buttonsContainer}>
+                  <TouchableOpacity onPress={onConfirm}>
+                    <Text style={[styles.confirmText, { color: confirmColor }]}>{confirmText}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={onCancel}>
+                    <Text style={[styles.cancelText, { color: cancelColor }]}>{cancelText}</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </View>
   );
 };
 
@@ -54,7 +56,7 @@ export default ConfirmModal;
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,

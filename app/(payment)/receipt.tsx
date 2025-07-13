@@ -59,7 +59,7 @@ export default function Receipt() {
           <Text style={styles.downloadText}>Скачать PDF</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.closeBtn} onPress={() => router.push("/(tabs)")}>
           <Text style={styles.closeText}>Закрыть</Text>
         </TouchableOpacity>
       </ScrollView>

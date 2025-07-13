@@ -1,4 +1,5 @@
 import NotificationIcon from "@/assets/icons/NotificationIcon";
+import ConfirmModal from "@/components/Modal";
 import Colors from "@/constants/Colors";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -9,6 +10,8 @@ export default function ProfileScreen() {
   const [isEnabled, setIsEnabled] = useState(true);
   const toggleSwitch = () => setIsEnabled((prev) => !prev);
 
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
+
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -17,6 +20,17 @@ export default function ProfileScreen() {
       setRefreshing(false);
     }, 1500);
   }, []);
+
+  const handleLogout = () => {
+    // тут можно сделать очистку токенов, переход на экран логина и т.д.
+    console.log("Пользователь вышел из аккаунта");
+    setIsLogoutModalVisible(false);
+    router.push("/welcome");
+  };
+
+  const handleCancelLogout = () => {
+    setIsLogoutModalVisible(false);
+  };
 
   const goToNotification = () => {
     router.push("/(notification)/notification");
@@ -101,11 +115,22 @@ export default function ProfileScreen() {
         </View>
 
         {/* Выход */}
-        <TouchableOpacity style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Выйти из приложения</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => setIsLogoutModalVisible(true)}>
+          <Text style={styles.logoutText}>Выйти из аккаунта</Text>
           <Ionicons name="chevron-forward" size={20} color="#666360" />
         </TouchableOpacity>
       </View>
+
+      <ConfirmModal
+        visible={isLogoutModalVisible}
+        onConfirm={handleLogout}
+        onCancel={handleCancelLogout}
+        title="Подтверждение"
+        message="Вы уверены, что хотите выйти из аккаунта?"
+        confirmText="Да, выйти"
+        cancelText="Отмена"
+        confirmColor="#E74C3D"
+      />
     </ScrollView>
   );
 }
@@ -161,7 +186,7 @@ const styles = StyleSheet.create({
     color: "#FFA726",
   },
   content: {
-    padding: 16,
+    padding: 10,
   },
   profileCard: {
     backgroundColor: "white",

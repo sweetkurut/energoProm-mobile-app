@@ -70,7 +70,7 @@ export default function Chart() {
           <Text style={styles.totalCounter}>кВт*ч</Text>
         </View>
       </View>
-      <Text style={styles.increase}>↑ 35 кВт-ч (16.7%)</Text>
+      <Text style={styles.increase}>↑ 35 кВт*ч (16.7%)</Text>
       <Text style={styles.subtitle}>Увеличение к прошлому периоду</Text>
 
       <Svg width={chartWidth} height={chartHeight + 40} style={styles.chart}>
