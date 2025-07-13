@@ -1,50 +1,57 @@
 import Colors from "@/constants/Colors";
-import { useFonts } from "expo-font";
+import SplashScreenView from "@/SplashScreenView";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import "react-native-reanimated";
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+  const [isShow, setIsShow] = useState(true);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsShow(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
-      {/* <ActivityIndicator /> */}
-      <Stack>
-        <Stack.Screen name="(login)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(payment)" options={{ headerShown: false }} />
-        <Stack.Screen name="(notification)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="listing/news/[id]"
-          options={{
-            title: "Узнать больше",
-            headerStyle: {
-              backgroundColor: Colors.HEADER,
-            },
-            headerTintColor: Colors.WHITE_COLOR,
-            headerTitleStyle: {
-              fontWeight: "500",
-            },
+    <>
+      {isShow ? (
+        <SplashScreenView />
+      ) : (
+        <View
+          style={{
+            flex: 1,
           }}
-        />
+        >
+          <Stack>
+            <Stack.Screen name="(login)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(payment)" options={{ headerShown: false }} />
+            <Stack.Screen name="(notification)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="listing/news/[id]"
+              options={{
+                title: "Узнать больше",
+                headerStyle: {
+                  backgroundColor: Colors.HEADER,
+                },
+                headerTintColor: Colors.WHITE_COLOR,
+                headerTitleStyle: {
+                  fontWeight: "500",
+                },
+              }}
+            />
 
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </View>
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </View>
+      )}
+    </>
   );
 }

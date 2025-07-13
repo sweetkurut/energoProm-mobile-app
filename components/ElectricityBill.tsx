@@ -20,7 +20,7 @@ export default function FullElectricityBill() {
         <Text style={styles.infoText}>Маршрут: 0106</Text>
       </View>
 
-      <Text style={styles.infoText}>Адрес: Кочкорка Эстебе 4</Text>
+      <Text style={styles.infoText}>Адрес: Кочкоров Эстебес 4</Text>
 
       <View style={styles.table}>
         <Text style={styles.sectionTitle}>Показания и начисления</Text>
@@ -28,35 +28,47 @@ export default function FullElectricityBill() {
         <View style={styles.rowHeader}>
           <Text style={styles.cellHeader}>Дата</Text>
           <Text style={styles.cellHeader}>Показ.</Text>
-          <Text style={styles.cellHeader}>Расход/Сумма</Text>
-          {/* <Text style={styles.cellHeader}>Сумма</Text> */}
+          <Text style={styles.cellHeader}>Расход</Text>
+          <Text style={styles.cellHeader}>Сумма</Text>
         </View>
 
-        <View style={styles.row}>
+        {/* <View style={styles.row}>
           <Text style={styles.cell}>28.05.25</Text>
           <Text style={styles.cell}>5166К</Text>
-          <Text style={styles.cell}>124/169.88</Text>
-          {/* <Text style={styles.cell}>169.88</Text> */}
+          <Text style={styles.cell}>124</Text>
+          <Text style={styles.cell}>169.88</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.cell}>27.06.25</Text>
           <Text style={styles.cell}>5290К</Text>
           <Text style={styles.cell}>–</Text>
-          {/* <Text style={styles.cell}>–</Text> */}
+          <Text style={styles.cell}>–</Text>
+        </View> */}
+        <View style={styles.row}>
+          <Text style={styles.cell}>28.05.25</Text>
+          <Text style={styles.cell}>5166К</Text>
+          <Text style={styles.cell}>124</Text>
+          <Text style={styles.cell}>169.88</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.cell}>27.06.25</Text>
+          <Text style={styles.cell}>5290К</Text>
+          <Text style={styles.cell}></Text>
+          <Text style={styles.cell}></Text>
         </View>
 
         <View style={styles.rowHeader}>
           <Text style={styles.cellHeader}>Дни</Text>
           <Text style={styles.cellHeader}>Тариф</Text>
-          <Text style={styles.cellHeader}>Расход/Сумма</Text>
-          {/* <Text style={styles.cellHeader}>Сумма</Text> */}
+          <Text style={styles.cellHeader}>Расход</Text>
+          <Text style={styles.cellHeader}>Сумма</Text>
         </View>
 
         <View style={styles.row}>
           <Text style={styles.cell}>30</Text>
           <Text style={styles.cell}>1.37</Text>
-          <Text style={styles.cell}>124/169.88</Text>
-          {/* <Text style={styles.cell}>169.88</Text> */}
+          <Text style={styles.cell}>124</Text>
+          <Text style={styles.cell}>169.88</Text>
         </View>
       </View>
 
@@ -74,8 +86,6 @@ export default function FullElectricityBill() {
           Итого к оплате: <Text style={styles.boldRed}>190.00 сом</Text>
         </Text>
       </View>
-
-      {/* <Text style={styles.footerText}>Счет выписан 30.06.2025. Счета хранятся — 3 года.</Text> */}
     </View>
   );
 }
