@@ -17,41 +17,35 @@ export default function RootLayout() {
     return () => clearTimeout(timeout);
   }, []);
 
-  return (
-    <>
-      {isShow ? (
-        <SplashScreenView />
-      ) : (
-        <View
-          style={{
-            flex: 1,
-          }}
-        >
-          <Stack>
-            <Stack.Screen name="(login)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(payment)" options={{ headerShown: false }} />
-            <Stack.Screen name="(notification)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="listing/news/[id]"
-              options={{
-                title: "Узнать больше",
-                headerStyle: {
-                  backgroundColor: Colors.HEADER,
-                },
-                headerTintColor: Colors.WHITE_COLOR,
-                headerTitleStyle: {
-                  fontWeight: "500",
-                },
-              }}
-            />
+  if (isShow) {
+    return <SplashScreenView />;
+  }
 
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </View>
-      )}
-    </>
+  return (
+    <View style={{ flex: 1 }}>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(login)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(payment)" options={{ headerShown: false }} />
+        <Stack.Screen name="(notification)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="listing/news/[id]"
+          options={{
+            title: "Узнать больше",
+            headerStyle: {
+              backgroundColor: Colors.HEADER,
+            },
+            headerTintColor: Colors.WHITE_COLOR,
+            headerTitleStyle: {
+              fontWeight: "500",
+            },
+          }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </View>
   );
 }

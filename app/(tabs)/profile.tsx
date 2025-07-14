@@ -43,10 +43,9 @@ export default function ProfileScreen() {
     >
       {/* Шапка */}
       <View style={styles.header}>
-        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 21 }}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 21 }}>
           <Text style={styles.headerTitle}>Профиль</Text>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.headerIcons}>
           <View style={styles.iconWrapper}>
