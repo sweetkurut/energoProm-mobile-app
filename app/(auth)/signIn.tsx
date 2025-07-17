@@ -2,13 +2,17 @@ import InstaIcon from "@/assets/icons/InstaIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchLogin, setError } from "@/store/slices/authSlice";
+import { hasTokens, saveTokens } from "@/utils/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Checkbox } from "expo-checkbox";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -21,6 +25,10 @@ import {
 import { SystemBars } from "react-native-edge-to-edge";
 
 export default function SignIn() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setChecked] = useState(false);
 
@@ -30,21 +38,46 @@ export default function SignIn() {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      phone: "",
+      email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: any) => {
-    router.push("/(tabs)");
-    console.log("Данные формы:", data);
+  useEffect(() => {
+    const checkSavedToken = async () => {
+      try {
+        const hasStoredTokens = await hasTokens();
+        if (hasStoredTokens) {
+          router.replace("/(tabs)");
+        }
+      } catch (error) {
+        console.error("Ошибка при проверке токенов:", error);
+      }
+    };
+
+    checkSavedToken();
+  }, []);
+
+  const onSubmit = async (data: any) => {
+    try {
+      const result = await dispatch(fetchLogin(data)).unwrap();
+
+      if (result) {
+        await saveTokens(result.access, result.refresh);
+        router.replace("/(tabs)");
+      }
+    } catch (error) {
+      console.error("Ошибка входа:", error);
+    }
   };
 
   const createAccount = () => {
+    dispatch(setError(""));
     router.push("/(auth)/signUp");
   };
 
   const goToForgotPassword = () => {
+    dispatch(setError(""));
     router.push("/(auth)/forgotPassword");
   };
 
@@ -66,16 +99,17 @@ export default function SignIn() {
         <View style={styles.formContainer}>
           <Text style={styles.title}>Войти в личный кабинет</Text>
           <Text style={styles.subtitle}>Введите данные для входа в систему</Text>
+
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Номер телефона</Text>
+            <Text style={styles.inputLabel}>Email</Text>
             <View style={styles.inputWrapper}>
               <Controller
                 control={control}
                 rules={{
-                  required: "Номер телефона обязателен",
+                  required: "Email обязателен",
                   pattern: {
-                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
-                    message: "Неверный формат номера",
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Неверный формат email",
                   },
                 }}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -84,16 +118,16 @@ export default function SignIn() {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="+996 XXX XXX XXX"
+                    placeholder="Введите ваш email"
                     placeholderTextColor="#AAA"
-                    keyboardType="phone-pad"
+                    keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 )}
-                name="phone"
+                name="email"
               />
             </View>
-            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
           </View>
 
           <View style={styles.inputContainer}>
@@ -150,8 +184,19 @@ export default function SignIn() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} activeOpacity={0.7}>
-            <Text style={styles.buttonText}>Войти</Text>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading}
+            activeOpacity={0.7}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE_COLOR} />
+            ) : (
+              <Text style={styles.buttonText}>Войти</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.signupContainer}>
@@ -161,6 +206,7 @@ export default function SignIn() {
             </TouchableOpacity>
           </View>
         </View>
+
         <View style={styles.supportContainer}>
           <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
           <View style={styles.iconContainer}>

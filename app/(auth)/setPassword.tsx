@@ -2,12 +2,17 @@ import InstaIcon from "@/assets/icons/InstaIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchSetPassword } from "@/store/slices/authSlice";
+import { ISetPassword } from "@/store/types";
+import { saveTokens } from "@/utils/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -25,6 +30,11 @@ interface PasswordForm {
 }
 
 export default function SetPassword() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const { email } = useLocalSearchParams<{ email: string }>();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -47,9 +57,24 @@ export default function SetPassword() {
     router.back();
   };
 
-  const handleSetPassword = (data: PasswordForm) => {
-    console.log("Форма установления пароля:", data);
-    router.push("/(auth)/signIn");
+  const handleSetPassword = async (data: PasswordForm) => {
+    try {
+      const fullData: ISetPassword = {
+        ...data,
+        email: email || "",
+      };
+
+      const result = await dispatch(fetchSetPassword(fullData)).unwrap();
+
+      if (result) {
+        if (result.access && result.refresh) {
+          await saveTokens(result.access, result.refresh);
+        }
+        router.replace("/(tabs)");
+      }
+    } catch (error) {
+      console.error("Ошибка при установке пароля:", error);
+    }
   };
 
   return (
@@ -73,6 +98,29 @@ export default function SetPassword() {
         <View style={styles.formContainer}>
           <Text style={styles.title}>Придумайте пароль</Text>
           <Text style={styles.subtitle}>Придумайте надёжный пароль для защиты вашего аккаунта</Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Имя</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="person-outline" size={20} color={Colors.GRAY_COLOR} style={styles.inputIcon} />
+              <Controller
+                control={control}
+                rules={{ required: "Имя обязательно" }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Введите ваше имя"
+                    placeholderTextColor="#AAA"
+                  />
+                )}
+                name="name"
+              />
+            </View>
+            {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+          </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Пароль</Text>
@@ -148,16 +196,22 @@ export default function SetPassword() {
             )}
           </View>
 
-          {/* Ошибки от сервера больше не отображаются */}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit(handleSetPassword)}
+            disabled={loading}
             activeOpacity={0.7}
           >
-            <Text style={styles.buttonText}>Подтвердить</Text>
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE_COLOR} />
+            ) : (
+              <Text style={styles.buttonText}>Подтвердить</Text>
+            )}
           </TouchableOpacity>
         </View>
+
         <View style={styles.supportContainer}>
           <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
           <View style={styles.iconContainer}>

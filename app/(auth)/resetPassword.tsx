@@ -1,8 +1,13 @@
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchResetPassword, setError } from "@/store/slices/authSlice";
+import { IResetPassword } from "@/store/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -21,6 +26,11 @@ interface ResetPasswordForm {
 }
 
 export default function ResetPassword() {
+  const router = useRouter();
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -40,12 +50,18 @@ export default function ResetPassword() {
 
   const password = watch("password");
 
+  useEffect(() => {
+    dispatch(setError(""));
+    setValidationError(null);
+  }, []);
+
   const handleBack = () => {
-    // navigation.goBack() при необходимости
+    router.back();
   };
 
-  const handleResetPassword = (data: ResetPasswordForm) => {
+  const handleResetPassword = async (data: ResetPasswordForm) => {
     setValidationError(null);
+    dispatch(setError(""));
 
     if (data.password !== data.confirmPassword) {
       setValidationError("Пароли не совпадают");
@@ -57,7 +73,28 @@ export default function ResetPassword() {
       return;
     }
 
-    console.log("Сброс пароля (заглушка):", data);
+    try {
+      const resetData: IResetPassword = {
+        email: email,
+        code: data.code,
+        new_password: data.password,
+      };
+
+      await dispatch(fetchResetPassword(resetData)).unwrap();
+      router.push("/(auth)/signIn");
+    } catch (err: any) {
+      console.error("Ошибка при сбросе пароля:", err);
+
+      if (typeof err === "string") {
+        setValidationError(err);
+      } else if (err?.non_field_errors?.[0]) {
+        setValidationError(err.non_field_errors[0]);
+      } else if (err?.message) {
+        setValidationError(err.message);
+      } else {
+        setValidationError("Неверный код или другая ошибка при сбросе пароля");
+      }
+    }
   };
 
   return (
@@ -73,10 +110,11 @@ export default function ResetPassword() {
               {/* <Ionicons name="lock-closed" size={40} color={Colors.ORANGE_COLOR} /> */}
             </View>
             <Text style={styles.title}>Сброс пароля</Text>
-            <Text style={styles.subtitle}>Введите код и укажите новый пароль</Text>
+            <Text style={styles.subtitle}>Введите код и укажите новый пароль для {email}</Text>
           </View>
 
           <View style={styles.formContainer}>
+            {/* Код подтверждения */}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Код подтверждения</Text>
               <View style={styles.inputWrapper}>
@@ -85,10 +123,7 @@ export default function ResetPassword() {
                   control={control}
                   rules={{
                     required: "Код подтверждения обязателен",
-                    minLength: {
-                      value: 4,
-                      message: "Код должен содержать не менее 4 символов",
-                    },
+                    minLength: { value: 4, message: "Код должен содержать не менее 4 символов" },
                   }}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
@@ -107,6 +142,7 @@ export default function ResetPassword() {
               {errors.code && <Text style={styles.errorText}>{errors.code.message}</Text>}
             </View>
 
+            {/* Новый пароль */}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Новый пароль</Text>
               <View style={styles.inputWrapper}>
@@ -120,10 +156,7 @@ export default function ResetPassword() {
                   control={control}
                   rules={{
                     required: "Пароль обязателен",
-                    minLength: {
-                      value: 6,
-                      message: "Пароль должен содержать минимум 6 символов",
-                    },
+                    minLength: { value: 6, message: "Пароль должен содержать минимум 6 символов" },
                   }}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
@@ -149,6 +182,7 @@ export default function ResetPassword() {
               {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
             </View>
 
+            {/* Подтверждение пароля */}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Повторите пароль</Text>
               <View style={styles.inputWrapper}>
@@ -193,18 +227,25 @@ export default function ResetPassword() {
               )}
             </View>
 
-            {validationError && (
+            {/* Ошибки */}
+            {(error || validationError) && (
               <View style={styles.errorContainer}>
-                <Text style={styles.errorMessage}>{validationError}</Text>
+                <Text style={styles.errorMessage}>{error || validationError}</Text>
               </View>
             )}
 
+            {/* Кнопка */}
             <TouchableOpacity
-              style={styles.button}
+              style={[styles.button, (Object.keys(errors).length > 0 || loading) && styles.buttonDisabled]}
               onPress={handleSubmit(handleResetPassword)}
+              disabled={Object.keys(errors).length > 0 || loading}
               activeOpacity={0.7}
             >
-              <Text style={styles.buttonText}>Сбросить пароль</Text>
+              {loading ? (
+                <ActivityIndicator color={Colors.WHITE_COLOR} />
+              ) : (
+                <Text style={styles.buttonText}>Сбросить пароль</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>

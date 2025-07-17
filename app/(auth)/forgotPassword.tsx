@@ -1,10 +1,13 @@
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchForgotPassword, setError } from "@/store/slices/authSlice";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -21,6 +24,11 @@ interface ForgotPasswordForm {
 }
 
 export default function ForgotPassword() {
+  const router = useRouter();
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const {
     control,
     handleSubmit,
@@ -31,14 +39,39 @@ export default function ForgotPassword() {
     },
   });
 
+  useEffect(() => {
+    dispatch(setError(""));
+    setValidationError(null);
+  }, []);
+
   const handleBack = () => {
     router.back();
-    // router.back() при необходимости
   };
 
-  const onSubmit = () => {
-    // console.log(data);
-    router.push("/(auth)/confirmCode");
+  const handleSendCode = async (data: ForgotPasswordForm) => {
+    try {
+      setValidationError(null);
+      dispatch(setError(""));
+      await dispatch(fetchForgotPassword({ email: data.email })).unwrap();
+      router.push({
+        pathname: "/(auth)/resetPassword",
+        params: { email: data.email },
+      });
+    } catch (error: any) {
+      console.error("Ошибка при отправке кода:", error);
+
+      if (typeof error === "string") {
+        setValidationError(error);
+      } else if (error?.non_field_errors?.[0]) {
+        setValidationError(error.non_field_errors[0]);
+      } else if (error?.email?.[0]) {
+        setValidationError(error.email[0]);
+      } else if (error?.message) {
+        setValidationError(error.message);
+      } else {
+        setValidationError("Неверный email или другая ошибка при отправке кода");
+      }
+    }
   };
 
   return (
@@ -62,19 +95,18 @@ export default function ForgotPassword() {
 
         <View style={styles.formContainer}>
           <Text style={styles.title}>Забыли пароль ?</Text>
-          <Text style={styles.subtitle}>
-            Укажите свой номер телефона и ожидайте SMS с кодом подтверждения
-          </Text>
+          <Text style={styles.subtitle}>Укажите свой email и ожидайте код подтверждения</Text>
+
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Номер телефона</Text>
+            <Text style={styles.inputLabel}>Email</Text>
             <View style={styles.inputWrapper}>
               <Controller
                 control={control}
                 rules={{
-                  required: "Номер телефона обязателен",
+                  required: "Email обязателен",
                   pattern: {
-                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
-                    message: "Неверный формат номера",
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Неверный формат email",
                   },
                 }}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -83,20 +115,35 @@ export default function ForgotPassword() {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="+996 XXX XXX XXX"
+                    placeholder="Введите ваш email"
                     placeholderTextColor="#AAA"
-                    keyboardType="phone-pad"
+                    keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 )}
-                name="phone"
+                name="email"
               />
             </View>
-            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
           </View>
 
-          <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={onSubmit}>
-            <Text style={styles.buttonText}>Отправить</Text>
+          {(error || validationError) && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorMessage}>{error || validationError}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.button, (Object.keys(errors).length > 0 || loading) && styles.buttonDisabled]}
+            onPress={handleSubmit(handleSendCode)}
+            disabled={Object.keys(errors).length > 0 || loading}
+            activeOpacity={0.7}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE_COLOR} />
+            ) : (
+              <Text style={styles.buttonText}>Отправить</Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

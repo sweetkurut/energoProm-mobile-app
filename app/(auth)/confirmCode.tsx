@@ -2,9 +2,12 @@ import InstaIcon from "@/assets/icons/InstaIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchSignUp, fetchVerifyCode } from "@/store/slices/authSlice";
+import { IVerifyCode } from "@/store/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -26,12 +29,16 @@ interface CodeFormData {
   digit1: string;
   digit2: string;
   digit3: string;
+  email: string;
 }
 
 export default function ConfirmCode() {
-  const [timer, setTimer] = useState(30);
-  const [loading, setLoading] = useState(false);
-  const [email] = useState("example@example.com");
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const { email } = useLocalSearchParams<{ email: string }>();
+
+  const [timer, setTimer] = useState(60);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const {
@@ -91,25 +98,33 @@ export default function ConfirmCode() {
 
   const handleContinue = async (data: CodeFormData) => {
     const codeString = Object.values(data).join("");
-    setLoading(true);
-    router.push("/(auth)/setPassword");
 
-    // Заглушка
-    setTimeout(() => {
-      console.log("Введённый код:", codeString);
-      setLoading(false);
-    }, 1500);
+    try {
+      const verifyData: IVerifyCode = {
+        email: email!,
+        verification_code: codeString,
+      };
+
+      const result = await dispatch(fetchVerifyCode(verifyData)).unwrap();
+
+      if (result) {
+        router.push({
+          pathname: "/(auth)/setPassword",
+          params: { email: email! },
+        });
+      }
+    } catch (error) {
+      console.error("Ошибка при проверке кода:", error);
+    }
   };
 
   const resendCode = () => {
-    console.log("Повторная отправка кода на:", email);
+    dispatch(fetchSignUp({ email: email! }));
     setTimer(30);
   };
 
   const handleBack = () => {
-    // Заглушка для возврата
-    console.log("Назад");
-    router.push("/(auth)/signUp");
+    router.back();
   };
 
   return (
@@ -119,7 +134,6 @@ export default function ConfirmCode() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      {/* <SystemBars style="dark" /> */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
@@ -137,6 +151,7 @@ export default function ConfirmCode() {
             Код подверждения отправлен. Пожалуйста введите его ниже для продолжения
           </Text>
 
+          <Text style={styles.inputLabel}>Введите код</Text>
           <View style={styles.codeContainer}>
             {codeValues.map((digit, index) => (
               <View key={index} style={styles.inputWrapper}>
@@ -172,6 +187,8 @@ export default function ConfirmCode() {
             ))}
           </View>
 
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
           <TouchableOpacity
             style={[styles.button, (!isCodeComplete || loading) && styles.buttonDisabled]}
             onPress={handleSubmit(handleContinue)}
@@ -196,6 +213,7 @@ export default function ConfirmCode() {
             )}
           </View>
         </View>
+
         <View style={styles.supportContainer}>
           <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
           <View style={styles.iconContainer}>
@@ -222,6 +240,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     // backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
   },
+
+  inputContainer: {
+    marginBottom: 16,
+  },
+
+  inputLabel: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "400",
+    marginBottom: 6,
+    marginLeft: 14,
+  },
+
+  emailInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: "#000",
+    marginHorizontal: 10,
+    // elevation: 2, // Android shadow
+    // shadowColor: "#000", // iOS shadow
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 2,
+  },
+
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
@@ -276,7 +324,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
+    marginBottom: 30,
   },
   codeContainer: {
     flexDirection: "row",

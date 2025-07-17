@@ -2,11 +2,14 @@ import InstaIcon from "@/assets/icons/InstaIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchSignUp } from "@/store/slices/authSlice";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -16,32 +19,58 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { SystemBars } from "react-native-edge-to-edge";
 
 interface ISignUpEmail {
-  phone: string;
-  accountNumber: string;
+  email: string;
 }
 
 export default function SignUp() {
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const {
     control,
-    // handleSubmit,
+    handleSubmit,
     formState: { errors },
   } = useForm<ISignUpEmail>({
     defaultValues: {
-      phone: "",
-      accountNumber: "",
+      email: "",
     },
   });
+
+  const handleRegister = async (data: ISignUpEmail) => {
+    try {
+      setValidationError(null); // сброс ошибки перед новым запросом
+      const result = await dispatch(fetchSignUp(data)).unwrap();
+      if (result) {
+        router.push({
+          pathname: "/(auth)/confirmCode",
+          params: { email: data.email },
+        });
+      }
+    } catch (err: any) {
+      console.error("Ошибка при регистрации:", err);
+
+      // Пример проверки ошибок из ответа сервера:
+      if (typeof err === "string") {
+        setValidationError(err);
+      } else if (err?.email && err.email.length > 0) {
+        setValidationError(err.email[0]);
+      } else if (err?.message) {
+        setValidationError(err.message);
+      } else {
+        setValidationError("Произошла ошибка при регистрации");
+      }
+    }
+  };
 
   const handleLogin = () => {
     router.push("/(auth)/signIn");
   };
-
-  // const handleRegister = (data: ISignUpEmail) => {
-  //   console.log("Регистрация (заглушка):", data);
-  // };
 
   const goToConfirm = () => {
     router.push("/(auth)/confirmCode");
@@ -68,15 +97,15 @@ export default function SignUp() {
             <Text style={styles.subtitle}>Зарегистрируйтесь для доступа к личному кабинету</Text>
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Лицевой счёт</Text>
+            <Text style={styles.inputLabel}>Gmail</Text>
             <View style={styles.inputWrapper}>
               <Controller
                 control={control}
                 rules={{
-                  required: "Лицевой счёт обязателен",
+                  required: "Email обязателен",
                   pattern: {
-                    value: /^[0-9]{6,12}$/, // Можно настроить под свой формат
-                    message: "Неверный формат лицевого счёта",
+                    value: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+                    message: "Введите корректный Gmail адрес",
                   },
                 }}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -85,51 +114,30 @@ export default function SignUp() {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="Введите лицевой счёт"
+                    placeholder="Введите адрес электронной почты"
                     placeholderTextColor="#AAA"
-                    keyboardType="number-pad"
+                    keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 )}
-                name="accountNumber"
+                name="email"
               />
             </View>
-            {errors.accountNumber && <Text style={styles.errorText}>{errors.accountNumber.message}</Text>}
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Номер телефона</Text>
-            <View style={styles.inputWrapper}>
-              <Controller
-                control={control}
-                rules={{
-                  required: "Номер телефона обязателен",
-                  pattern: {
-                    value: /^\+996\s?\d{3}\s?\d{3}\s?\d{3}$/,
-                    message: "Неверный формат номера",
-                  },
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.input}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder="+996 XXX XXX XXX"
-                    placeholderTextColor="#AAA"
-                    keyboardType="phone-pad"
-                    autoCapitalize="none"
-                  />
-                )}
-                name="phone"
-              />
-            </View>
-            {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+            {validationError && <Text style={styles.errorText}>{validationError}</Text>}
           </View>
 
-          {/* Здесь раньше выводилась ошибка с бэка */}
-
-          <TouchableOpacity style={styles.button} onPress={goToConfirm} activeOpacity={0.7}>
-            <Text style={styles.buttonText}>Зарегистрироваться</Text>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleSubmit(handleRegister)}
+            disabled={loading}
+            activeOpacity={0.7}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE_COLOR} />
+            ) : (
+              <Text style={styles.buttonText}>Продолжить</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
@@ -158,6 +166,7 @@ export default function SignUp() {
     </LinearGradient>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -194,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // marginBottom: 24,
     objectFit: "contain",
-    marginTop: 50,
+    marginTop: 60,
   },
   title: {
     fontSize: 22,
@@ -224,6 +233,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     marginHorizontal: 10,
+    marginTop: 20,
   },
   inputContainer: {
     marginBottom: 15,
