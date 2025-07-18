@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -107,10 +108,8 @@ export default function ResetPassword() {
 
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              {/* <Ionicons name="lock-closed" size={40} color={Colors.ORANGE_COLOR} /> */}
+              <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
             </View>
-            <Text style={styles.title}>Сброс пароля</Text>
-            <Text style={styles.subtitle}>Введите код и укажите новый пароль для {email}</Text>
           </View>
 
           <View style={styles.formContainer}>

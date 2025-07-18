@@ -1,18 +1,34 @@
 import NotificationIcon from "@/assets/icons/NotificationIcon";
 import ConfirmModal from "@/components/Modal";
 import Colors from "@/constants/Colors";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchGetProfile } from "@/store/slices/profileSlice";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ProfileScreen() {
+  const dispatch = useAppDispatch();
+  const { profile, loading } = useAppSelector((state) => state.profile);
+  const avatarUrl = profile?.avatar;
+
+  console.log("profile:", profile);
+
   const [isEnabled, setIsEnabled] = useState(true);
   const toggleSwitch = () => setIsEnabled((prev) => !prev);
-
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
-
   const [refreshing, setRefreshing] = useState(false);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     // Имитируем загрузку данных
@@ -20,6 +36,17 @@ export default function ProfileScreen() {
       setRefreshing(false);
     }, 1500);
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchGetProfile());
+  }, [dispatch]);
+
+  const getInitials = (fullName?: string | null) => {
+    if (!fullName) return "??";
+    const names = fullName.trim().split(" ");
+    if (names.length === 1) return names[0][0].toUpperCase();
+    return (names[0][0] + names[1][0]).toUpperCase();
+  };
 
   const handleLogout = () => {
     // тут можно сделать очистку токенов, переход на экран логина и т.д.
@@ -61,10 +88,15 @@ export default function ProfileScreen() {
       <View style={styles.content}>
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>БР</Text>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{getInitials(profile?.name || profile?.email)}</Text>
+            )}
           </View>
-          <Text style={styles.name}>Борзенко Руслан</Text>
-          <Text style={styles.account}>Лицевой счет: 563463465345345</Text>
+          <Text style={styles.name}>{profile?.name}</Text>
+          <Text style={styles.account}>Gmail почта: {profile?.email}</Text>
+          {/* <Text style={styles.account}>Лицевой счет: 563463465345345</Text> */}
         </View>
 
         {/* Контактная информация */}
@@ -208,6 +240,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
   },
+  avatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+  },
+
   name: {
     fontSize: 14,
     fontWeight: "700",

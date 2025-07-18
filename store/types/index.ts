@@ -57,20 +57,14 @@ export interface IProfile {
   name: string;
   email: string;
   avatar: string | null;
-  is_company: boolean;
   registered_at: string;
   updated_at: string;
-  // active_advertisements: IAalladvertisements[];
-  // inactive_advertisements: IAalladvertisements[];
-  message?: string;
-  favorites_count: number;
 }
 
 export interface IProfileUpdate {
   name: string;
   email: string;
   avatar: string;
-  is_company: boolean;
 }
 
 export interface IProfileUpdatePassword {
