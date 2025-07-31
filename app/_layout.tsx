@@ -11,94 +11,107 @@ import "react-native-reanimated";
 import { Provider } from "react-redux";
 
 export const AuthContext = React.createContext({
-  isAuthenticated: false,
-  isAuthLoading: true,
-  updateAuthState: (state: boolean) => {},
+    isAuthenticated: false,
+    isAuthLoading: true,
+    updateAuthState: (state: boolean) => {},
 });
 
 export default function RootLayout() {
-  const [isShow, setIsShow] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+    const [isShow, setIsShow] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const updateAuthState = useCallback((state: boolean) => {
-    setIsAuthenticated(state);
-  }, []);
+    const updateAuthState = useCallback((state: boolean) => {
+        setIsAuthenticated(state);
+    }, []);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setIsAuthLoading(true);
-        const hasToken = await verifyAuthWithDelay(700);
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                setIsAuthLoading(true);
+                const hasToken = await verifyAuthWithDelay(700);
 
-        if (hasToken) {
-          try {
-            const refreshToken = await getRefreshToken();
-            if (refreshToken) {
-              await store.dispatch(fetchRefreshToken(refreshToken)).unwrap();
-              setIsAuthenticated(true);
-            } else {
-              setIsAuthenticated(false);
+                if (hasToken) {
+                    try {
+                        const refreshToken = await getRefreshToken();
+                        if (refreshToken) {
+                            await store.dispatch(fetchRefreshToken(refreshToken)).unwrap();
+                            setIsAuthenticated(true);
+                        } else {
+                            setIsAuthenticated(false);
+                        }
+                    } catch (error) {
+                        console.error("Ошибка при обновлении токена:", error);
+                        setIsAuthenticated(false);
+                    }
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (error) {
+                console.error("Ошибка при автологине:", error);
+                setIsAuthenticated(false);
+            } finally {
+                setIsAuthLoading(false);
             }
-          } catch (error) {
-            console.error("Ошибка при обновлении токена:", error);
-            setIsAuthenticated(false);
-          }
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Ошибка при автологине:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsAuthLoading(false);
-      }
-    };
+        };
 
-    checkAuth();
-  }, []);
+        checkAuth();
+    }, []);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsShow(false);
-    }, 3000);
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setIsShow(false);
+        }, 3000);
 
-    return () => clearTimeout(timeout);
-  }, []);
+        return () => clearTimeout(timeout);
+    }, []);
 
-  if (isShow) {
-    return <SplashScreenView />;
-  }
+    if (isShow) {
+        return <SplashScreenView />;
+    }
 
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, isAuthLoading, updateAuthState }}>
-      <View style={{ flex: 1 }}>
-        <Provider store={store}>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(login)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(payment)" options={{ headerShown: false }} />
-            <Stack.Screen name="(notification)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="listing/news/[id]"
-              options={{
-                title: "Узнать больше",
-                headerStyle: {
-                  backgroundColor: Colors.HEADER,
-                },
-                headerTintColor: Colors.WHITE_COLOR,
-                headerTitleStyle: {
-                  fontWeight: "500",
-                },
-              }}
-            />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </Provider>
-        <StatusBar style="auto" />
-      </View>
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={{ isAuthenticated, isAuthLoading, updateAuthState }}>
+            <View style={{ flex: 1 }}>
+                <Provider store={store}>
+                    <Stack>
+                        <Stack.Screen name="index" options={{ headerShown: false }} />
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(login)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(payment)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(notification)" options={{ headerShown: false }} />
+                        <Stack.Screen
+                            name="listing/news/[id]"
+                            options={{
+                                title: "Узнать больше",
+                                headerStyle: {
+                                    backgroundColor: Colors.HEADER,
+                                },
+                                headerTintColor: Colors.WHITE_COLOR,
+                                headerTitleStyle: {
+                                    fontWeight: "500",
+                                },
+                            }}
+                        />
+                        <Stack.Screen
+                            name="listing/check/[id]"
+                            options={{
+                                title: "Мой лицевой счёт",
+                                headerStyle: {
+                                    backgroundColor: Colors.HEADER,
+                                },
+                                headerTintColor: Colors.WHITE_COLOR,
+                                headerTitleStyle: {
+                                    fontWeight: "500",
+                                },
+                            }}
+                        />
+                        <Stack.Screen name="+not-found" />
+                    </Stack>
+                </Provider>
+                <StatusBar style="auto" />
+            </View>
+        </AuthContext.Provider>
+    );
 }

@@ -20,6 +20,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
     "d3-shape": "^3.2.0",
+    "dayjs": "^1.11.13",
     "expo": "53.0.19",
     "expo-blur": "~14.1.5",
     "expo-checkbox": "^4.1.4",
