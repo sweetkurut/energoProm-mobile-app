@@ -324,3 +324,57 @@ export interface Graphic {
     current_check_date: string | null;
     month_name: string;
 }
+
+// сделки
+
+export interface Deal {
+    id: number;
+    date_of_deal: string;
+    address: string;
+    status: string; // при желании сузить: 'new' | 'in_progress' | 'done' | ...
+    phone_number: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    user: number;
+    bid: number;
+}
+
+export interface CreateDeal {
+    address: string;
+    status: string; // при желании сузить: 'new' | 'in_progress' | 'done' | ...
+    phone_number: string;
+    description: string;
+    user: number;
+    bid: number;
+}
+
+export interface DealDetail {
+    id: number;
+    date_of_deal: string;
+    address: string;
+    status: string; // при желании сузить: 'new' | 'in_progress' | 'done' | ...
+    phone_number: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    user: number;
+    bid: number;
+}
+
+export interface Bid {
+    id: number;
+    name: string;
+    description: string;
+    icon: string;
+    created_at: string;
+    updated_at: string;
+}
+export interface BidDetail {
+    id: number;
+    name: string;
+    description: string;
+    icon: string;
+    created_at: string;
+    updated_at: string;
+}

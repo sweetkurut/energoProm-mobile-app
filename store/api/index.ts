@@ -11,7 +11,7 @@ import {
 } from "../types";
 
 const instance = axios.create({
-    baseURL: "http://34.63.218.55/api/",
+    baseURL: "http://34.60.149.31/api/",
     headers: {
         "Content-Type": "application/json",
     },
@@ -100,5 +100,30 @@ export const storesApi = {
                 house_card: houseCardId,
             },
         });
+    },
+
+    // список заявок
+    getListDeals() {
+        return instance.get("bid/deal/");
+    },
+
+    getDetailDeal(id: number) {
+        return instance.get(`bid/deal/${id}/`);
+    },
+
+    addDeal(data: any) {
+        return instance.post("bid/deal/", data);
+    },
+
+    deleteDeal(id: number) {
+        return instance.delete(`bid/deal/${id}/`);
+    },
+
+    //  список услуг bid
+    getListBids() {
+        return instance.get("bid/bid/");
+    },
+    getDetailBid(id: number) {
+        return instance.get(`bid/bid/${id}/`);
     },
 };

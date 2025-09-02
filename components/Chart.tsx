@@ -23,7 +23,7 @@ const yAxisLabels = [15, 10, 5, 0];
 
 export default function Chart() {
     const { id } = useLocalSearchParams();
-    const { graphic, loading } = useAplector((state) => state.graphic);
+    const { graphic, loading } = useAppSelector((state) => state.graphic);
     const dispatch = useAppDispatch();
 
     const [activeTab, setActiveTab] = useState("Год");

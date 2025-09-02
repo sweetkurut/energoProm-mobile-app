@@ -1,4 +1,3 @@
-import Chart from "@/components/Chart";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchLastCheck } from "@/store/slices/checkSlice";
 
@@ -171,7 +170,7 @@ export default function DetailCheckScreen() {
                 </View>
             </View>
 
-            <Chart />
+            {/* <Chart /> */}
         </ScrollView>
     );
 }
