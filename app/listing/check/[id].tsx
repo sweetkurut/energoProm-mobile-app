@@ -1,9 +1,21 @@
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { fetchLastCheck } from "@/store/slices/checkSlice";
+import { fetchLastCheck, updateCheckPhoto } from "@/store/slices/checkSlice";
 
-import { useLocalSearchParams } from "expo-router";
-import React, { useEffect } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Chart from "@/components/Chart";
+import Colors from "@/constants/Colors";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { PhotoUploader } from "./PhotoUploader";
 
 export default function DetailCheckScreen() {
     const { id } = useLocalSearchParams();
@@ -11,24 +23,62 @@ export default function DetailCheckScreen() {
     const data = check;
     const dispatch = useAppDispatch();
 
+    const [currentCheckValue, setCurrentCheckValue] = useState<string>("");
+    const [photoFile, setPhotoFile] = useState<any>(null);
+
     useEffect(() => {
         if (id) {
             const houseCardId = Number(id);
             dispatch(fetchLastCheck(houseCardId));
-            // dispatch(fetchGraphic(houseCardId));
         }
     }, [id, dispatch]);
 
     useEffect(() => {
-        console.log("залупа:", check);
-    }, [check]);
+        if (data?.counter_current_check) {
+            setCurrentCheckValue(data.counter_current_check.toString());
+        }
+    }, [data]);
 
-    if (loading)
+    // /===================
+    const handleUpdate = async () => {
+        if (!data || !currentCheckValue) {
+            Alert.alert("Ошибка", "Заполните показания счетчика.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("counter_current_check", Number(currentCheckValue));
+
+            if (photoFile) {
+                formData.append("counter_photo", {
+                    uri: photoFile.uri,
+                    name: photoFile.name,
+                    type: photoFile.type,
+                } as any);
+            } else {
+                formData.append("counter_photo", "");
+            }
+
+            await dispatch(updateCheckPhoto({ id: data.id, formData })).unwrap();
+
+            Alert.alert("Успех", "Данные успешно отправлены!");
+            setTimeout(() => {
+                router.back();
+            }, 500);
+        } catch (error) {
+            console.error("Ошибка обновления данных:", error);
+            Alert.alert("Ошибка", "Не удалось обновить данные.");
+        }
+    };
+
+    if (loading || !data || !data.house_card) {
         return (
             <View style={styles.loader}>
                 <ActivityIndicator size={"large"} color={"#EA961C"} />
             </View>
         );
+    }
 
     return (
         <ScrollView style={styles.container}>
@@ -52,10 +102,16 @@ export default function DetailCheckScreen() {
                 </Text>
 
                 <Text style={styles.infoText}>
-                    Адрес: {data?.house_card.address.street.name} {data?.house_card.address.house}, кв.{" "}
-                    {data?.house_card.address.apartment}
-                    {data?.house_card.address.apartment_liter &&
-                        `(${data?.house_card.address.apartment_liter})`}
+                    Адрес:{" "}
+                    {data?.house_card.address
+                        ? `${data.house_card.address.street.name} ${data.house_card.address.house}, кв. ${
+                              data.house_card.address.apartment
+                          }${
+                              data.house_card.address.apartment_liter
+                                  ? `(${data.house_card.address.apartment_liter})`
+                                  : ""
+                          }`
+                        : "Адрес не указан"}
                 </Text>
 
                 <View style={styles.table}>
@@ -70,23 +126,32 @@ export default function DetailCheckScreen() {
 
                     <View style={styles.row}>
                         <Text style={styles.cell}>
-                            {new Date(data?.previous_check_date).toLocaleDateString("ru-RU")}
+                            {data?.previous_check_date
+                                ? new Date(data.previous_check_date).toLocaleDateString("ru-RU")
+                                : "-"}
                         </Text>
                         <Text style={styles.cell}>{data?.previous_check}</Text>
                         <Text style={styles.cell}>{data?.consumption}</Text>
                         <Text style={styles.cell}>
-                            {(data?.consumption * data?.tariff.kw_cost).toFixed(2)}
+                            {data?.consumption && data?.tariff?.kw_cost
+                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                : "0.00"}
                         </Text>
                     </View>
 
                     <View style={styles.row}>
                         <Text style={styles.cell}>
-                            {new Date(data?.current_check_date).toLocaleDateString("ru-RU")}
+                            {/* {new Date(data?.current_check_date).toLocaleDateString("ru-RU")} */}
+                            {data?.current_check_date
+                                ? new Date(data.current_check_date).toLocaleDateString("ru-RU")
+                                : "-"}
                         </Text>
                         <Text style={styles.cell}>{data?.current_check}</Text>
                         <Text style={styles.cell}>{data?.consumption}</Text>
                         <Text style={styles.cell}>
-                            {(data?.consumption * data?.tariff.kw_cost).toFixed(2)}
+                            {data?.consumption && data?.tariff?.kw_cost
+                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                : "0.00"}
                         </Text>
                     </View>
 
@@ -102,30 +167,37 @@ export default function DetailCheckScreen() {
                         <Text style={styles.cell}>{data?.tariff.kw_cost}</Text>
                         <Text style={styles.cell}>{data?.consumption}</Text>
                         <Text style={styles.cell}>
-                            {(data?.consumption * data?.tariff.kw_cost).toFixed(2)}
+                            {data?.consumption && data?.tariff?.kw_cost
+                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                : "0.00"}
                         </Text>
                     </View>
                 </View>
 
                 {data?.counter_photo ? (
-                    <TouchableOpacity
-                        style={{
-                            marginTop: 20,
-                            alignItems: "center",
-                            backgroundColor: "#f3f3f3",
-                            paddingBottom: 10,
-                            flex: 1,
-                            borderRadius: 10,
-                        }}
-                    >
-                        <Text style={[styles.infoText, { marginBottom: 5 }]}>Фото счетчика:</Text>
-                        <Image
-                            source={{
-                                uri: `http://34.63.218.55${data.counter_photo}`,
-                            }}
-                            style={{ width: 250, height: 200, resizeMode: "contain", borderRadius: 10 }}
+                    <View style={styles.card_consumption}>
+                        <PhotoUploader
+                            photoUrl={
+                                data?.counter_photo ? `http://34.60.149.31${data.counter_photo}` : undefined
+                            }
+                            onPhotoSelected={setPhotoFile}
                         />
-                    </TouchableOpacity>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Показание счетчика (кВт*ч):</Text>
+                            <TextInput
+                                style={styles.input}
+                                keyboardType="numeric"
+                                value={currentCheckValue}
+                                onChangeText={setCurrentCheckValue}
+                                placeholder="Введите показания"
+                            />
+                        </View>
+
+                        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+                            <Text style={styles.buttonText}>Отправить показания</Text>
+                        </TouchableOpacity>
+                    </View>
                 ) : (
                     <Text style={styles.infoText}>Фото счетчика отсутствует</Text>
                 )}
@@ -136,24 +208,30 @@ export default function DetailCheckScreen() {
                     </Text>
                     <Text style={styles.infoText}>
                         Дата записи:{" "}
-                        {new Date(data?.created_at).toLocaleString("ru-RU", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
+                        {data?.created_at
+                            ? new Date(data.created_at).toLocaleString("ru-RU", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                              })
+                            : "-"}
                     </Text>
+
                     <Text style={styles.infoText}>
                         Обновлено:{" "}
-                        {new Date(data?.updated_at).toLocaleString("ru-RU", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
+                        {data?.updated_at
+                            ? new Date(data.updated_at).toLocaleString("ru-RU", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                              })
+                            : "-"}
                     </Text>
+
                     <Text style={styles.summaryText}>
                         Переплата(-)/Недоплата:{" "}
                         <Text style={styles.bold}>{data?.house_card.overpayment_underpayment} сом</Text>
@@ -170,7 +248,7 @@ export default function DetailCheckScreen() {
                 </View>
             </View>
 
-            {/* <Chart /> */}
+            <Chart id={2} />
         </ScrollView>
     );
 }
@@ -184,6 +262,49 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
+    },
+
+    card_consumption: {
+        backgroundColor: "#F9F9F9",
+        borderRadius: 10,
+        padding: 15,
+        marginVertical: 12,
+        // shadowColor: "#000",
+        // shadowOpacity: 0.05,
+        // shadowRadius: 6,
+        // elevation: 1.5,
+    },
+
+    inputContainer: {
+        marginBottom: 10,
+        marginTop: 10,
+    },
+
+    label: {
+        fontSize: 14,
+        marginBottom: 4,
+    },
+
+    input: {
+        height: 40,
+        borderColor: "#ccc",
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 10,
+    },
+
+    button: {
+        backgroundColor: Colors.BUTTONSERVICE,
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: "center",
+    },
+
+    buttonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
     },
 
     card: {

@@ -58,7 +58,11 @@ const ServiceListScreen = () => {
                 <View style={styles.cards}>
                     {bids?.map((item) => (
                         <>
-                            <TouchableOpacity style={styles.card} onPress={() => goToCreate(item.id)}  key={item.id}>
+                            <TouchableOpacity
+                                style={styles.card}
+                                onPress={() => goToCreate(item.id)}
+                                key={item.id}
+                            >
                                 <View style={styles.cardTitles}>
                                     <View style={styles.iconWrap}>
                                         <CounterIcon />
@@ -149,6 +153,7 @@ const ServiceListScreen = () => {
                         return (
                             <RequestCard
                                 key={item.id}
+                                id={item.id}
                                 title={bidDetails.name} // Получаем название из bid
                                 date={formattedDate} // Используем created_at из deal
                                 desc={item.description} // Используем описание из deal

@@ -1,141 +1,201 @@
-import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchGraphic } from "@/store/slices/graphicSlice";
 import * as shape from "d3-shape";
-import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Svg, { Circle, Defs, G, Line, LinearGradient, Path, Stop, Text as SvgText } from "react-native-svg";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import Svg, {
+    Circle,
+    Defs,
+    G,
+    Line,
+    LinearGradient,
+    Path,
+    Rect,
+    Stop,
+    Text as SvgText,
+} from "react-native-svg";
 
 const { width } = Dimensions.get("window");
-const chartHeight = 160;
-const chartWidth = width - 64;
+const chartHeight = 250;
+const chartWidth = width - 80; // ширина видимой области
+const minGap = 60; // минимальный отступ между точками
 
-const chartDataMap = {
-    День: [4, 6, 3, 5, 2],
-    Неделя: [8, 10, 6, 11, 5],
-    Месяц: [3, 7, 4, 9, 6],
-    Год: [15.56, 3.5, 2.2, 6.8, 10],
-};
+interface ChartProps {
+    id: number | string;
+}
 
-const chartLabels = ["01.01.25", "02.02.25", "03.03.25", "04.04.25", "05.05.25"];
-const yAxisLabels = [15, 10, 5, 0];
-
-export default function Chart() {
-    const { id } = useLocalSearchParams();
+export default function Chart({ id }: ChartProps) {
     const { graphic, loading } = useAppSelector((state) => state.graphic);
     const dispatch = useAppDispatch();
 
-    const [activeTab, setActiveTab] = useState("Год");
+    const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number | null } | null>(null);
 
     useEffect(() => {
         if (id) {
             dispatch(fetchGraphic(Number(id)));
         }
-    }, [id]);
+    }, [id, dispatch]);
 
     if (loading) {
-        return <Text style={{ textAlign: "center", marginVertical: 20 }}>Загрузка графика...</Text>;
+        return <Text style={styles.loadingText}>Загрузка графика...</Text>;
     }
 
-    if (!graphic || graphic.length === 0) {
-        return <Text style={{ textAlign: "center", marginVertical: 20 }}>Нет данных для графика</Text>;
+    if (!graphic || !graphic.graphic_evaluate || graphic.graphic_evaluate.length === 0) {
+        return (
+            <View style={styles.noDataContainer}>
+                <Text style={styles.noDataTitle}>Нет данных для графика</Text>
+                <Text style={styles.noDataSubtitle}>Попробуйте выбрать другой объект или период</Text>
+            </View>
+        );
     }
 
-    // Пример обработки данных (в зависимости от структуры)
-    const consumptionData = graphic.map((item) => item.consumption ?? 0);
-    const chartLabels = graphic.map((item) => item.month_name ?? ""); // или item.date
+    const consumptionData = graphic.graphic_evaluate.map((item) => item.consumption ?? 0);
+    const chartLabels = graphic.graphic_evaluate.map((item) => item.month_name ?? "");
 
-    const maxValue = Math.max(...consumptionData) + 5;
-    const xGap = chartWidth / (consumptionData.length - 1);
+    const maxValue = Math.max(...consumptionData) > 0 ? Math.max(...consumptionData) * 1.2 : 10;
+
+    // шаг между точками (если точек мало — распределим на всю ширину экрана, если много — фиксированный шаг для скролла)
+    const xGap = consumptionData.length <= 6 ? chartWidth / (consumptionData.length - 1 || 1) : minGap;
+
     const points = consumptionData.map((val, i) => ({
-        x: xGap * i,
+        x: 40 + xGap * i,
         y: chartHeight - (val / maxValue) * chartHeight,
+        value: val,
     }));
 
+    const fullChartWidth = 40 + xGap * (consumptionData.length - 1) + 40; // общая ширина графика
+
     const line = shape
-        .line()
-        .x((_, i) => points[i].x)
-        .y((_, i) => points[i].y)
-        .curve(shape.curveLinear)(consumptionData);
+        .line<{ x: number; y: number }>()
+        .x((d) => d.x)
+        .y((d) => d.y)
+        .curve(shape.curveLinear)(points);
 
     const area = shape
-        .area()
-        .x((_, i) => points[i].x)
+        .area<{ x: number; y: number }>()
+        .x((d) => d.x)
         .y0(chartHeight)
-        .y1((_, i) => points[i].y)
-        .curve(shape.curveLinear)(consumptionData);
+        .y1((d) => d.y)
+        .curve(shape.curveLinear)(points);
 
-    const yAxisLabels = [0, Math.floor(maxValue / 2), maxValue];
+    const yStep = maxValue / 5;
+    const yLabels = Array.from({ length: 5 }, (_, i) => Math.round(yStep * i));
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>График потребления</Text>
 
-            <Svg width={chartWidth} height={chartHeight + 40} style={styles.chart}>
-                <Defs>
-                    <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0%" stopColor="#FDBA74" stopOpacity="0.4" />
-                        <Stop offset="100%" stopColor="#FDBA74" stopOpacity="0" />
-                    </LinearGradient>
-                </Defs>
-
-                {/* Горизонтальные линии */}
-                {yAxisLabels.map((val, i) => (
-                    <Line
-                        key={i}
-                        x1={0}
-                        x2={chartWidth}
-                        y1={(chartHeight / maxValue) * (maxValue - val)}
-                        y2={(chartHeight / maxValue) * (maxValue - val)}
-                        stroke="#E4E4E7"
-                        strokeWidth={1}
-                        strokeDasharray="4,4"
-                    />
-                ))}
-
-                <Path d={area!} fill="url(#grad)" />
-                <Path d={line!} fill="none" stroke="#F97316" strokeWidth={2} />
-
-                {points.map((point, i) => (
-                    <G key={i} x={point.x} y={point.y}>
-                        <Circle cx={0} cy={0} r={4} fill="#F97316" />
-                    </G>
-                ))}
-
-                {chartLabels.map((label, i) => (
-                    <SvgText
-                        key={i}
-                        x={points[i].x}
-                        y={chartHeight + 16}
-                        fontSize="10"
-                        fill="#52525B"
-                        textAnchor="middle"
-                    >
-                        {label}
-                    </SvgText>
-                ))}
-
-                {yAxisLabels.map((val, i) => (
-                    <SvgText
-                        key={i}
-                        x={chartWidth + 5}
-                        y={(chartHeight / maxValue) * (maxValue - val) + 4}
-                        fontSize="10"
-                        fill="#52525B"
-                    >
-                        {val} кВт
-                    </SvgText>
-                ))}
-            </Svg>
-
-            <View style={styles.footerTabs}>
-                {["Год"].map((label) => (
-                    <TouchableOpacity key={label} onPress={() => setActiveTab(label)}>
-                        <Text style={[styles.tab, activeTab === label && styles.activeTab]}>{label}</Text>
-                    </TouchableOpacity>
-                ))}
+            <View style={styles.infoContainer}>
+                <Text style={styles.consumptionValue}>{graphic.average_consumption} кВт*ч</Text>
+                <View style={styles.diffContainer}>
+                    <Text style={styles.increase}>
+                        ↑ {graphic.diff_amount} кВт*ч ({graphic.diff_percent}%)
+                    </Text>
+                </View>
+                <Text style={styles.subtitle}>Увеличение к прошлому периоду</Text>
             </View>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+                <Svg width={fullChartWidth} height={chartHeight + 50} style={styles.chart}>
+                    <Defs>
+                        <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                            <Stop offset="0%" stopColor="#FDBA74" stopOpacity="0.4" />
+                            <Stop offset="100%" stopColor="#FDBA74" stopOpacity="0" />
+                        </LinearGradient>
+                    </Defs>
+
+                    {/* Горизонтальные линии + подписи Y */}
+                    {yLabels.map((val, i) => {
+                        const y = chartHeight - (val / maxValue) * chartHeight;
+                        return (
+                            <G key={i}>
+                                <Line
+                                    x1={40}
+                                    x2={fullChartWidth}
+                                    y1={y}
+                                    y2={y}
+                                    stroke="#E4E4E7"
+                                    strokeWidth={1}
+                                    strokeDasharray="4,4"
+                                />
+                                <SvgText
+                                    x={30}
+                                    y={y}
+                                    fontSize="10"
+                                    fill="#52525B"
+                                    textAnchor="end"
+                                    alignmentBaseline="middle"
+                                >
+                                    {val}
+                                </SvgText>
+                            </G>
+                        );
+                    })}
+
+                    {/* Область и линия */}
+                    <Path d={area!} fill="url(#grad)" />
+                    <Path d={line!} fill="none" stroke="#F97316" strokeWidth={2} />
+
+                    {/* Вертикальные линии */}
+                    {points.map((point, i) => (
+                        <Line
+                            key={`vline-${i}`}
+                            x1={point.x}
+                            y1={point.y}
+                            x2={point.x}
+                            y2={chartHeight}
+                            stroke="#F97316"
+                            strokeWidth={1}
+                            strokeDasharray="4,4"
+                        />
+                    ))}
+
+                    {/* Точки */}
+                    {points.map((point, i) => (
+                        <Circle
+                            key={`point-${i}`}
+                            cx={point.x}
+                            cy={point.y}
+                            r={5}
+                            fill="#fff"
+                            stroke="#F97316"
+                            strokeWidth={2}
+                            onPress={() => setTooltip({ x: point.x, y: point.y, value: point.value })}
+                        />
+                    ))}
+
+                    {/* Тултип */}
+                    {tooltip && (
+                        <G x={tooltip.x} y={tooltip.y - 35}>
+                            <Rect x={-28} y={-20} width={56} height={18} rx={4} fill="#F97316" />
+                            <SvgText
+                                x={-12}
+                                y={-8}
+                                fontSize="11"
+                                fontWeight="bold"
+                                fill="#fff"
+                                textAnchor="middle"
+                            >
+                                {tooltip.value?.toFixed(0)} кВт*ч
+                            </SvgText>
+                        </G>
+                    )}
+
+                    {/* Подписи оси X */}
+                    {chartLabels.map((label, i) => (
+                        <SvgText
+                            key={i}
+                            x={points[i].x}
+                            y={chartHeight + 25}
+                            fontSize="11"
+                            fill="#52525B"
+                            textAnchor="middle"
+                        >
+                            {label}
+                        </SvgText>
+                    ))}
+                </Svg>
+            </ScrollView>
         </View>
     );
 }
@@ -143,63 +203,64 @@ export default function Chart() {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: "#fff",
-        borderRadius: 10,
+        borderRadius: 12,
         padding: 16,
         marginHorizontal: 10,
         marginVertical: 10,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    loadingText: {
+        textAlign: "center",
+        marginVertical: 20,
+    },
+    noDataContainer: {
+        alignItems: "center",
+        marginVertical: 20,
+    },
+    noDataTitle: {
+        fontSize: 16,
+        color: "#6B7280",
+    },
+    noDataSubtitle: {
+        fontSize: 12,
+        color: "#9CA3AF",
     },
     title: {
         fontSize: 16,
-        fontWeight: "400",
-        marginBottom: 4,
-        color: Colors.GRAY_COLOR,
+        fontWeight: "500",
+        marginBottom: 6,
+        color: "#4B5563",
     },
-    total: {
-        fontSize: 25,
+    infoContainer: {
+        marginBottom: -16,
+    },
+    consumptionValue: {
+        fontSize: 24,
         fontWeight: "700",
-        color: Colors.BUTTONSERVICE,
+        color: "#F97316",
     },
-    totalCounter: {
-        fontSize: 18,
-        fontWeight: "400",
-        color: Colors.GRAY_COLOR,
-    },
-
-    increase: {
-        fontSize: 16,
-        color: "#E74C3D",
+    diffContainer: {
+        flexDirection: "row",
+        alignItems: "center",
         marginTop: 4,
+    },
+    increase: {
+        fontSize: 14,
+        color: "#E74C3D",
+        fontWeight: "bold",
     },
     subtitle: {
         fontSize: 12,
-        fontWeight: "300",
+        fontWeight: "400",
         color: "#9B9EA1",
-        marginBottom: 20,
+        marginTop: 4,
     },
     chart: {
         marginTop: 8,
         marginBottom: 12,
-    },
-    footerTabs: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        marginTop: 12,
-        backgroundColor: "#F3F3F3",
-        borderRadius: 7,
-        padding: 8,
-    },
-    tab: {
-        fontSize: 12,
-        color: "#A1A1AA",
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: 4,
-        // backgroundColor: "#F4F4F5",
-        overflow: "hidden",
-        fontWeight: 500,
-    },
-    activeTab: {
-        backgroundColor: Colors.BUTTONSERVICE,
-        color: "#fff",
     },
 });

@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { storesApi } from "../api";
-import { Graphic } from "../types";
+import { GraphicData } from "../types";
 
 type InfoState = {
     // detail: HouseCardDetail | null;
     loading: boolean;
     error: null | string;
-    graphic: Graphic[] | null;
+    graphic: GraphicData | null;
 };
 
 const initialState: InfoState = {
@@ -16,7 +16,7 @@ const initialState: InfoState = {
     // detail: null,
 };
 
-export const fetchGraphic = createAsyncThunk<Graphic[], number, { rejectValue: string }>(
+export const fetchGraphic = createAsyncThunk<GraphicData, number, { rejectValue: string }>(
     "graphic/fetchGraphic",
     async (houseCardId, { rejectWithValue }) => {
         try {
@@ -27,7 +27,7 @@ export const fetchGraphic = createAsyncThunk<Graphic[], number, { rejectValue: s
                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
             }
 
-            return res.data as Graphic[];
+            return res.data as GraphicData;
         } catch (error: any) {
             console.error(error);
             return rejectWithValue(`Ошибка: ${error?.message || error}`);

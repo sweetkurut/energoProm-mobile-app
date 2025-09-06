@@ -313,18 +313,26 @@ export interface LastCheck {
     total_sum: number;
     counter_photo: string;
     counter_current_check: number;
-    created_at: string;
-    updated_at: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 // графики
-export interface Graphic {
+// Этот интерфейс описывает один элемент графика, который находится внутри массива
+export interface GraphicItem {
     created_at: string;
     consumption: number | null;
     current_check_date: string | null;
     month_name: string;
 }
 
+// Этот новый интерфейс описывает полную структуру ответа от API
+export interface GraphicData {
+    average_consumption: number;
+    diff_amount: number;
+    diff_percent: number;
+    graphic_evaluate: GraphicItem[]; // Здесь мы указываем, что это массив GraphicItem
+}
 // сделки
 
 export interface Deal {
@@ -377,4 +385,9 @@ export interface BidDetail {
     icon: string;
     created_at: string;
     updated_at: string;
+}
+
+// PATCH-запрос на фото со стороны пользователя
+export interface UpdateCheckUser {
+    counter_current_check: number;
 }

@@ -93,9 +93,17 @@ export const storesApi = {
         });
     },
 
+    updatePhoto(id: number, formData: FormData) {
+        return instance.patch(`check/${id}/update-photo/`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+
     // графики
     getGraphicChecks(houseCardId: number) {
-        return instance.get("check/graphic-checks", {
+        return instance.get("check/graphic-checks/", {
             params: {
                 house_card: houseCardId,
             },

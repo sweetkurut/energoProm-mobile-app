@@ -6,7 +6,15 @@ import { fetchHouseCard } from "@/store/slices/housecardSlice";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 import dayjs from "dayjs";
 
@@ -14,6 +22,7 @@ export default function HomeScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const dispatch = useAppDispatch();
     const { house, loading } = useAppSelector((state) => state.house);
+    const { profile } = useAppSelector((state) => state.profile);
 
     useEffect(() => {
         dispatch(fetchHouseCard());
@@ -25,11 +34,8 @@ export default function HomeScreen() {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        // Здесь симулируем загрузку. Замените на реальный fetch/запрос.
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 1500);
-    }, []);
+        dispatch(fetchHouseCard()).then(() => setRefreshing(false));
+    }, [dispatch]);
 
     const onPay = () => {
         router.push("/(payment)/payment");
@@ -38,29 +44,34 @@ export default function HomeScreen() {
     const goToDetail = (id: number) => {
         router.push(`/listing/check/${id}`);
     };
+
+    if (loading)
+        return (
+            <View style={styles.loader}>
+                <ActivityIndicator size={"large"} color={"#EA961C"} />
+            </View>
+        );
+
     return (
         <ScrollView
             style={styles.container}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-            {/* шапка главной страницы */}
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcomeText}>Добро пожаловать!</Text>
-                    <Text style={styles.nameText}>Иван Иванов</Text>
-                    <Text style={styles.balance}>Лицевой счёт: 45087634892346</Text>
+                    <Text style={styles.nameText}>{profile?.name}</Text>
                 </View>
                 <View style={styles.headerIcons}>
-                    <View style={styles.iconWrapper}>
+                    {/* <View style={styles.iconWrapper}>
                         <Text style={styles.language}>Ру</Text>
-                    </View>
+                    </View> */}
                     <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
                         <NotificationIcon />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Лицевые счета */}
             <Text style={styles.textCountNumber}>Мои лицевые счета</Text>
 
             {house?.map((item) => (
@@ -118,7 +129,6 @@ export default function HomeScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* Сервисы */}
             <CardServices />
         </ScrollView>
     );
@@ -132,6 +142,12 @@ const styles = StyleSheet.create({
         color: Colors.GRAY_COLOR,
         fontWeight: 400,
         marginHorizontal: 10,
+    },
+
+    loader: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     houseCard: {

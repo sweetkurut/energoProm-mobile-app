@@ -1,15 +1,30 @@
 import AdressIcon from "@/assets/icons/AdressIcon";
 import LocationIcon from "@/assets/icons/LocationIcon";
 import Colors from "@/constants/Colors";
+import { useAppDispatch } from "@/store/hook";
+import { deleteDeal } from "@/store/slices/dealsSlice";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ConfirmModal from "./Modal";
 
-const RequestCard = ({ title, date, desc, address, planDate, status }: any) => {
+const RequestCard = ({ id, title, date, desc, address, planDate, status }: any) => {
     const [modalVisible, setModalVisible] = useState(false);
+
+    const dispatch = useAppDispatch();
 
     const handleCancel = () => {
         setModalVisible(false);
+    };
+
+    const handleDelete = async () => {
+        try {
+            console.log("Попытка удаления с ID:", id);
+            await dispatch(deleteDeal(id)).unwrap();
+            console.log("Удаление успешно");
+            setModalVisible(false);
+        } catch (error) {
+            console.error("Ошибка", error);
+        }
     };
 
     const getStatusStyle = () => {
@@ -55,7 +70,7 @@ const RequestCard = ({ title, date, desc, address, planDate, status }: any) => {
 
             <ConfirmModal
                 visible={modalVisible}
-                onConfirm={handleCancel}
+                onConfirm={handleDelete}
                 onCancel={() => setModalVisible(false)}
                 title="Отмена заявки"
                 message="Вы действительно хотите отменить заявку?\nВ случае отмены с вами свяжутся для уточнения"

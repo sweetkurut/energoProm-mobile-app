@@ -33,6 +33,22 @@ export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue:
     }
 );
 
+export const updateCheckPhoto = createAsyncThunk(
+    "check/updateCheckPhoto",
+    async ({ id, formData }: { id: number; formData: FormData }, { rejectWithValue }) => {
+        try {
+            const res = await storesApi.updatePhoto(id, formData);
+            if (res.status !== 200) {
+                return rejectWithValue(`Ошибка сервера: ${res.status}`);
+            }
+            return await res.data;
+        } catch (error: any) {
+            console.error(error);
+            return rejectWithValue(`Ошибка: ${error?.message || error}`);
+        }
+    }
+);
+
 const checkSlice = createSlice({
     name: "check",
     initialState,
@@ -49,6 +65,19 @@ const checkSlice = createSlice({
             })
             .addCase(fetchLastCheck.rejected, (state) => {
                 state.loading = false;
+            })
+
+            .addCase(updateCheckPhoto.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateCheckPhoto.fulfilled, (state, action) => {
+                state.loading = false;
+                state.check = action.payload;
+            })
+            .addCase(updateCheckPhoto.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
             });
     },
 });

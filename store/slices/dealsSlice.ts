@@ -68,24 +68,15 @@ export const createDeal = createAsyncThunk(
     }
 );
 
-// export const createDeal = createAsyncThunk<DealDetail, number, { rejectValue: string }>(
-//     "deal/createDeal",
-//     async (id, { rejectWithValue }) => {
-//         try {
-//             const res = await storesApi.getDetailDeal(id);
-//             console.log(res, "создание заявки");
-
-//             if (res.status !== 200) {
-//                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
-//             }
-
-//             return res.data as DealDetail;
-//         } catch (error: any) {
-//             console.error(error);
-//             return rejectWithValue(`Ошибка: ${error?.message || error}`);
-//         }
-//     }
-// );
+export const deleteDeal = createAsyncThunk("deal/deleteDeal", async (id: number, { rejectWithValue }) => {
+    try {
+        const res = await storesApi.deleteDeal(id);
+        console.log(res, "удаление заявки");
+        return id;
+    } catch (error: any) {
+        return rejectWithValue(handleApiError(error, "Ошибка при удалении"));
+    }
+});
 
 const dealsSlice = createSlice({
     name: "deals",
@@ -114,6 +105,22 @@ const dealsSlice = createSlice({
                 state.deal = action.payload;
             })
             .addCase(fetchDetailDeal.rejected, (state) => {
+                state.loading = false;
+            })
+
+            .addCase(deleteDeal.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteDeal.fulfilled, (state, action) => {
+                state.loading = false;
+                // action.payload - это ID, который мы вернули из asyncThunk
+                // Фильтруем массив, чтобы удалить элемент
+                if (state.deals) {
+                    state.deals = state.deals.filter((deal) => deal.id !== action.payload);
+                }
+            })
+            .addCase(deleteDeal.rejected, (state) => {
                 state.loading = false;
             });
     },
