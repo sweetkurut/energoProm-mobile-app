@@ -13,6 +13,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const CreateRequestScreen = () => {
     const { bids } = useAppSelector((state) => state.bids);
+
     const profileState = useAppSelector((state) => state.profile);
     const userId = profileState.profile?.id;
     const { bidId } = useLocalSearchParams();
@@ -31,7 +32,7 @@ const CreateRequestScreen = () => {
     const showDate = () => setDatePickerVisibility(true);
     const hideDatePicker = () => setDatePickerVisibility(false);
 
-    const handleConfirm = (date) => {
+    const handleConfirm = (date: Date) => {
         setSelectedDate(date);
         hideDatePicker();
     };

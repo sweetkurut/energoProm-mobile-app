@@ -1,11 +1,11 @@
 import ArrowRightIcon from "@/assets/icons/ArrowRightIcon";
-import CounterIcon from "@/assets/icons/CounterIcon";
 import RequestCard from "@/components/RequestCard";
 import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchBids } from "@/store/slices/bidSlice";
 import { fetchDeals } from "@/store/slices/dealsSlice";
 import { router } from "expo-router";
+import { Wrench } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -22,7 +22,6 @@ const ServiceListScreen = () => {
     }, [dispatch]);
 
     const goToCreate = (bidId: number) => {
-        // Передаем id услуги в URL
         router.push({
             pathname: "/(login)/createRequest",
             params: { bidId: bidId },
@@ -57,87 +56,33 @@ const ServiceListScreen = () => {
             {!tabs ? (
                 <View style={styles.cards}>
                     {bids?.map((item) => (
-                        <>
-                            <TouchableOpacity
-                                style={styles.card}
-                                onPress={() => goToCreate(item.id)}
-                                key={item.id}
-                            >
-                                <View style={styles.cardTitles}>
-                                    <View style={styles.iconWrap}>
-                                        <CounterIcon />
-                                    </View>
-                                    <View>
-                                        <Text style={styles.cardtitle}>{item.name}</Text>
-                                        <Text style={styles.cardSubtitle}>{item.description}</Text>
-                                    </View>
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => goToCreate(item.id)}
+                            key={item.id}
+                        >
+                            <View style={styles.cardTitles}>
+                                <View style={styles.iconWrap}>
+                                    <Wrench />
                                 </View>
-                                <ArrowRightIcon />
-                            </TouchableOpacity>
-                        </>
+                                <View>
+                                    <Text style={styles.cardtitle}>{item.name}</Text>
+                                    <Text style={styles.cardSubtitle}>{item.description}</Text>
+                                </View>
+                            </View>
+                            <ArrowRightIcon />
+                        </TouchableOpacity>
                     ))}
-
-                    {/* <TouchableOpacity style={styles.card} onPress={goToCreate}>
-                        <View style={styles.cardTitles}>
-                            <View style={styles.iconWrap}>
-                                <CounterIcon />
-                            </View>
-                            <View>
-                                <Text style={styles.cardtitle}>Установка счетчика</Text>
-                                <Text style={styles.cardSubtitle}>Установка нового электросчетчика</Text>
-                            </View>
-                        </View>
-                        <ArrowRightIcon />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.card}>
-                        <View style={styles.cardTitles}>
-                            <View style={styles.iconWrap}>
-                                <RepairIcon />
-                            </View>
-                            <View>
-                                <Text style={styles.cardtitle}>Ремонт счетчика</Text>
-                                <Text style={styles.cardSubtitle}>
-                                    Ремонт или замена неисправного счетчика
-                                </Text>
-                            </View>
-                        </View>
-                        <ArrowRightIcon />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.card}>
-                        <View style={styles.cardTitles}>
-                            <View style={styles.iconWrap}>
-                                <MaintenanceIcon />
-                            </View>
-                            <View>
-                                <Text style={styles.cardtitle}>Техническое обслуживание</Text>
-                                <Text style={styles.cardSubtitle}>Плановое ТО электрооборудования</Text>
-                            </View>
-                        </View>
-                        <ArrowRightIcon />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.card}>
-                        <View style={styles.cardTitles}>
-                            <View style={styles.iconWrap}>
-                                <ElectricityIcon />
-                            </View>
-                            <View>
-                                <Text style={styles.cardtitle}>Подключение к сети</Text>
-                                <Text style={styles.cardSubtitle}>
-                                    Подключение нового объекта к элетросети
-                                </Text>
-                            </View>
-                        </View>
-                        <ArrowRightIcon />
-                    </TouchableOpacity> */}
                 </View>
             ) : (
                 <>
                     {deals?.map((item) => {
+                        if (!bids) return null;
+
                         const bidDetails = bids.find((bid) => bid.id === item.bid);
                         if (!bidDetails) return null;
 
-                        // Правильное форматирование даты
-                        const formattedDate = new Date(item.created_at).toLocaleDateString("ru-RU", {
+                        const formattedDate = new Date(item.date_of_deal).toLocaleDateString("ru-RU", {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
@@ -154,13 +99,12 @@ const ServiceListScreen = () => {
                             <RequestCard
                                 key={item.id}
                                 id={item.id}
-                                title={bidDetails.name} // Получаем название из bid
-                                date={formattedDate} // Используем created_at из deal
-                                desc={item.description} // Используем описание из deal
-                                address={item.address} // Используем адрес из deal
-                                planDate={formattedDate} // У вас пока нет этих данных, возможно, они будут в будущем ответе API
-                                status={statusMap[item.status] || "Неизвестно"} // Получаем статус из deal
-                                // status={item.status}
+                                title={bidDetails.name}
+                                date={formattedDate}
+                                desc={item.description}
+                                address={item.address}
+                                planDate={formattedDate}
+                                status={statusMap[item.status as keyof typeof statusMap] || "Неизвестно"}
                             />
                         );
                     })}
@@ -255,6 +199,7 @@ const styles = StyleSheet.create({
     cardSubtitle: {
         fontSize: 11,
         color: Colors.GRAY_COLOR,
+        width: 270,
     },
 
     iconWrap: {
