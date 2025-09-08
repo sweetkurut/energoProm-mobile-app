@@ -60,19 +60,27 @@ export default function HomeScreen() {
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcomeText}>Добро пожаловать!</Text>
-                    <Text style={styles.nameText}>{profile?.name}</Text>
+                    <Text style={styles.nameText}>{profile ? profile.name : "Загрузка..."}</Text>
                 </View>
                 <View style={styles.headerIcons}>
-                    {/* <View style={styles.iconWrapper}>
-                        <Text style={styles.language}>Ру</Text>
-                    </View> */}
                     <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
                         <NotificationIcon />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <Text style={styles.textCountNumber}>Мои лицевые счета</Text>
+            <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    // justifyContent: "space-between",
+                    // marginBottom: 10,
+                    marginHorizontal: 10,
+                }}
+            >
+                <Feather name="bar-chart" size={24} color={Colors.ORANGE_COLOR} />
+                <Text style={styles.textCountNumber}>Мои лицевые счета</Text>
+            </View>
 
             {house?.map((item) => (
                 <TouchableOpacity
@@ -82,13 +90,13 @@ export default function HomeScreen() {
                 >
                     <View style={styles.houseCardHeader}>
                         <View style={styles.iconRow}>
-                            <Feather name="paperclip" size={16} color={Colors.ORANGE_COLOR} />
+                            <Feather name="bookmark" size={16} color={Colors.ORANGE_COLOR} />
                             <Text style={styles.accountNumber}>Л/с: {item.house_card}</Text>
                         </View>
 
                         <View style={styles.iconRow}>
                             <Feather name="activity" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.tariff}>{item.tariff?.kw_cost} сом/кВт·ч</Text>
+                            <Text style={styles.tariff}>{item.tariff?.kw_cost} сом/кВт*ч</Text>
                         </View>
                     </View>
 
@@ -96,7 +104,8 @@ export default function HomeScreen() {
                         <View style={styles.iconRow}>
                             <Feather name="home" size={16} color={Colors.ORANGE_COLOR} />
                             <Text style={styles.address}>
-                                {item.address?.street?.name}, {item.address?.house}, кв.{" "}
+                                {/* {item.address?.street?.name}, {item.address?.house}, кв.{" "} */}
+                                {item.address?.street?.name}
                                 {item.address?.apartment}{" "}
                                 {item.address?.apartment_liter && `(${item.address.apartment_liter})`}
                             </Text>
@@ -105,7 +114,8 @@ export default function HomeScreen() {
                         <View style={styles.iconRow}>
                             <Feather name="zap" size={16} color={Colors.ORANGE_COLOR} />
                             <Text style={styles.indication}>
-                                Показания: <Text style={styles.indicationValue}>— кВт*ч</Text>{" "}
+                                Показания:
+                                <Text style={styles.indicationValue}> {item.tariff.kw_cost} кВт*ч</Text>
                                 {/* Пока нет данных */}
                             </Text>
                         </View>
@@ -157,6 +167,18 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         marginHorizontal: 10,
     },
+    // houseCard: {
+    //     backgroundColor: "#fff",
+    //     borderRadius: 12,
+    //     padding: 14,
+    //     marginVertical: 8,
+    //     marginHorizontal: 12,
+    //     shadowColor: "#000",
+    //     shadowOffset: { width: 0, height: 2 },
+    //     shadowOpacity: 0.1,
+    //     shadowRadius: 4,
+    //     elevation: 3,
+    // },
 
     houseCardHeader: {
         flexDirection: "row",
@@ -205,9 +227,9 @@ const styles = StyleSheet.create({
     },
 
     date: {
-        fontSize: 13,
+        fontSize: 14,
         color: "#aaa",
-        marginTop: 6,
+        // marginTop: 6,
     },
 
     container: {
@@ -233,13 +255,13 @@ const styles = StyleSheet.create({
     },
 
     welcomeText: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 400,
         color: Colors.WHITE_COLOR,
     },
 
     nameText: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 600,
         color: Colors.WHITE_COLOR,
     },
@@ -278,7 +300,7 @@ const styles = StyleSheet.create({
     },
 
     check_balance: {
-        fontSize: 16,
+        fontSize: 22,
         fontWeight: 700,
         color: Colors.HEADER,
     },
