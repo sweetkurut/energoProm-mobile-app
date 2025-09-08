@@ -45,20 +45,22 @@ export default function SignIn() {
     });
 
     useEffect(() => {
-        const checkSavedToken = async () => {
+        const init = async () => {
             try {
+                // Отправляем токен на сервер
+                await sendPushTokenToServer();
+
+                // Проверяем сохранённые токены
                 const hasStoredTokens = await hasTokens();
                 if (hasStoredTokens) {
                     router.replace("/(tabs)");
                 }
             } catch (error) {
-                console.error("Ошибка при проверке токенов:", error);
+                console.error("Ошибка при инициализации уведомлений:", error);
             }
         };
 
-        sendPushTokenToServer();
-
-        checkSavedToken();
+        init();
     }, []);
 
     const onSubmit = async (data: any) => {
