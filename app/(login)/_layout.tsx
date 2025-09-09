@@ -13,7 +13,15 @@ const LoginLayout = () => {
                 initialRouteName="welcome"
                 screenOptions={{
                     headerShown: true,
-                    animationDuration: 0,
+                    animation: "ios_from_right", // ✅ плавный переход справа
+                    headerBackTitle: "Назад", // текст кнопки назад (iOS)
+                    headerTintColor: Colors.WHITE_COLOR,
+                    headerStyle: {
+                        backgroundColor: Colors.HEADER,
+                    },
+                    headerTitleStyle: {
+                        fontWeight: "500",
+                    },
                 }}
             >
                 <Stack.Screen
@@ -27,26 +35,12 @@ const LoginLayout = () => {
                     name="service"
                     options={{
                         title: "Заявки на услуги",
-                        headerStyle: {
-                            backgroundColor: Colors.HEADER,
-                        },
-                        headerTintColor: Colors.WHITE_COLOR,
-                        headerTitleStyle: {
-                            fontWeight: "500",
-                        },
                     }}
                 />
                 <Stack.Screen
                     name="createRequest"
                     options={{
                         title: "Новая заявка",
-                        headerStyle: {
-                            backgroundColor: Colors.HEADER,
-                        },
-                        headerTintColor: Colors.WHITE_COLOR,
-                        headerTitleStyle: {
-                            fontWeight: "500",
-                        },
                     }}
                 />
             </Stack>

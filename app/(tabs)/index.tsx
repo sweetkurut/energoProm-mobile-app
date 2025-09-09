@@ -55,7 +55,14 @@ export default function HomeScreen() {
     return (
         <ScrollView
             style={styles.container}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={["#EA961C"]}
+                    tintColor="#EA961C"
+                />
+            }
         >
             <View style={styles.header}>
                 <View>
@@ -82,51 +89,74 @@ export default function HomeScreen() {
                 <Text style={styles.textCountNumber}>Мои лицевые счета</Text>
             </View>
 
-            {house?.map((item) => (
-                <TouchableOpacity
-                    key={item.id}
-                    style={styles.houseCard}
-                    onPress={() => goToDetail(item.house_card)}
-                >
-                    <View style={styles.houseCardHeader}>
-                        <View style={styles.iconRow}>
-                            <Feather name="bookmark" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.accountNumber}>Л/с: {item.house_card}</Text>
+            {house && house.length > 0 ? (
+                house.map((item) => (
+                    <TouchableOpacity
+                        key={item.id}
+                        style={styles.houseCard}
+                        onPress={() => goToDetail(item.house_card)}
+                    >
+                        <View style={styles.houseCardHeader}>
+                            <View style={styles.iconRow}>
+                                <Feather name="bookmark" size={16} color={Colors.ORANGE_COLOR} />
+                                <Text style={styles.accountNumber}>Л/с: {item.house_card}</Text>
+                            </View>
+
+                            <View style={styles.iconRow}>
+                                <Feather name="activity" size={16} color={Colors.ORANGE_COLOR} />
+                                <Text style={styles.tariff}>{item.tariff?.kw_cost} сом/кВт*ч</Text>
+                            </View>
                         </View>
 
-                        <View style={styles.iconRow}>
-                            <Feather name="activity" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.tariff}>{item.tariff?.kw_cost} сом/кВт*ч</Text>
+                        <View style={styles.houseCardBody}>
+                            <View style={styles.iconRow}>
+                                <Feather name="home" size={16} color={Colors.ORANGE_COLOR} />
+                                <Text style={styles.address}>
+                                    {item.address?.street?.name}
+                                    {item.address?.apartment}{" "}
+                                    {item.address?.apartment_liter && `(${item.address.apartment_liter})`}
+                                </Text>
+                            </View>
+
+                            <View style={styles.iconRow}>
+                                <Feather name="zap" size={16} color={Colors.ORANGE_COLOR} />
+                                <Text style={styles.indication}>
+                                    Показания:
+                                    <Text style={styles.indicationValue}>
+                                        {" "}
+                                        {item.tariff?.kw_cost ?? "-"} кВт*ч
+                                    </Text>
+                                </Text>
+                            </View>
+
+                            <View style={styles.iconRow}>
+                                <Feather name="calendar" size={16} color={Colors.ORANGE_COLOR} />
+                                <Text style={styles.date}>
+                                    {item.contract_date
+                                        ? dayjs(item.contract_date).format("DD.MM.YYYY")
+                                        : "-"}
+                                </Text>
+                            </View>
                         </View>
+                    </TouchableOpacity>
+                ))
+            ) : (
+                <View style={styles.noDataContainer}>
+                    <View style={styles.noDataCard}>
+                        <Feather
+                            name="info"
+                            size={40}
+                            color={Colors.ORANGE_COLOR}
+                            style={{ marginBottom: 10 }}
+                        />
+                        <Text style={styles.noDataTitle}>Лицевые счета отсутствуют</Text>
+                        <Text style={styles.noDataSubtitle}>
+                            Пока у вас нет зарегистрированных лицевых счетов. Обратитесь в поддержку для
+                            получения информации.
+                        </Text>
                     </View>
-
-                    <View style={styles.houseCardBody}>
-                        <View style={styles.iconRow}>
-                            <Feather name="home" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.address}>
-                                {/* {item.address?.street?.name}, {item.address?.house}, кв.{" "} */}
-                                {item.address?.street?.name}
-                                {item.address?.apartment}{" "}
-                                {item.address?.apartment_liter && `(${item.address.apartment_liter})`}
-                            </Text>
-                        </View>
-
-                        <View style={styles.iconRow}>
-                            <Feather name="zap" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.indication}>
-                                Показания:
-                                <Text style={styles.indicationValue}> {item.tariff.kw_cost} кВт*ч</Text>
-                                {/* Пока нет данных */}
-                            </Text>
-                        </View>
-
-                        <View style={styles.iconRow}>
-                            <Feather name="calendar" size={16} color={Colors.ORANGE_COLOR} />
-                            <Text style={styles.date}>{dayjs(item.contract_date).format("DD.MM.YYYY")}</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            ))}
+                </View>
+            )}
 
             <View style={styles.check}>
                 <View>
@@ -152,6 +182,37 @@ const styles = StyleSheet.create({
         color: Colors.GRAY_COLOR,
         fontWeight: 400,
         marginHorizontal: 10,
+    },
+
+    noDataContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    noDataCard: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+        width: "100%",
+    },
+    noDataTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: Colors.GRAY_COLOR,
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    noDataSubtitle: {
+        fontSize: 14,
+        color: Colors.GRAY_COLOR,
+        textAlign: "center",
     },
 
     loader: {

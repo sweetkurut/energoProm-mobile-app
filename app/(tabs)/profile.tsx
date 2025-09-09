@@ -72,7 +72,14 @@ export default function ProfileScreen() {
     return (
         <ScrollView
             style={styles.container}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={["#EA961C"]}
+                    tintColor="#EA961C"
+                />
+            }
         >
             {/* Шапка */}
             <View style={styles.header}>

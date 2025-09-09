@@ -62,7 +62,14 @@ export default function PaymentScreen() {
 
             <ScrollView
                 contentContainerStyle={styles.listContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor="#EA961C" // iOS цвет
+                        colors={["#EA961C"]} // Android цвет
+                    />
+                }
             >
                 {filteredPayments.length === 0 ? (
                     <View style={styles.empty}>

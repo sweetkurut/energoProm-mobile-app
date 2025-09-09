@@ -11,7 +11,7 @@ export default function CheckLayout() {
             <SystemBars style="dark" />
             <Stack
                 screenOptions={{
-                    animationDuration: 0,
+                    animation: "ios_from_right", // ✅ плавная анимация перехода
                     headerStyle: {
                         backgroundColor: Colors.HEADER,
                     },
@@ -19,6 +19,7 @@ export default function CheckLayout() {
                     headerTitleStyle: {
                         fontWeight: "500",
                     },
+                    headerBackTitle: "Назад", // текст кнопки назад (iOS)
                 }}
             >
                 <Stack.Screen

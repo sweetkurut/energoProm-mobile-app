@@ -6,20 +6,39 @@ import { fetchBids } from "@/store/slices/bidSlice";
 import { fetchDeals } from "@/store/slices/dealsSlice";
 import { router } from "expo-router";
 import { Wrench } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const ServiceListScreen = () => {
     const [tabs, setTabs] = useState<boolean>(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const dispatch = useAppDispatch();
     const { bids, loading } = useAppSelector((state) => state.bids);
     const { deals } = useAppSelector((state) => state.deals);
 
-    useEffect(() => {
-        dispatch(fetchBids());
-        dispatch(fetchDeals());
+    const loadData = useCallback(async () => {
+        await dispatch(fetchBids());
+        await dispatch(fetchDeals());
     }, [dispatch]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await loadData();
+        setRefreshing(false);
+    }, [loadData]);
 
     const goToCreate = (bidId: number) => {
         router.push({
@@ -36,7 +55,17 @@ const ServiceListScreen = () => {
         );
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView
+            style={styles.container}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={["#EA961C"]}
+                    tintColor="#EA961C"
+                />
+            }
+        >
             <View style={styles.tabs}>
                 <TouchableOpacity
                     style={[styles.tabButton, !tabs && styles.activeTab]}
