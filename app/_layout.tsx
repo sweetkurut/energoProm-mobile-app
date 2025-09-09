@@ -74,7 +74,13 @@ export default function RootLayout() {
         <AuthContext.Provider value={{ isAuthenticated, isAuthLoading, updateAuthState }}>
             <View style={{ flex: 1 }}>
                 <Provider store={store}>
-                    <Stack>
+                    <Stack
+                        screenOptions={{
+                            animation: "ios_from_right",
+                            headerBackTitle: "Назад",
+                            headerTintColor: Colors.BLACK,
+                        }}
+                    >
                         <Stack.Screen name="index" options={{ headerShown: false }} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                         <Stack.Screen name="(login)" options={{ headerShown: false }} />
@@ -85,26 +91,20 @@ export default function RootLayout() {
                             name="listing/news/[id]"
                             options={{
                                 title: "Узнать больше",
-                                headerStyle: {
-                                    backgroundColor: Colors.HEADER,
-                                },
+                                headerStyle: { backgroundColor: Colors.HEADER },
                                 headerTintColor: Colors.WHITE_COLOR,
-                                headerTitleStyle: {
-                                    fontWeight: "500",
-                                },
+                                headerTitleStyle: { fontWeight: "500" },
+                                animation: "ios_from_right",
                             }}
                         />
                         <Stack.Screen
                             name="listing/check/[id]"
                             options={{
                                 title: "Мой лицевой счёт",
-                                headerStyle: {
-                                    backgroundColor: Colors.HEADER,
-                                },
+                                headerStyle: { backgroundColor: Colors.HEADER },
                                 headerTintColor: Colors.WHITE_COLOR,
-                                headerTitleStyle: {
-                                    fontWeight: "500",
-                                },
+                                headerTitleStyle: { fontWeight: "500" },
+                                animation: "ios_from_right",
                             }}
                         />
                         <Stack.Screen name="+not-found" />

@@ -4,13 +4,12 @@
         "slug": "Energo",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        // "icon": "./assets/images/icon1024.png",
+        "icon": "./assets/images/icon1024.png",
         "scheme": "energoprommobileapp",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "splash": {
-            "image": "./assets/images/Splash.png",
+            "image": "./assets/images/512.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -24,7 +23,7 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
+                "foregroundImage": "./assets/images/iconpng1024.png",
                 "backgroundColor": "#ffffff"
             },
             "edgeToEdgeEnabled": true,
@@ -33,7 +32,7 @@
         "web": {
             "bundler": "metro",
             "output": "static",
-            "favicon": "./assets/images/favicon.png"
+            "favicon": "./assets/images/iconpng1024.png"
         },
         "plugins": ["expo-router", "expo-font", "expo-secure-store"],
         "experiments": {
