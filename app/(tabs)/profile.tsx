@@ -62,6 +62,10 @@ export default function ProfileScreen() {
         router.push("/(notification)/notification");
     };
 
+    const goToSupport = () => {
+        router.push("/(support)/support");
+    };
+
     if (loading)
         return (
             <View style={styles.loader}>
@@ -145,7 +149,7 @@ export default function ProfileScreen() {
                         <Switch value={isEnabled} onValueChange={toggleSwitch} />
                     </View>
 
-                    <TouchableOpacity style={styles.rowLink}>
+                    <TouchableOpacity style={styles.rowLink} onPress={goToSupport}>
                         <View>
                             <Text style={styles.rowText}>Связаться с поддержкой</Text>
                             <Text style={styles.smallText}>Задать вопрос или сообщить о проблеме</Text>

@@ -107,6 +107,16 @@ export default function RootLayout() {
                                 animation: "ios_from_right",
                             }}
                         />
+                        <Stack.Screen
+                            name="(support)"
+                            options={{
+                                headerShown: false,
+                                title: "Поддержка",
+                                headerStyle: { backgroundColor: Colors.HEADER },
+                                headerTintColor: Colors.WHITE_COLOR,
+                                headerTitleStyle: { fontWeight: "500" },
+                            }}
+                        />
                         <Stack.Screen name="+not-found" />
                     </Stack>
                 </Provider>
