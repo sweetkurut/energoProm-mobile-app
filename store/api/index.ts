@@ -11,7 +11,7 @@ import {
 } from "../types";
 
 const instance = axios.create({
-    baseURL: "http://34.60.149.31/api/",
+    baseURL: "https://flagman-backend.com.kg/api/",
     headers: {
         "Content-Type": "application/json",
     },
