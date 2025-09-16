@@ -17,8 +17,8 @@ import Svg, {
 
 const { width } = Dimensions.get("window");
 const chartHeight = 250;
-const chartWidth = width - 80; // ширина видимой области
-const minGap = 60; // минимальный отступ между точками
+const chartWidth = width - 80;
+const minGap = 60;
 
 interface ChartProps {
     id: number | string;

@@ -12,36 +12,48 @@ export default function SupportScreen() {
         }
     };
 
+    const options = [
+        {
+            icon: "call",
+            color: "#4CAF50",
+            text: "Позвонить: +996 700 123 456",
+            url: "tel:+996700123456",
+        },
+        {
+            icon: "logo-whatsapp",
+            color: "#25D366",
+            text: "Написать в WhatsApp",
+            url: "whatsapp://send?phone=+996700123456&text=Здравствуйте!",
+        },
+        {
+            icon: "paper-plane",
+            color: "#0088cc",
+            text: "Написать в Telegram",
+            url: "tg://resolve?domain=MySupportBot",
+        },
+        {
+            icon: "mail",
+            color: "#FF9800",
+            text: "Написать на Email",
+            url: "mailto:support@myapp.com?subject=Поддержка&body=Здравствуйте",
+        },
+    ];
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.item} onPress={() => openLink("tel:+996700123456")}>
-                <Ionicons name="call" size={24} color="#4CAF50" />
-                <Text style={styles.text}>Позвонить: +996 700 123 456</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.item}
-                onPress={() => openLink("whatsapp://send?phone=+996700123456&text=Здравствуйте!")}
-            >
-                <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
-                <Text style={styles.text}>Написать в WhatsApp</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.item}
-                onPress={() => openLink("tg://resolve?domain=MySupportBot")}
-            >
-                <Ionicons name="paper-plane" size={24} color="#0088cc" />
-                <Text style={styles.text}>Написать в Telegram</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.item}
-                onPress={() => openLink("mailto:support@myapp.com?subject=Поддержка&body=Здравствуйте")}
-            >
-                <Ionicons name="mail" size={24} color="#FF9800" />
-                <Text style={styles.text}>Написать на Email</Text>
-            </TouchableOpacity>
+            {options.map((opt, idx) => (
+                <TouchableOpacity
+                    key={idx}
+                    style={styles.card}
+                    onPress={() => openLink(opt.url)}
+                    activeOpacity={0.8}
+                >
+                    <View style={[styles.iconWrapper, { backgroundColor: opt.color + "20" }]}>
+                        <Ionicons name={opt.icon as any} size={28} color={opt.color} />
+                    </View>
+                    <Text style={styles.text}>{opt.text}</Text>
+                </TouchableOpacity>
+            ))}
         </View>
     );
 }
@@ -49,23 +61,34 @@ export default function SupportScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
+        padding: 10,
     },
-    title: {
-        fontSize: 20,
-        fontWeight: "600",
-        marginBottom: 20,
-    },
-    item: {
+
+    card: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
+        backgroundColor: "#fff",
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        marginBottom: 10,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    iconWrapper: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 12,
     },
     text: {
-        marginLeft: 10,
         fontSize: 16,
+        color: "#333",
+        flexShrink: 1,
     },
 });

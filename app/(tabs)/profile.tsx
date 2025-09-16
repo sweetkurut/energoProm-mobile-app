@@ -3,9 +3,10 @@ import ConfirmModal from "@/components/Modal";
 import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchGetProfile } from "@/store/slices/profileSlice";
+import { removeTokens } from "@/utils/auth";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Image,
@@ -17,8 +18,10 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { AuthContext } from "../_layout";
 
 export default function ProfileScreen() {
+    const { updateAuthState } = useContext(AuthContext);
     const dispatch = useAppDispatch();
     const { profile, loading } = useAppSelector((state) => state.profile);
     const avatarUrl = profile?.avatar;
@@ -47,11 +50,17 @@ export default function ProfileScreen() {
         return (names[0][0] + names[1][0]).toUpperCase();
     };
 
-    const handleLogout = () => {
-        // тут можно сделать очистку токенов, переход на экран логина и т.д.
-        console.log("Пользователь вышел из аккаунта");
-        setIsLogoutModalVisible(false);
-        router.push("/welcome");
+    const handleLogout = async () => {
+        try {
+            await removeTokens();
+            // обновили глобальное состояние
+            updateAuthState(false);
+            router.replace("/(auth)/signIn");
+        } catch (e) {
+            console.error("Ошибка при выходе:", e);
+        } finally {
+            setIsLogoutModalVisible(false);
+        }
     };
 
     const handleCancelLogout = () => {

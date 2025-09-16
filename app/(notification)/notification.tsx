@@ -62,7 +62,11 @@ export default function NotificationsScreen() {
                         style={[styles.tab, activeTab === tab && styles.activeTab]}
                         onPress={() => setActiveTab(tab)}
                     >
-                        <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
+                        <View>
+                            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                                {tab}
+                            </Text>
+                        </View>
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{mockData[tab].length}</Text>
                         </View>
@@ -110,45 +114,55 @@ const styles = StyleSheet.create({
     tabs: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 10,
-        paddingHorizontal: 5,
+        marginBottom: 8,
+        paddingHorizontal: 4,
     },
+
     tab: {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#fff",
         borderRadius: 20,
-        // paddingVertical: 6,
-        padding: 6,
-        paddingHorizontal: 9,
-        marginHorizontal: 4,
-        // width: 69,
-        // elevation: 2,
+        paddingVertical: 6,
+        paddingHorizontal: 13,
+        marginHorizontal: 2,
+        elevation: 2, // лёгкая тень для Android
+        shadowColor: "#000", // тень для iOS
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     },
+
     activeTab: {
         backgroundColor: "#FFA726",
     },
+
     tabText: {
         color: "#666360",
         fontWeight: "500",
-        // marginRight: 6,
-        textAlign: "center",
-        // fontSize: 12,
+        fontSize: 13,
+        marginRight: 6,
     },
+
     activeTabText: {
         color: "#fff",
     },
+
     badge: {
-        backgroundColor: Colors.BADGE,
-        borderRadius: "50%",
-        paddingHorizontal: 8,
-        paddingVertical: 1,
-        // marginLeft: 6,
+        backgroundColor: "#E53935",
+        borderRadius: 12,
+        minWidth: 20,
+        height: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 6,
     },
+
     badgeText: {
-        fontSize: 10,
+        fontSize: 11,
         color: "#fff",
+        fontWeight: "600",
     },
+
     emptyContainer: {
         flex: 1,
         alignItems: "center",
