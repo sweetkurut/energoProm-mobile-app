@@ -178,7 +178,9 @@ export default function DetailCheckScreen() {
                     <View style={styles.card_consumption}>
                         <PhotoUploader
                             photoUrl={
-                                data?.counter_photo ? `http://34.60.149.31${data.counter_photo}` : undefined
+                                data?.counter_photo
+                                    ? `https://flagman-backend.com.kg${data.counter_photo}`
+                                    : undefined
                             }
                             onPhotoSelected={setPhotoFile}
                         />

@@ -6,9 +6,10 @@ import { fetchBids } from "@/store/slices/bidSlice";
 import { fetchDeals } from "@/store/slices/dealsSlice";
 import { router } from "expo-router";
 import { Wrench } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    FlatList,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -17,42 +18,136 @@ import {
     View,
 } from "react-native";
 
+interface Bid {
+    id: number;
+    name: string;
+    description: string;
+}
+
+interface DealDetails {
+    id: number;
+    title: string;
+    planDate: string;
+    status: string;
+    address: string;
+    description: string;
+}
+
 const ServiceListScreen = () => {
-    const [tabs, setTabs] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState("services");
     const [refreshing, setRefreshing] = useState(false);
 
     const dispatch = useAppDispatch();
-    const { bids, loading } = useAppSelector((state) => state.bids);
-    const { deals } = useAppSelector((state) => state.deals);
+    const { bids, loading: bidsLoading } = useAppSelector((state) => state.bids);
+    const { deals, loading: dealsLoading } = useAppSelector((state) => state.deals);
 
+    // Мемоизируем функцию загрузки
     const loadData = useCallback(async () => {
-        await dispatch(fetchBids());
-        await dispatch(fetchDeals());
+        try {
+            await Promise.all([dispatch(fetchBids()), dispatch(fetchDeals())]);
+        } catch (error) {
+            console.error("Ошибка при загрузке данных:", error);
+        }
     }, [dispatch]);
 
     useEffect(() => {
         loadData();
     }, [loadData]);
 
+    // Мемоизируем функцию обновления
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await loadData();
         setRefreshing(false);
     }, [loadData]);
 
-    const goToCreate = (bidId: number) => {
+    // Мемоизируем функцию перехода
+    const goToCreate = useCallback((bidId: number) => {
         router.push({
             pathname: "/(login)/createRequest",
             params: { bidId: bidId },
         });
-    };
+    }, []);
 
-    if (loading)
+    const memoizedDeals: DealDetails[] = useMemo(() => {
+        if (!deals || !bids) {
+            return [];
+        }
+        const statusMap = {
+            new: "Новая",
+            "in progress": "В работе",
+            completed: "Выполнена",
+            cancelled: "Отменена",
+        };
+
+        return deals
+            .map((item) => {
+                const bidDetails = bids.find((bid) => bid.id === item.bid);
+                if (!bidDetails) return null;
+
+                const formattedDate = new Date(item.date_of_deal).toLocaleDateString("ru-RU", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                });
+
+                return {
+                    ...item,
+                    title: bidDetails.name,
+                    planDate: formattedDate,
+                    status: statusMap[item.status as keyof typeof statusMap] || "Неизвестно",
+                } as DealDetails;
+            })
+            .filter((item): item is DealDetails => item !== null);
+    }, [deals, bids]);
+
+    // Проверка на общую загрузку
+    const isLoading = bidsLoading || dealsLoading;
+    if (isLoading && !bids?.length && !deals?.length) {
         return (
             <View style={styles.loader}>
-                <ActivityIndicator size={"large"} color={"#EA961C"} />
+                <ActivityIndicator size="large" color="#EA961C" />
             </View>
         );
+    }
+
+    // Мемоизируем массив сделок, чтобы избежать лишних вычислений внутри FlatList
+
+    // Рендер элементов списка услуг
+    const renderBidItem = ({ item }: { item: Bid }) => (
+        <TouchableOpacity style={styles.card} onPress={() => goToCreate(item.id)}>
+            <View style={styles.cardTitles}>
+                <View style={styles.iconWrap}>
+                    <Wrench />
+                </View>
+                <View>
+                    <Text style={styles.cardtitle}>{item.name}</Text>
+                    <Text style={styles.cardSubtitle}>{item.description}</Text>
+                </View>
+            </View>
+            <ArrowRightIcon />
+        </TouchableOpacity>
+    );
+
+    // Рендер элементов списка заявок
+    const renderDealItem = ({ item }: { item: (typeof memoizedDeals)[0] | null }) => {
+        if (!item) {
+            return null; // Если элемент почему-то null, ничего не рендерим
+        }
+
+        return (
+            <RequestCard
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                date={item.planDate}
+                desc={item.description}
+                address={item.address}
+                planDate={item.planDate}
+                status={item.status}
+            />
+        );
+    };
 
     return (
         <ScrollView
@@ -68,76 +163,40 @@ const ServiceListScreen = () => {
         >
             <View style={styles.tabs}>
                 <TouchableOpacity
-                    style={[styles.tabButton, !tabs && styles.activeTab]}
-                    onPress={() => setTabs(false)}
+                    style={[styles.tabButton, activeTab === "services" && styles.activeTab]}
+                    onPress={() => setActiveTab("services")}
                 >
-                    <Text style={[styles.tabText, !tabs && styles.activeText]}>Услуги</Text>
+                    <Text style={[styles.tabText, activeTab === "services" && styles.activeText]}>
+                        Услуги
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.tabButton, tabs && styles.activeTab]}
-                    onPress={() => setTabs(true)}
+                    style={[styles.tabButton, activeTab === "deals" && styles.activeTab]}
+                    onPress={() => setActiveTab("deals")}
                 >
-                    <Text style={[styles.tabText, tabs && styles.activeText]}>Мои заявки</Text>
+                    <Text style={[styles.tabText, activeTab === "deals" && styles.activeText]}>
+                        Мои заявки
+                    </Text>
                 </TouchableOpacity>
             </View>
 
-            {!tabs ? (
+            {activeTab === "services" ? (
                 <View style={styles.cards}>
-                    {bids?.map((item) => (
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => goToCreate(item.id)}
-                            key={item.id}
-                        >
-                            <View style={styles.cardTitles}>
-                                <View style={styles.iconWrap}>
-                                    <Wrench />
-                                </View>
-                                <View>
-                                    <Text style={styles.cardtitle}>{item.name}</Text>
-                                    <Text style={styles.cardSubtitle}>{item.description}</Text>
-                                </View>
-                            </View>
-                            <ArrowRightIcon />
-                        </TouchableOpacity>
-                    ))}
+                    <FlatList
+                        data={bids}
+                        renderItem={renderBidItem}
+                        keyExtractor={(item) => item.id.toString()}
+                    />
                 </View>
             ) : (
-                <>
-                    {deals?.map((item) => {
-                        if (!bids) return null;
-
-                        const bidDetails = bids.find((bid) => bid.id === item.bid);
-                        if (!bidDetails) return null;
-
-                        const formattedDate = new Date(item.date_of_deal).toLocaleDateString("ru-RU", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        });
-
-                        const statusMap = {
-                            new: "Новая",
-                            "in progress": "В работе",
-                            completed: "Выполнена",
-                            cancelled: "Отменена",
-                        };
-
-                        return (
-                            <RequestCard
-                                key={item.id}
-                                id={item.id}
-                                title={bidDetails.name}
-                                date={formattedDate}
-                                desc={item.description}
-                                address={item.address}
-                                planDate={formattedDate}
-                                status={statusMap[item.status as keyof typeof statusMap] || "Неизвестно"}
-                            />
-                        );
-                    })}
-                </>
+                <View style={styles.cards}>
+                    <FlatList
+                        data={memoizedDeals}
+                        renderItem={renderDealItem}
+                        keyExtractor={(item) => item.id.toString()}
+                    />
+                </View>
             )}
         </ScrollView>
     );
@@ -145,7 +204,8 @@ const ServiceListScreen = () => {
 
 export default ServiceListScreen;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({    // Добавь другие поля, если они есть
+
     container: {
         flex: 1,
         paddingHorizontal: 10,
@@ -211,6 +271,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.WHITE_COLOR,
         padding: 16,
         borderRadius: 15,
+        marginBottom: 10,
     },
 
     cardTitles: {

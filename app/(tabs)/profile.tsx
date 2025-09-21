@@ -27,33 +27,34 @@ export default function ProfileScreen() {
     const avatarUrl = profile?.avatar;
 
     const [isEnabled, setIsEnabled] = useState(true);
-    const toggleSwitch = () => setIsEnabled((prev) => !prev);
     const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
-    const onRefresh = useCallback(() => {
+    // Мемоизированная функция для получения инициалов
+    const getInitials = useCallback((fullName?: string | null): string => {
+        if (!fullName) return "??";
+        const names = fullName.trim().split(" ");
+        if (names.length === 1) return names[0][0]?.toUpperCase() ?? "??";
+        return (names[0]?.[0] + names[1]?.[0])?.toUpperCase() ?? "??";
+    }, []);
+
+    // Мемоизированный обработчик обновления
+    const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-            dispatch(fetchGetProfile());
-        }, 1500);
+        await dispatch(fetchGetProfile());
+        setRefreshing(false);
     }, [dispatch]);
 
     useEffect(() => {
-        dispatch(fetchGetProfile());
-    }, [dispatch]);
+        if (!profile) {
+            dispatch(fetchGetProfile());
+        }
+    }, [dispatch, profile]);
 
-    const getInitials = (fullName?: string | null) => {
-        if (!fullName) return "??";
-        const names = fullName.trim().split(" ");
-        if (names.length === 1) return names[0][0].toUpperCase();
-        return (names[0][0] + names[1][0]).toUpperCase();
-    };
-
-    const handleLogout = async () => {
+    // Мемоизированные обработчики навигации и действий
+    const handleLogout = useCallback(async () => {
         try {
             await removeTokens();
-            // обновили глобальное состояние
             updateAuthState(false);
             router.replace("/(auth)/signIn");
         } catch (e) {
@@ -61,26 +62,29 @@ export default function ProfileScreen() {
         } finally {
             setIsLogoutModalVisible(false);
         }
-    };
+    }, [updateAuthState]);
 
-    const handleCancelLogout = () => {
+    const handleCancelLogout = useCallback(() => {
         setIsLogoutModalVisible(false);
-    };
+    }, []);
 
-    const goToNotification = () => {
+    const goToNotification = useCallback(() => {
         router.push("/(notification)/notification");
-    };
+    }, []);
 
-    const goToSupport = () => {
+    const goToSupport = useCallback(() => {
         router.push("/(support)/support");
-    };
+    }, []);
 
-    if (loading)
+    const toggleSwitch = useCallback(() => setIsEnabled((prev) => !prev), []);
+
+    if (loading && !profile) {
         return (
             <View style={styles.loader}>
                 <ActivityIndicator size={"large"} color={"#EA961C"} />
             </View>
         );
+    }
 
     return (
         <ScrollView
@@ -96,14 +100,10 @@ export default function ProfileScreen() {
         >
             {/* Шапка */}
             <View style={styles.header}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 21 }}>
+                <View>
                     <Text style={styles.headerTitle}>Профиль</Text>
                 </View>
-
                 <View style={styles.headerIcons}>
-                    {/* <View style={styles.iconWrapper}>
-                        <Text style={{ fontSize: 13, fontWeight: "700", color: "#666360" }}>Ру</Text>
-                    </View> */}
                     <TouchableOpacity style={styles.iconWrapper} onPress={goToNotification}>
                         <NotificationIcon />
                     </TouchableOpacity>
@@ -124,7 +124,6 @@ export default function ProfileScreen() {
                     </View>
                     <Text style={styles.name}>{profile?.name}</Text>
                     <Text style={styles.account}>Gmail почта: {profile?.email}</Text>
-                    {/* <Text style={styles.account}>Лицевой счет: 563463465345345</Text> */}
                 </View>
 
                 {/* Контактная информация */}
@@ -147,7 +146,6 @@ export default function ProfileScreen() {
                 {/* Настройки */}
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Другое</Text>
-
                     <View style={styles.switchRow}>
                         <View>
                             <Text style={styles.rowText}>Push-уведомление</Text>
@@ -155,7 +153,12 @@ export default function ProfileScreen() {
                                 Получать уведомление о новых счетах и платежах
                             </Text>
                         </View>
-                        <Switch value={isEnabled} onValueChange={toggleSwitch} />
+                        <Switch
+                            value={isEnabled}
+                            onValueChange={toggleSwitch}
+                            trackColor={{ false: "#767577", true: "#81b0ff" }}
+                            thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
+                        />
                     </View>
 
                     <TouchableOpacity style={styles.rowLink} onPress={goToSupport}>

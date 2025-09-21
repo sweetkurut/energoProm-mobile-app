@@ -7,7 +7,7 @@ import { createDeal } from "@/store/slices/dealsSlice";
 import { fetchGetProfile } from "@/store/slices/profileSlice";
 import { router, useLocalSearchParams } from "expo-router";
 import { CalendarFold } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
@@ -17,7 +17,9 @@ const CreateRequestScreen = () => {
     const profileState = useAppSelector((state) => state.profile);
     const userId = profileState.profile?.id;
     const { bidId } = useLocalSearchParams();
-    const parsedBidId = parseInt(bidId, 10);
+
+    const parsedBidId = useMemo(() => parseInt(bidId, 10), [bidId]);
+
     const dispatch = useAppDispatch();
 
     const [address, setAddress] = useState("");
@@ -27,15 +29,12 @@ const CreateRequestScreen = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [modalVisible, setModalVisible] = useState(false);
 
-    const bidDetails = bids.find((bid) => bid.id === parsedBidId);
+    const bidDetails = useMemo(() => bids.find((bid) => bid.id === parsedBidId), [bids, parsedBidId]);
 
-    const showDate = () => setDatePickerVisibility(true);
-    const hideDatePicker = () => setDatePickerVisibility(false);
-
-    const handleConfirm = (date: Date) => {
+    const handleConfirm = useCallback((date: Date) => {
         setSelectedDate(date);
-        hideDatePicker();
-    };
+        setDatePickerVisibility(false);
+    }, []);
 
     useEffect(() => {
         if (!profileState.profile && !profileState.loading) {
@@ -43,9 +42,9 @@ const CreateRequestScreen = () => {
         }
     }, [dispatch, profileState.profile, profileState.loading]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (!bidDetails || !address || !phone || !description) {
-            Alert.alert("Ошибка", "Пожалуйста, заполните все поля и выберите услугу.");
+            Alert.alert("Ошибка", "Пожалуйста, заполните все поля.");
             return;
         }
 
@@ -63,9 +62,11 @@ const CreateRequestScreen = () => {
             await dispatch(createDeal(dealData)).unwrap();
             setModalVisible(true);
         } catch (error) {
+            // Добавление обратной связи для пользователя
+            Alert.alert("Ошибка", "Не удалось отправить заявку. Попробуйте еще раз.");
             console.error("Ошибка при отправке заявки:", error);
         }
-    };
+    }, [address, phone, description, selectedDate, bidDetails, parsedBidId, userId, dispatch]);
 
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
@@ -102,27 +103,25 @@ const CreateRequestScreen = () => {
                 />
 
                 <Text style={styles.label}>Выберите дату</Text>
-                <TouchableOpacity style={styles.dateInput} onPress={showDate}>
+                <TouchableOpacity style={styles.dateInput} onPress={() => setDatePickerVisibility(true)}>
                     <Text style={styles.dateText}>{selectedDate.toLocaleDateString("ru-RU")}</Text>
                     <CalendarFold size={20} color="#CCCCCC" />
                 </TouchableOpacity>
 
-                {isDatePickerVisible && (
-                    <DateTimePickerModal
-                        isVisible={isDatePickerVisible}
-                        mode="date"
-                        onConfirm={handleConfirm}
-                        onCancel={hideDatePicker}
-                        minimumDate={new Date()}
-                    />
-                )}
+                <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={() => setDatePickerVisibility(false)}
+                    minimumDate={new Date()}
+                />
 
                 <Text style={styles.label}>Описание проблемы/задачи</Text>
                 <TextInput
                     placeholder="Укажите, что нужно сделать. Например: «Установить новый счётчик в подъезде №3»."
                     placeholderTextColor="#BBBBBB"
                     style={[styles.input, styles.textArea]}
-                    multiline={true}
+                    multiline
                     numberOfLines={5}
                     value={description}
                     onChangeText={setDescription}
@@ -148,8 +147,8 @@ const CreateRequestScreen = () => {
                 visible={modalVisible}
                 onConfirm={() => router.back()}
                 onCancel={() => setModalVisible(false)}
-                title={"Заявка оформлена"}
-                message={"Ожидайте звонка — мы свяжемся с вами за день до визита для уточнения деталей."}
+                title="Заявка оформлена"
+                message="Ожидайте звонка — мы свяжемся с вами за день до визита для уточнения деталей."
                 confirmColor="#4CAF50"
                 confirmText="Хорошо"
                 cancelText=""

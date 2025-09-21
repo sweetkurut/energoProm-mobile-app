@@ -4,21 +4,21 @@ import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import React, { useCallback } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const WelcomeScreen = () => {
-    const handleSigUp = () => {
+    const handleSigUp = useCallback(() => {
         router.push("/(auth)/signUp");
-    };
+    }, []);
 
-    const handleService = () => {
+    const handleService = useCallback(() => {
         router.push("/(login)/service");
-    };
+    }, []);
 
-    const goToProfile = () => {
+    const goToProfile = useCallback(() => {
         router.push("/(auth)/signIn");
-    };
+    }, []);
 
     return (
         <LinearGradient
