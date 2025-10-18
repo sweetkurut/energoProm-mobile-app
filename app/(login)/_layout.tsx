@@ -13,8 +13,8 @@ const LoginLayout = () => {
                 initialRouteName="welcome"
                 screenOptions={{
                     headerShown: true,
-                    animation: "ios_from_right", // ✅ плавный переход справа
-                    headerBackTitle: "Назад", // текст кнопки назад (iOS)
+                    animation: "ios_from_right",
+                    headerBackTitle: "Назад",
                     headerTintColor: Colors.WHITE_COLOR,
                     headerStyle: {
                         backgroundColor: Colors.HEADER,

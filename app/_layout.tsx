@@ -83,9 +83,27 @@ export default function RootLayout() {
                     >
                         <Stack.Screen name="index" options={{ headerShown: false }} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                        <Stack.Screen name="(login)" options={{ headerShown: false }} />
+                        <Stack.Screen
+                            name="(login)"
+                            options={{
+                                headerShown: false,
+                                headerStyle: { backgroundColor: Colors.HEADER },
+                                headerTintColor: Colors.WHITE_COLOR,
+                                headerTitleStyle: { fontWeight: "500" },
+                                animation: "ios_from_right",
+                            }}
+                        />
                         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                        <Stack.Screen name="(payment)" options={{ headerShown: false }} />
+                        <Stack.Screen
+                            name="(payment)"
+                            options={{
+                                headerShown: false,
+                                headerStyle: { backgroundColor: Colors.HEADER },
+                                headerTintColor: Colors.WHITE_COLOR,
+                                headerTitleStyle: { fontWeight: "500" },
+                                animation: "ios_from_right",
+                            }}
+                        />
                         <Stack.Screen name="(notification)" options={{ headerShown: false }} />
                         <Stack.Screen
                             name="listing/news/[id]"
@@ -115,6 +133,7 @@ export default function RootLayout() {
                                 headerStyle: { backgroundColor: Colors.HEADER },
                                 headerTintColor: Colors.WHITE_COLOR,
                                 headerTitleStyle: { fontWeight: "500" },
+                                animation: "ios_from_right",
                             }}
                         />
                         <Stack.Screen name="+not-found" />

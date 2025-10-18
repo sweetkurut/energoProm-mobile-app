@@ -12,6 +12,7 @@ export default function SupportLayout() {
             <Stack
                 screenOptions={{
                     animation: "ios_from_right",
+                    headerBackTitle: "Назад",
                     headerStyle: {
                         backgroundColor: Colors.HEADER,
                     },
@@ -19,7 +20,6 @@ export default function SupportLayout() {
                     headerTitleStyle: {
                         fontWeight: "500",
                     },
-                    headerBackTitle: "Назад",
                 }}
             >
                 <Stack.Screen
