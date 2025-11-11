@@ -104,7 +104,7 @@ export default function HomeScreen() {
 
                             <View style={styles.iconRow}>
                                 <Feather name="activity" size={16} color={Colors.ORANGE_COLOR} />
-                                <Text style={styles.tariff}>{item.tariff?.kw_cost} сом/кВт*ч</Text>
+                                <Text style={styles.tariff}>{item.tariff?.kw_cost} кВт*ч</Text>
                             </View>
                         </View>
 

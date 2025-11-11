@@ -126,10 +126,12 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         paddingHorizontal: 13,
         marginHorizontal: 2,
-        elevation: 2, // лёгкая тень для Android
-        shadowColor: "#000", // тень для iOS
+        elevation: 2,
+        shadowColor: "#00000063",
         shadowOpacity: 0.1,
         shadowRadius: 3,
+        justifyContent: "space-between",
+        // width: 90,
     },
 
     activeTab: {

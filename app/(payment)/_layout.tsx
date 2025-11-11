@@ -1,17 +1,20 @@
 import Colors from "@/constants/Colors";
-import { Stack } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useNavigation } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PaymentLayout() {
+    const navigation = useNavigation();
+
     return (
         <SafeAreaView style={styles.container} edges={["bottom"]}>
             <SystemBars style="dark" />
             <Stack
                 screenOptions={{
-                    animation: "slide_from_right", // плавный переход
+                    animation: "slide_from_right",
                     headerStyle: {
                         backgroundColor: Colors.HEADER,
                     },
@@ -19,6 +22,12 @@ export default function PaymentLayout() {
                     headerTitleStyle: {
                         fontWeight: "500",
                     },
+                    headerLeft: ({ canGoBack }) =>
+                        canGoBack ? (
+                            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 5 }}>
+                                <Ionicons name="chevron-back" size={24} color={Colors.WHITE_COLOR} />
+                            </TouchableOpacity>
+                        ) : null,
                 }}
             >
                 <Stack.Screen

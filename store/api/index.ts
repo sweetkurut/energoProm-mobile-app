@@ -86,7 +86,16 @@ export const storesApi = {
 
     // чеки
     getLastCheck(houseCardId: number) {
-        return instance.get("check/last-check", {
+        return instance.get("check/last-check/", {
+            params: {
+                house_card: houseCardId,
+            },
+        });
+    }, 
+
+    // графики
+    getGraphicChecks(houseCardId: number) {
+        return instance.get("check/graphic-checks/", {
             params: {
                 house_card: houseCardId,
             },
@@ -97,15 +106,6 @@ export const storesApi = {
         return instance.patch(`check/${id}/update-photo/`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
-            },
-        });
-    },
-
-    // графики
-    getGraphicChecks(houseCardId: number) {
-        return instance.get("check/graphic-checks/", {
-            params: {
-                house_card: houseCardId,
             },
         });
     },

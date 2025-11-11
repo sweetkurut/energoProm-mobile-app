@@ -16,12 +16,32 @@ const initialState: InfoState = {
     // detail: null,
 };
 
+// export const fetchGraphic = createAsyncThunk<GraphicData, number, { rejectValue: string }>(
+//     "graphic/fetchGraphic",
+//     async (houseCardId, { rejectWithValue }) => {
+//         try {
+//             const res = await storesApi.getGraphicChecks(houseCardId);
+//             console.log(res, "график");
+
+//             if (res.status !== 200) {
+//                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
+//             }
+
+//             return res.data as GraphicData;
+//         } catch (error: any) {
+//             console.error(error);
+//             return rejectWithValue(`Ошибка: ${error?.message || error}`);
+//         }
+//     }
+// );
+
 export const fetchGraphic = createAsyncThunk<GraphicData, number, { rejectValue: string }>(
     "graphic/fetchGraphic",
     async (houseCardId, { rejectWithValue }) => {
         try {
+            console.log("🔍 fetchGraphic - houseCardId:", houseCardId, "type:", typeof houseCardId);
             const res = await storesApi.getGraphicChecks(houseCardId);
-            console.log(res, "график");
+            console.log("✅ fetchGraphic response:", res.data);
 
             if (res.status !== 200) {
                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
@@ -29,7 +49,7 @@ export const fetchGraphic = createAsyncThunk<GraphicData, number, { rejectValue:
 
             return res.data as GraphicData;
         } catch (error: any) {
-            console.error(error);
+            console.error("❌ fetchGraphic error:", error);
             return rejectWithValue(`Ошибка: ${error?.message || error}`);
         }
     }

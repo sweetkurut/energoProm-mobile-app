@@ -1,11 +1,14 @@
 import Colors from "@/constants/Colors";
-import { Stack } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginLayout = () => {
+    const router = useRouter();
+
     return (
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
             <SystemBars style="dark" />
@@ -14,7 +17,6 @@ const LoginLayout = () => {
                 screenOptions={{
                     headerShown: true,
                     animation: "ios_from_right",
-                    headerBackTitle: "Назад",
                     headerTintColor: Colors.WHITE_COLOR,
                     headerStyle: {
                         backgroundColor: Colors.HEADER,
@@ -22,6 +24,12 @@ const LoginLayout = () => {
                     headerTitleStyle: {
                         fontWeight: "500",
                     },
+                    headerLeft: ({ canGoBack }) =>
+                        canGoBack && Platform.OS === "ios" ? (
+                            <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 5 }}>
+                                <Ionicons name="chevron-back" size={24} color={Colors.WHITE_COLOR} />
+                            </TouchableOpacity>
+                        ) : null,
                 }}
             >
                 <Stack.Screen

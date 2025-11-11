@@ -18,8 +18,9 @@ export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue:
     "lastcheck/fetchLastCheck",
     async (houseCardId, { rejectWithValue }) => {
         try {
+            console.log("🔍 fetchLastCheck - houseCardId:", houseCardId, "type:", typeof houseCardId);
             const res = await storesApi.getLastCheck(houseCardId);
-            console.log(res, "чек");
+            console.log("✅ fetchLastCheck response:", res.data);
 
             if (res.status !== 200) {
                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
@@ -27,7 +28,7 @@ export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue:
 
             return res.data as LastCheck;
         } catch (error: any) {
-            console.error(error);
+            console.error("❌ fetchLastCheck error:", error);
             return rejectWithValue(`Ошибка: ${error?.message || error}`);
         }
     }
