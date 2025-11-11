@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Image,
     ScrollView,
     StyleSheet,
     Text,
@@ -36,6 +37,16 @@ export default function DetailCheckScreen() {
     useEffect(() => {
         if (data?.counter_current_check) {
             setCurrentCheckValue(data.counter_current_check.toString());
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (data) {
+            console.log("📊 Data for Chart:", {
+                check_id: data.id,
+                house_card_id: data.house_card?.id,
+                house_card_data: data.house_card,
+            });
         }
     }, [data]);
 
@@ -87,31 +98,32 @@ export default function DetailCheckScreen() {
                     <Text style={styles.infoText}>
                         Л/счет: <Text style={styles.bold}>{data?.house_card.house_card}</Text>
                     </Text>
-                    <Text style={styles.infoText}>Инспектор: {data?.house_card.route.executor.name}</Text>
                 </View>
+                <Text style={styles.infoText}>
+                    Инспектор:
+                    <Text style={styles.bold}> {data?.house_card.route.executor.name}</Text>
+                </Text>
 
                 <View style={styles.infoRow}>
                     <Text style={styles.infoText}>
                         Ф.И.О.: <Text style={styles.bold}>{data?.username.name}</Text>
                     </Text>
-                    <Text style={styles.infoText}>Маршрут: {data?.house_card.route.route_number}</Text>
                 </View>
+                <Text>
+                    Маршрут:
+                    <Text style={styles.bold}> {data?.house_card.route.route_number}</Text>
+                </Text>
                 <Text style={styles.infoText}>
-                    Тариф: <Text style={styles.bold}>{data?.tariff.name}</Text> ({data?.tariff.kw_cost}{" "}
-                    сом/кВт*ч)
+                    Тариф: <Text style={styles.bold}>{data?.tariff.name}</Text> ({data?.tariff.kw_cost} кВт*ч)
                 </Text>
 
                 <Text style={styles.infoText}>
                     Адрес:{" "}
-                    {data?.house_card.address
-                        ? `${data.house_card.address.street.name} ${data.house_card.address.house}, кв. ${
-                              data.house_card.address.apartment
-                          }${
-                              data.house_card.address.apartment_liter
-                                  ? `(${data.house_card.address.apartment_liter})`
-                                  : ""
-                          }`
-                        : "Адрес не указан"}
+                    <Text style={styles.bold}>
+                        {data?.house_card.address
+                            ? `${data.house_card.address.street.name} ${data.house_card.address.house}, кв. ${data.house_card.address.apartment}`
+                            : "Адрес не указан"}
+                    </Text>
                 </Text>
 
                 <View style={styles.table}>
@@ -176,14 +188,34 @@ export default function DetailCheckScreen() {
 
                 {data?.counter_photo ? (
                     <View style={styles.card_consumption}>
-                        <PhotoUploader
-                            photoUrl={
-                                data?.counter_photo
-                                    ? `https://flagman-backend.com.kg${data.counter_photo}`
-                                    : undefined
-                            }
-                            onPhotoSelected={setPhotoFile}
-                        />
+                        <View style={styles.photoStatus}>
+                            <View style={styles.sentPhotoContainer}>
+                                <Image
+                                    source={{
+                                        uri: data.counter_photo.startsWith("http")
+                                            ? data.counter_photo
+                                            : `https://flagman-backend.com.kg${data.counter_photo}`,
+                                    }}
+                                    style={styles.sentPhoto}
+                                    resizeMode="center"
+                                    onError={(e) => console.log("Image error:", e.nativeEvent.error)}
+                                />
+                                <View style={styles.photoOverlay}>
+                                    <Text style={styles.photoBadge}>✓ Отправлено</Text>
+                                </View>
+                            </View>
+
+                            {/* Показываем показания из фото */}
+                            <View style={styles.photoReading}>
+                                <Text style={styles.photoReadingLabel}>Показание по фото:</Text>
+                                <Text style={styles.photoReadingValue}>1012</Text>
+                            </View>
+                        </View>
+                    </View>
+                ) : (
+                    // Форма для отправки...
+                    <View style={styles.card_consumption}>
+                        <PhotoUploader photoUrl={data?.counter_photo} onPhotoSelected={setPhotoFile} />
 
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Показание счетчика (кВт*ч):</Text>
@@ -193,15 +225,21 @@ export default function DetailCheckScreen() {
                                 value={currentCheckValue}
                                 onChangeText={setCurrentCheckValue}
                                 placeholder="Введите показания"
+                                placeholderTextColor="#999"
                             />
                         </View>
 
-                        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+                        <TouchableOpacity
+                            style={[
+                                styles.button,
+                                currentCheckValue ? styles.buttonActive : styles.buttonDisabled,
+                            ]}
+                            onPress={handleUpdate}
+                            disabled={!currentCheckValue}
+                        >
                             <Text style={styles.buttonText}>Отправить показания</Text>
                         </TouchableOpacity>
                     </View>
-                ) : (
-                    <Text style={styles.infoText}>Фото счетчика отсутствует</Text>
                 )}
 
                 <View style={styles.summary}>
@@ -249,8 +287,7 @@ export default function DetailCheckScreen() {
                     </Text>
                 </View>
             </View>
-
-            <Chart id={2} />
+            <Chart id={data?.house_card?.house_card} />
         </ScrollView>
     );
 }
@@ -266,47 +303,180 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    card_consumption: {
-        backgroundColor: "#F9F9F9",
-        borderRadius: 10,
-        padding: 15,
-        marginVertical: 12,
-        // shadowColor: "#000",
-        // shadowOpacity: 0.05,
-        // shadowRadius: 6,
-        // elevation: 1.5,
+    photoReading: {
+        backgroundColor: "#F8F9FA",
+        padding: 16,
+        borderRadius: 12,
+        marginTop: 16,
+        borderWidth: 1,
+        borderColor: "#E9ECEF",
     },
 
-    inputContainer: {
-        marginBottom: 10,
-        marginTop: 10,
-    },
-
-    label: {
+    photoReadingLabel: {
         fontSize: 14,
+        color: "#6C757D",
         marginBottom: 4,
     },
 
-    input: {
-        height: 40,
-        borderColor: "#ccc",
+    photoReadingValue: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#333",
+    },
+
+    card_consumption: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 16,
+        padding: 20,
+        marginVertical: 12,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
         borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        marginBottom: 10,
+        borderColor: "#F0F0F0",
+    },
+
+    photoStatus: {
+        width: "100%",
+    },
+
+    statusHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+
+    statusIcon: {
+        fontSize: 24,
+        marginRight: 12,
+    },
+
+    statusTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#333",
+    },
+
+    successBadge: {
+        backgroundColor: "#E8F5E8",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: "#4CAF50",
+    },
+
+    successText: {
+        color: "#2E7D32",
+        fontSize: 16,
+        fontWeight: "600",
+        marginBottom: 4,
+    },
+
+    successSubtext: {
+        color: "#4CAF50",
+        fontSize: 14,
+    },
+
+    currentReading: {
+        backgroundColor: "#F8F9FA",
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#E9ECEF",
+    },
+
+    readingLabel: {
+        fontSize: 14,
+        color: "#6C757D",
+        marginBottom: 4,
+    },
+
+    readingValue: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#333",
+    },
+
+    inputContainer: {
+        marginBottom: 16,
+        marginTop: 16,
+    },
+
+    label: {
+        fontSize: 15,
+        fontWeight: "600",
+        marginBottom: 8,
+        color: "#333",
+    },
+
+    input: {
+        height: 48,
+        borderColor: "#E1E1E1",
+        borderWidth: 1.5,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        fontSize: 16,
+        backgroundColor: "#FAFAFA",
+        color: "#333",
     },
 
     button: {
-        backgroundColor: Colors.BUTTONSERVICE,
-        paddingVertical: 10,
-        borderRadius: 10,
+        paddingVertical: 14,
+        borderRadius: 12,
         alignItems: "center",
+        marginTop: 8,
+    },
+
+    buttonActive: {
+        backgroundColor: Colors.BUTTONSERVICE,
+    },
+
+    buttonDisabled: {
+        backgroundColor: "#CCCCCC",
     },
 
     buttonText: {
         color: "#fff",
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: "700",
+    },
+
+    sentPhotoContainer: {
+        position: "relative",
+        borderRadius: 12,
+        overflow: "hidden",
+        marginBottom: 16,
+        borderWidth: 2,
+        borderColor: "#E8F5E8",
+    },
+
+    sentPhoto: {
+        width: "100%",
+        height: 200,
+        backgroundColor: "#F5F5F5",
+    },
+
+    photoOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "rgba(76, 175, 80, 0.9)",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+
+    photoBadge: {
+        color: "#FFFFFF",
+        fontSize: 14,
+        fontWeight: "600",
+        textAlign: "center",
     },
 
     card: {

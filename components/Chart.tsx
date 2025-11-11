@@ -31,8 +31,13 @@ export default function Chart({ id }: ChartProps) {
     const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number | null } | null>(null);
 
     useEffect(() => {
-        if (id) {
-            dispatch(fetchGraphic(Number(id)));
+        const numericId = Number(id);
+        console.log("🔍 Chart - house_card_id:", id, "numericId:", numericId);
+
+        if (numericId && !isNaN(numericId)) {
+            dispatch(fetchGraphic(numericId));
+        } else {
+            console.log("❌ Chart - invalid house_card_id:", id);
         }
     }, [id, dispatch]);
 
@@ -44,7 +49,11 @@ export default function Chart({ id }: ChartProps) {
         return (
             <View style={styles.noDataContainer}>
                 <Text style={styles.noDataTitle}>Нет данных для графика</Text>
-                <Text style={styles.noDataSubtitle}>Попробуйте выбрать другой объект или период</Text>
+                <Text style={styles.noDataSubtitle}>
+                    {graphic?.average_consumption === 0
+                        ? "За текущий период потребление отсутствует"
+                        : "Попробуйте выбрать другой объект или период"}
+                </Text>
             </View>
         );
     }
