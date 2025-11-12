@@ -91,7 +91,7 @@ export const storesApi = {
                 house_card: houseCardId,
             },
         });
-    }, 
+    },
 
     // графики
     getGraphicChecks(houseCardId: number) {
@@ -133,5 +133,32 @@ export const storesApi = {
     },
     getDetailBid(id: number) {
         return instance.get(`bid/bid/${id}/`);
+    },
+
+    // платежка
+    // Создание платежа
+    createPayment: (houseCardId: number, requisite: string, sum: string) => {
+        return instance.post(`/check/${houseCardId}/payment/create/`, {
+            requisite,
+            sum,
+        });
+    },
+
+    // Получение PDF чека
+    getPaymentPdf: (houseCardId: number) => {
+        return instance.get(`/check/${houseCardId}/payment/pdf/`);
+    },
+
+    // Предпросмотр платежа
+    previewPayment: (houseCardId: number, requisite: string, sum: string) => {
+        return instance.post(`/check/${houseCardId}/payment/preview/`, {
+            requisite,
+            sum,
+        });
+    },
+
+    // История платежей
+    getPaymentsHistory: (houseCardId: number) => {
+        return instance.get(`/check/${houseCardId}/payments/`);
     },
 };

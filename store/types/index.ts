@@ -391,3 +391,47 @@ export interface BidDetail {
 export interface UpdateCheckUser {
     counter_current_check: number;
 }
+
+// create payment
+
+export type CommissionType = "percent" | "fixed";
+
+export interface PaymentMethod {
+    logo: string;
+    name: string;
+    link: string;
+    active: number;
+    order_num: number;
+}
+
+export interface PaymentResponse {
+    requisite: string;
+    sum: string;
+    urls: PaymentMethod[];
+}
+
+export interface PaymentState {
+    loading: boolean;
+    error: null | string;
+    paymentMethods: PaymentMethod[];
+    requisite: string;
+    sum: string;
+    preview: PaymentPreviewState;
+}
+
+export interface PaymentPreviewResponse {
+    comservice: string;
+    comservice_name: string;
+    com_account: string;
+    total: string;
+    comission: number;
+    total_with_comission: number;
+    comission_type: CommissionType;
+    comission_value: number;
+}
+
+export interface PaymentPreviewState {
+    loading: boolean;
+    error: null | string;
+    previewData: PaymentPreviewResponse | null;
+}

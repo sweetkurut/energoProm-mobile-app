@@ -16,6 +16,7 @@ import {
     View,
 } from "react-native";
 
+import { previewPayment } from "@/store/slices/paymentSlice";
 import dayjs from "dayjs";
 
 export default function HomeScreen() {
@@ -23,10 +24,34 @@ export default function HomeScreen() {
     const dispatch = useAppDispatch();
     const { house, loading } = useAppSelector((state) => state.house);
     const { profile } = useAppSelector((state) => state.profile);
+    const { preview } = useAppSelector((state) => state.payment);
 
     useEffect(() => {
         dispatch(fetchHouseCard());
     }, [dispatch]);
+
+    useEffect(() => {
+        if (house && house.length > 0) {
+            loadPaymentPreview();
+        }
+    }, [house]);
+
+    const loadPaymentPreview = async () => {
+        if (!house || house.length === 0) return;
+
+        try {
+            const firstHouse = house[0];
+            await dispatch(
+                previewPayment({
+                    houseCardId: firstHouse.id, // или firstHouse.house_card
+                    requisite: firstHouse.house_card?.toString() || "",
+                    sum: "9678", // Можно сделать динамическим
+                })
+            ).unwrap();
+        } catch (error) {
+            console.error("Ошибка загрузки предпросмотра платежа:", error);
+        }
+    };
 
     const goToNotification = () => {
         router.push("/(notification)/notification");
@@ -34,11 +59,34 @@ export default function HomeScreen() {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        dispatch(fetchHouseCard()).then(() => setRefreshing(false));
-    }, [dispatch]);
+        dispatch(fetchHouseCard())
+            .then(() => {
+                loadPaymentPreview();
+                setRefreshing(false);
+            })
+            .catch(() => setRefreshing(false));
+    }, []);
+
+    // Получаем сумму для оплаты
+    const getPaymentAmount = () => {
+        if (preview.previewData) {
+            return preview.previewData.total_with_comission.toString();
+        }
+        return "0"; //
+    };
 
     const onPay = () => {
-        router.push("/(payment)/payment");
+        if (house && house.length > 0) {
+            router.push({
+                pathname: "/(payment)/payment",
+                params: {
+                    houseCardId: house[0].id.toString(),
+                    amount: getPaymentAmount(),
+                },
+            });
+        } else {
+            router.push("/(payment)/payment");
+        }
     };
 
     const goToDetail = (id: number) => {
@@ -161,11 +209,21 @@ export default function HomeScreen() {
             <View style={styles.check}>
                 <View>
                     <Text style={styles.check_title}>Текущий счёт</Text>
-                    <Text style={styles.check_balance}>1225 сом</Text>
+                    <Text style={styles.check_balance}>
+                        {preview.loading ? (
+                            <ActivityIndicator size="small" color="#EA961C" />
+                        ) : (
+                            `${getPaymentAmount()} сом`
+                        )}
+                    </Text>
                     <Text style={styles.check_span}>Оплатить до 25 числа текущего месяца</Text>
                 </View>
-                <TouchableOpacity style={styles.button} onPress={onPay}>
-                    <Text style={styles.button_text}>Оплатить</Text>
+                <TouchableOpacity
+                    style={[styles.button, preview.loading && styles.buttonDisabled]}
+                    onPress={onPay}
+                    disabled={preview.loading}
+                >
+                    <Text style={styles.button_text}>{preview.loading ? "Загрузка..." : "Оплатить"}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -381,5 +439,9 @@ const styles = StyleSheet.create({
         color: Colors.WHITE_COLOR,
         fontWeight: 500,
         fontSize: 12,
+    },
+
+    buttonDisabled: {
+        opacity: 0.6,
     },
 });

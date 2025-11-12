@@ -1,19 +1,28 @@
-import * as MediaLibrary from "expo-media-library";
 import * as Print from "expo-print";
-import { Alert, Platform, ToastAndroid } from "react-native";
+import * as Sharing from "expo-sharing";
+import { Alert } from "react-native";
 
 export const generateAndSavePdf = async (receipt: {
-  amount: number;
-  description: string;
-  date: string;
-  method: string;
-  invoice: string;
-  status: string;
+    amount: number;
+    description: string;
+    date: string;
+    method: string;
+    invoice: string;
+    status: string;
 }) => {
-  try {
-    const html = `
+    try {
+        const html = `
       <html>
-        <body style="font-family: Arial; padding: 24px;">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            h2 { color: #333; text-align: center; }
+            p { margin: 10px 0; }
+            strong { color: #666; }
+          </style>
+        </head>
+        <body>
           <h2>Квитанция об оплате</h2>
           <p><strong>Сумма:</strong> ${receipt.amount} сом</p>
           <p><strong>Описание:</strong> ${receipt.description}</p>
@@ -21,31 +30,28 @@ export const generateAndSavePdf = async (receipt: {
           <p><strong>Способ оплаты:</strong> ${receipt.method}</p>
           <p><strong>Номер квитанции:</strong> ${receipt.invoice}</p>
           <p><strong>Статус:</strong> ${receipt.status}</p>
+          <p style="text-align: center; color: #999; margin-top: 20px;">
+            Сгенерировано: ${new Date().toLocaleString("ru-RU")}
+          </p>
         </body>
       </html>
     `;
 
-    // 1. Генерация PDF, получаем URI файла
-    const { uri } = await Print.printToFileAsync({ html });
+        console.log("🔄 Генерация PDF...");
 
-    // 2. Запрос разрешений
-    const permission = await MediaLibrary.requestPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Нет доступа", "Разрешите доступ к файлам для сохранения PDF");
-      return;
+        const { uri } = await Print.printToFileAsync({ html });
+        console.log("📄 PDF создан:", uri);
+
+        if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(uri, {
+                mimeType: "application/pdf",
+                dialogTitle: "Сохранить квитанцию",
+            });
+        } else {
+            Alert.alert("Успех", "PDF сгенерирован, но шаринг недоступен");
+        }
+    } catch (error) {
+        console.error("❌ Ошибка:", error);
+        throw new Error("Не удалось создать PDF");
     }
-
-    // 3. Создание ассета напрямую из URI
-    const asset = await MediaLibrary.createAssetAsync(uri);
-    await MediaLibrary.createAlbumAsync("Download", asset, false);
-
-    if (Platform.OS === "android") {
-      ToastAndroid.show("PDF сохранён в папку Downloads", ToastAndroid.LONG);
-    } else {
-      Alert.alert("Успешно", "PDF успешно сохранён");
-    }
-  } catch (error) {
-    console.error("Ошибка при сохранении PDF:", error);
-    Alert.alert("Ошибка", "Не удалось сохранить PDF-файл");
-  }
 };

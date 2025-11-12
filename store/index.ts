@@ -5,6 +5,7 @@ import CheckSlice from "./slices/checkSlice";
 import DealsSlice from "./slices/dealsSlice";
 import GraphicSlice from "./slices/graphicSlice";
 import HouceCardSlice from "./slices/housecardSlice";
+import PaymentSlice from "./slices/paymentSlice";
 import ProfileSlice from "./slices/profileSlice";
 
 export const store = configureStore({
@@ -16,6 +17,7 @@ export const store = configureStore({
         graphic: GraphicSlice,
         deals: DealsSlice,
         bids: BidSlice,
+        payment: PaymentSlice,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

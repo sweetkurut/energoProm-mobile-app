@@ -287,7 +287,8 @@ export default function DetailCheckScreen() {
                     </Text>
                 </View>
             </View>
-            <Chart id={data?.house_card?.house_card} />
+            {/* <Chart id={data?.house_card?.house_card} /> */}
+            <Chart id={2} />
         </ScrollView>
     );
 }
