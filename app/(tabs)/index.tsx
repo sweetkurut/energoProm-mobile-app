@@ -43,9 +43,9 @@ export default function HomeScreen() {
             const firstHouse = house[0];
             await dispatch(
                 previewPayment({
-                    houseCardId: firstHouse.id, // или firstHouse.house_card
+                    houseCardId: firstHouse.id, //
                     requisite: firstHouse.house_card?.toString() || "",
-                    sum: "9678", // Можно сделать динамическим
+                    sum: firstHouse.house_card,
                 })
             ).unwrap();
         } catch (error) {
@@ -67,12 +67,11 @@ export default function HomeScreen() {
             .catch(() => setRefreshing(false));
     }, []);
 
-    // Получаем сумму для оплаты
     const getPaymentAmount = () => {
         if (preview.previewData) {
             return preview.previewData.total_with_comission.toString();
         }
-        return "0"; //
+        return "0";
     };
 
     const onPay = () => {
