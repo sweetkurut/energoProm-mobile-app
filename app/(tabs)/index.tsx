@@ -71,20 +71,20 @@ export default function HomeScreen() {
         if (preview.previewData) {
             return preview.previewData.total_with_comission.toString();
         }
-        return "0";
+        return "0"; // Пока не загрузилось
     };
 
     const onPay = () => {
         if (house && house.length > 0) {
+            const firstHouse = house[0];
             router.push({
-                pathname: "/(payment)/payment",
+                pathname: "/(payment)/payment",   
                 params: {
-                    houseCardId: house[0].id.toString(),
-                    amount: getPaymentAmount(),
+                    houseCardId: firstHouse.id.toString(),
+                    houseCardNumber: firstHouse.house_card?.toString() || "",
+                    // НЕ передаем amount - он загрузится через preview
                 },
             });
-        } else {
-            router.push("/(payment)/payment");
         }
     };
 
@@ -217,12 +217,8 @@ export default function HomeScreen() {
                     </Text>
                     <Text style={styles.check_span}>Оплатить до 25 числа текущего месяца</Text>
                 </View>
-                <TouchableOpacity
-                    style={[styles.button, preview.loading && styles.buttonDisabled]}
-                    onPress={onPay}
-                    disabled={preview.loading}
-                >
-                    <Text style={styles.button_text}>{preview.loading ? "Загрузка..." : "Оплатить"}</Text>
+                <TouchableOpacity style={styles.button} onPress={onPay}>
+                    <Text style={styles.button_text}>Оплатить</Text>
                 </TouchableOpacity>
             </View>
 

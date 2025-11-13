@@ -20,6 +20,7 @@ import { PhotoUploader } from "./PhotoUploader";
 
 export default function DetailCheckScreen() {
     const { id } = useLocalSearchParams();
+    const numericId = Number(id);
     const { check, loading } = useAppSelector((state) => state.check);
     const data = check;
     const dispatch = useAppDispatch();
@@ -46,6 +47,7 @@ export default function DetailCheckScreen() {
                 check_id: data.id,
                 house_card_id: data.house_card?.id,
                 house_card_data: data.house_card,
+                house_card_number: data.house_card?.house_card,
             });
         }
     }, [data]);
@@ -288,7 +290,8 @@ export default function DetailCheckScreen() {
                 </View>
             </View>
             {/* <Chart id={data?.house_card?.house_card} /> */}
-            <Chart id={2} />
+            {/* <Chart id={numericId} /> */}
+            <Chart id={data.house_card.house_card} />
         </ScrollView>
     );
 }

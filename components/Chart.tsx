@@ -41,11 +41,22 @@ export default function Chart({ id }: ChartProps) {
         }
     }, [id, dispatch]);
 
+    console.log("📊 Chart component props:", { id });
+    console.log("📊 Chart Redux state:", {
+        graphic,
+        loading,
+        hasGraphicData: !!graphic,
+        hasGraphicEvaluate: !!graphic?.graphic_evaluate,
+        evaluateLength: graphic?.graphic_evaluate?.length,
+    });
+
     if (loading) {
         return <Text style={styles.loadingText}>Загрузка графика...</Text>;
     }
 
+    // ИСПРАВЛЕННАЯ ПРОВЕРКА ДАННЫХ
     if (!graphic || !graphic.graphic_evaluate || graphic.graphic_evaluate.length === 0) {
+        console.log("📊 No data condition triggered");
         return (
             <View style={styles.noDataContainer}>
                 <Text style={styles.noDataTitle}>Нет данных для графика</Text>
@@ -58,12 +69,19 @@ export default function Chart({ id }: ChartProps) {
         );
     }
 
-    const consumptionData = graphic.graphic_evaluate.map((item) => item.consumption ?? 0);
+    // ИСПРАВЛЕННОЕ ПРЕОБРАЗОВАНИЕ ДАННЫХ
+    const consumptionData = graphic.graphic_evaluate.map(
+        (item) => parseFloat(item.consumption) || 0 // ИСПРАВЛЕНО: parseFloat вместо Number
+    );
+
     const chartLabels = graphic.graphic_evaluate.map((item) => item.month_name ?? "");
+
+    console.log("📊 Processed consumptionData:", consumptionData);
+    console.log("📊 Processed chartLabels:", chartLabels);
 
     const maxValue = Math.max(...consumptionData) > 0 ? Math.max(...consumptionData) * 1.2 : 10;
 
-    // шаг между точками (если точек мало — распределим на всю ширину экрана, если много — фиксированный шаг для скролла)
+    // шаг между точками
     const xGap = consumptionData.length <= 6 ? chartWidth / (consumptionData.length - 1 || 1) : minGap;
 
     const points = consumptionData.map((val, i) => ({
@@ -72,7 +90,7 @@ export default function Chart({ id }: ChartProps) {
         value: val,
     }));
 
-    const fullChartWidth = 40 + xGap * (consumptionData.length - 1) + 40; // общая ширина графика
+    const fullChartWidth = 40 + xGap * (consumptionData.length - 1) + 40;
 
     const line = shape
         .line<{ x: number; y: number }>()
@@ -96,11 +114,13 @@ export default function Chart({ id }: ChartProps) {
 
             <View style={styles.infoContainer}>
                 <Text style={styles.consumptionValue}>{graphic.average_consumption} кВт*ч</Text>
-                <View style={styles.diffContainer}>
-                    <Text style={styles.increase}>
-                        ↑ {graphic.diff_amount} кВт*ч ({graphic.diff_percent}%)
-                    </Text>
-                </View>
+                {graphic.diff_amount !== null && graphic.diff_percent !== null && (
+                    <View style={styles.diffContainer}>
+                        <Text style={styles.increase}>
+                            ↑ {graphic.diff_amount} кВт*ч ({graphic.diff_percent}%)
+                        </Text>
+                    </View>
+                )}
                 <Text style={styles.subtitle}>Увеличение к прошлому периоду</Text>
             </View>
 

@@ -2,7 +2,7 @@ import ExclamationIcon from "@/assets/icons/ExclamationIcon";
 import LightningIcon from "@/assets/icons/LightningIcon";
 import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { createPayment } from "@/store/slices/paymentSlice";
+import { createPayment, previewPayment } from "@/store/slices/paymentSlice";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -21,29 +21,54 @@ import {
 export default function Payment() {
     const params = useLocalSearchParams();
     const houseCardId = params.houseCardId as string;
-    const amount = params.amount as string;
+    const houseCardNumber = params.houseCardNumber as string;
 
     const [selectedMethod, setSelectedMethod] = useState<string>();
+    const [step, setStep] = useState<"preview" | "banks">("preview"); // Добавляем шаги
     const dispatch = useAppDispatch();
-    const { paymentMethods, loading } = useAppSelector((state) => state.payment);
+    const {
+        paymentMethods,
+        loading: banksLoading,
+        preview,
+        loading,
+    } = useAppSelector((state) => state.payment);
 
     useEffect(() => {
         if (houseCardId) {
-            loadPaymentMethods();
+            loadPaymentPreview();
         }
     }, [houseCardId]);
 
+    // 1. Загружаем предпросмотр платежа
+    const loadPaymentPreview = async () => {
+        try {
+            await dispatch(
+                previewPayment({
+                    houseCardId: parseInt(houseCardId),
+                    requisite: houseCardNumber || houseCardId,
+                    sum: "9678", // Можно сделать динамическим
+                })
+            ).unwrap();
+        } catch (error) {
+            console.error("Ошибка загрузки предпросмотра:", error);
+            Alert.alert("Ошибка", "Не удалось загрузить данные для оплаты");
+        }
+    };
+
+    // 2. Загружаем методы оплаты (банки)
     const loadPaymentMethods = async () => {
         try {
+            setStep("banks");
             await dispatch(
                 createPayment({
                     houseCardId: parseInt(houseCardId),
-                    requisite: houseCardId,
-                    sum: amount || "1225",
+                    requisite: houseCardNumber || houseCardId,
+                    sum: preview.previewData?.total_with_comission.toString() || "9678",
                 })
             ).unwrap();
         } catch (error) {
             console.error("Ошибка загрузки методов оплаты:", error);
+            Alert.alert("Ошибка", "Не удалось загрузить способы оплаты");
         }
     };
 
@@ -64,6 +89,11 @@ export default function Payment() {
         return icons[bankName] || <FontAwesome5 name="credit-card" size={24} color="#FF8C00" />;
     };
 
+    // Проверка активности банка
+    const isBankActive = (bank: any): boolean => {
+        return bank.active === 1 && bank.link && bank.link !== "." && bank.link !== "";
+    };
+
     // Процесс оплаты
     const processPayment = async () => {
         if (!selectedMethod) {
@@ -73,7 +103,7 @@ export default function Payment() {
 
         const selectedBank = paymentMethods.find((bank) => bank.name === selectedMethod);
 
-        if (!selectedBank) {
+        if (!selectedBank || !isBankActive(selectedBank)) {
             Alert.alert("Ошибка", "Выбранный способ оплаты недоступен");
             return;
         }
@@ -97,10 +127,12 @@ export default function Payment() {
     };
 
     const goToReceipt = (methodName: string) => {
+        const amount = preview.previewData?.total_with_comission || 9678;
+
         router.push({
             pathname: "/(payment)/receipt",
             params: {
-                amount: amount || "1225",
+                amount: amount.toString(),
                 description: "Оплата за электроэнергию",
                 date: new Date().toLocaleString("ru-RU", {
                     day: "2-digit",
@@ -112,10 +144,96 @@ export default function Payment() {
                 method: methodName,
                 invoice: `TXN${Date.now()}`,
                 status: "Успешно",
+                houseCardId: houseCardId,
             },
         });
     };
 
+    // Фильтруем только активные банки
+    const activeBanks = paymentMethods.filter(isBankActive);
+
+    // Шаг 1: Предпросмотр платежа
+    if (step === "preview") {
+        return (
+            <ScrollView style={styles.container}>
+                <View style={styles.card}>
+                    <View style={styles.header}>
+                        <LightningIcon />
+                        <View style={{ marginLeft: 10 }}>
+                            <Text style={styles.title}>Счет за электроэнергию</Text>
+                            <Text style={styles.subtitle}>
+                                {new Date().toLocaleString("ru-RU", { month: "long", year: "numeric" })}
+                            </Text>
+                            <Text style={styles.subtitle}>
+                                Лицевой счет: {houseCardNumber || houseCardId}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Данные из Preview */}
+                    {preview.loading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#FF8C00" />
+                            <Text style={styles.loadingText}>Загрузка данных...</Text>
+                        </View>
+                    ) : preview.previewData ? (
+                        <View style={styles.previewData}>
+                            <View style={styles.row}>
+                                <Text style={styles.rowTitle}>Сумма:</Text>
+                                <Text style={styles.amount}>{preview.previewData.total} сом</Text>
+                            </View>
+                            {preview.previewData.comission > 0 && (
+                                <View style={styles.row}>
+                                    <Text style={styles.rowTitle}>Комиссия:</Text>
+                                    <Text style={styles.commission}>
+                                        {preview.previewData.comission}{" "}
+                                        {preview.previewData.comission_type === "percent" ? "%" : "сом"}
+                                    </Text>
+                                </View>
+                            )}
+                            <View style={styles.divider} />
+                            <View style={styles.row}>
+                                <Text style={[styles.rowTitle, { fontWeight: "600" }]}>Итого к оплате:</Text>
+                                <Text style={styles.totalAmount}>
+                                    {preview.previewData.total_with_comission} сом
+                                </Text>
+                            </View>
+                        </View>
+                    ) : (
+                        <Text style={styles.errorText}>Не удалось загрузить данные</Text>
+                    )}
+                </View>
+
+                <View style={styles.infoBox}>
+                    <View style={styles.infoHeader}>
+                        <ExclamationIcon />
+                        <Text style={styles.infoTitle}>Информация об оплате</Text>
+                    </View>
+                    <Text style={styles.infoText}>
+                        • После подтверждения вы перейдете к выбору способа оплаты{"\n"}• Доступны оплата
+                        через приложения банков и онлайн-платежи
+                    </Text>
+                </View>
+
+                <View style={styles.btnWrap}>
+                    <TouchableOpacity
+                        style={[
+                            styles.payButton,
+                            (preview.loading || !preview.previewData) && styles.payButtonDisabled,
+                        ]}
+                        onPress={loadPaymentMethods}
+                        disabled={preview.loading || !preview.previewData}
+                    >
+                        <Text style={styles.payButtonText}>
+                            {preview.loading ? "Загрузка..." : "Перейти к оплате"}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        );
+    }
+
+    // Шаг 2: Выбор банка
     return (
         <>
             <ScrollView style={styles.container}>
@@ -128,7 +246,7 @@ export default function Payment() {
                                 {new Date().toLocaleString("ru-RU", { month: "long", year: "numeric" })}
                             </Text>
                             <Text style={styles.subtitle}>
-                                Лицевой счет: {houseCardId || "563463465345345"}
+                                Лицевой счет: {houseCardNumber || houseCardId}
                             </Text>
                         </View>
                     </View>
@@ -136,7 +254,7 @@ export default function Payment() {
                         <View style={styles.row}>
                             <Text style={styles.rowTitle}>К оплате:</Text>
                             <Text style={{ color: "#FEA94B", fontWeight: "500", fontSize: 16 }}>
-                                {amount || "1225"} сом
+                                {preview.previewData?.total_with_comission || "9678"} сом
                             </Text>
                         </View>
                     </View>
@@ -145,14 +263,14 @@ export default function Payment() {
                 <View style={styles.paymentCard}>
                     <Text style={styles.sectionTitle}>Выберите способ оплаты</Text>
 
-                    {loading ? (
+                    {banksLoading ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FF8C00" />
                             <Text style={styles.loadingText}>Загрузка методов оплаты...</Text>
                         </View>
-                    ) : paymentMethods.length > 0 ? (
+                    ) : activeBanks.length > 0 ? (
                         <View style={styles.methods}>
-                            {paymentMethods.map((method) => (
+                            {activeBanks.map((method) => (
                                 <TouchableOpacity
                                     key={method.name}
                                     style={[
@@ -167,8 +285,11 @@ export default function Payment() {
                                             <Image
                                                 style={styles.logo}
                                                 source={{
-                                                    uri: `${method.logo}`,
+                                                    uri: method.logo,
                                                 }}
+                                                onError={() =>
+                                                    console.log(`Не удалось загрузить лого: ${method.logo}`)
+                                                }
                                             />
                                             <Text style={styles.methodLabel}>{method.name}</Text>
                                             <Text style={styles.methodDesc}>
@@ -203,11 +324,13 @@ export default function Payment() {
 
             <View style={styles.btnWrap}>
                 <TouchableOpacity
-                    style={[styles.payButton, (!selectedMethod || loading) && styles.payButtonDisabled]}
+                    style={[styles.payButton, (!selectedMethod || banksLoading) && styles.payButtonDisabled]}
                     onPress={processPayment}
-                    disabled={!selectedMethod || loading}
+                    disabled={!selectedMethod || banksLoading}
                 >
-                    <Text style={styles.payButtonText}>Оплатить {amount || "1225"} сом</Text>
+                    <Text style={styles.payButtonText}>
+                        Оплатить {preview.previewData?.total_with_comission || "9678"} сом
+                    </Text>
                 </TouchableOpacity>
             </View>
         </>
@@ -215,6 +338,37 @@ export default function Payment() {
 }
 
 const styles = StyleSheet.create({
+    previewData: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+    },
+    amount: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#333",
+    },
+    commission: {
+        fontSize: 14,
+        color: "#666",
+    },
+    totalAmount: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#FF8C00",
+    },
+    divider: {
+        height: 1,
+        backgroundColor: "#e0e0e0",
+        marginVertical: 8,
+    },
+    errorText: {
+        textAlign: "center",
+        color: "#ff6b6b",
+        marginTop: 16,
+    },
+
     container: {
         padding: 10,
         flex: 1,

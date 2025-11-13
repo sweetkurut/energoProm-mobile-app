@@ -94,10 +94,13 @@ export const storesApi = {
     },
 
     // графики
-    getGraphicChecks(houseCardId: number) {
+    getGraphicChecks(houseCardId: number | string) {
+        const numericId = Number(houseCardId);
+        console.log("🔍 API Request - house_card:", numericId);
+
         return instance.get("check/graphic-checks/", {
             params: {
-                house_card: houseCardId,
+                house_card: numericId,
             },
         });
     },
