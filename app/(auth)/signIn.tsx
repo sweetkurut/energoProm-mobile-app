@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchLogin, setError } from "@/store/slices/authSlice";
 import { hasTokens, saveTokens } from "@/utils/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Checkbox } from "expo-checkbox";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -17,12 +16,14 @@ import {
     Image,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
+
 import { SystemBars } from "react-native-edge-to-edge";
 
 export default function SignIn() {
@@ -94,145 +95,158 @@ export default function SignIn() {
             end={{ x: 1, y: 1 }}
         >
             <SystemBars style="dark" />
+
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-                <View style={styles.header}>
-                    <View style={styles.logoContainer}>
-                        <Image
-                            source={require("../../assets/images/custom_icon.png")}
-                            width={170}
-                            height={116}
-                        />
-                    </View>
-                </View>
-
-                <View style={styles.formContainer}>
-                    <Text style={styles.title}>Войти в личный кабинет</Text>
-                    <Text style={styles.subtitle}>Введите данные для входа в систему</Text>
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.inputLabel}>Email</Text>
-                        <View style={styles.inputWrapper}>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Email обязателен",
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: "Неверный формат email",
-                                    },
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <TextInput
-                                        style={styles.input}
-                                        onBlur={onBlur}
-                                        onChangeText={onChange}
-                                        value={value}
-                                        placeholder="Введите ваш email"
-                                        placeholderTextColor="#AAA"
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                    />
-                                )}
-                                name="email"
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.header}>
+                        <View style={styles.logoContainer}>
+                            <Image
+                                source={require("../../assets/images/custom_icon.png")}
+                                width={170}
+                                height={116}
                             />
                         </View>
-                        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.inputLabel}>Пароль</Text>
-                        <View style={styles.inputWrapper}>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Пароль обязателен",
-                                    minLength: {
-                                        value: 6,
-                                        message: "Пароль должен содержать минимум 6 символов",
-                                    },
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <TextInput
-                                        style={styles.input}
-                                        onBlur={onBlur}
-                                        onChangeText={onChange}
-                                        value={value}
-                                        placeholder="******"
-                                        placeholderTextColor="#AAA"
-                                        secureTextEntry={!showPassword}
-                                    />
-                                )}
-                                name="password"
-                            />
-                            <TouchableOpacity
-                                onPress={() => setShowPassword(!showPassword)}
-                                style={styles.eyeIcon}
-                            >
-                                <Ionicons
-                                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                                    size={20}
-                                    color={Colors.SPAN_AUTH}
+                    <View style={styles.formContainer}>
+                        <Text style={styles.title}>Войти в личный кабинет</Text>
+                        <Text style={styles.subtitle}>Введите данные для входа в систему</Text>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Email</Text>
+                            <View style={styles.inputWrapper}>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Email обязателен",
+                                        pattern: {
+                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                            message: "Неверный формат email",
+                                        },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            style={styles.input}
+                                            onBlur={onBlur}
+                                            onChangeText={onChange}
+                                            value={value}
+                                            placeholder="Введите ваш email"
+                                            placeholderTextColor="#AAA"
+                                            keyboardType="email-address"
+                                            autoCapitalize="none"
+                                        />
+                                    )}
+                                    name="email"
                                 />
+                            </View>
+                            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Пароль</Text>
+                            <View style={styles.inputWrapper}>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Пароль обязателен",
+                                        minLength: {
+                                            value: 6,
+                                            message: "Пароль должен содержать минимум 6 символов",
+                                        },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            style={styles.input}
+                                            onBlur={onBlur}
+                                            onChangeText={onChange}
+                                            value={value}
+                                            placeholder="******"
+                                            placeholderTextColor="#AAA"
+                                            secureTextEntry={!showPassword}
+                                        />
+                                    )}
+                                    name="password"
+                                />
+                                <TouchableOpacity
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    style={styles.eyeIcon}
+                                >
+                                    <Ionicons
+                                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                        size={20}
+                                        color={Colors.SPAN_AUTH}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                            {errors.password && (
+                                <Text style={styles.errorText}>{errors.password.message}</Text>
+                            )}
+                        </View>
+
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                marginTop: -15,
+                            }}
+                        >
+                            {/* <View style={styles.checkboxContainer}>
+                                <Checkbox
+                                    style={styles.checkbox}
+                                    value={isChecked}
+                                    onValueChange={setChecked}
+                                />
+                                <Text style={styles.label}>Запомнить меня</Text>
+                            </View> */}
+
+                            <TouchableOpacity style={styles.forgotPasswordLink} onPress={goToForgotPassword}>
+                                <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
                             </TouchableOpacity>
                         </View>
-                        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-                    </View>
 
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginTop: -15,
-                        }}
-                    >
-                        <View style={styles.checkboxContainer}>
-                            <Checkbox style={styles.checkbox} value={isChecked} onValueChange={setChecked} />
-                            <Text style={styles.label}>Запомнить меня</Text>
+                        {error && <Text style={styles.errorText}>{error}</Text>}
+
+                        <TouchableOpacity
+                            style={[styles.button, loading && styles.buttonDisabled]}
+                            onPress={handleSubmit(onSubmit)}
+                            disabled={loading}
+                            activeOpacity={0.7}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color={Colors.WHITE_COLOR} />
+                            ) : (
+                                <Text style={styles.buttonText}>Войти</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.signupContainer}>
+                            <Text style={styles.signupText}>Еще нет аккаунта?</Text>
+                            <TouchableOpacity onPress={createAccount}>
+                                <Text style={styles.signupLink}>Зарегистрироваться</Text>
+                            </TouchableOpacity>
                         </View>
-
-                        <TouchableOpacity style={styles.forgotPasswordLink} onPress={goToForgotPassword}>
-                            <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
-                        </TouchableOpacity>
                     </View>
 
-                    {error && <Text style={styles.errorText}>{error}</Text>}
-
-                    <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={handleSubmit(onSubmit)}
-                        disabled={loading}
-                        activeOpacity={0.7}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color={Colors.WHITE_COLOR} />
-                        ) : (
-                            <Text style={styles.buttonText}>Войти</Text>
-                        )}
-                    </TouchableOpacity>
-
-                    <View style={styles.signupContainer}>
-                        <Text style={styles.signupText}>Еще нет аккаунта?</Text>
-                        <TouchableOpacity onPress={createAccount}>
-                            <Text style={styles.signupLink}>Зарегистрироваться</Text>
-                        </TouchableOpacity>
+                    <View style={styles.supportContainer}>
+                        <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+                        <View style={styles.iconContainer}>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <WhatsappIcon />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <InstaIcon />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <PhoneIcon />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-
-                <View style={styles.supportContainer}>
-                    <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
-                    <View style={styles.iconContainer}>
-                        <TouchableOpacity style={styles.iconWrapper}>
-                            <WhatsappIcon />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconWrapper}>
-                            <InstaIcon />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconWrapper}>
-                            <PhoneIcon />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </LinearGradient>
     );
@@ -241,6 +255,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        height: "100%",
         backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
     },
     scrollContainer: {

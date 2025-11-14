@@ -5,14 +5,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthLayout() {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.HEADER }} edges={["top", "bottom"]}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.HEADER }} edges={["bottom"]}>
             <SystemBars style="dark" />
             <Stack
                 screenOptions={{
                     headerShown: false,
-                    animation: "ios_from_right", // плавный переход справа налево
-                    headerBackTitle: "Назад", // текст кнопки Назад (iOS)
-                    headerTintColor: Colors.BLACK, // цвет стрелки назад
+                    animation: "ios_from_right",
+                    headerBackTitle: "Назад",
+                    headerTintColor: Colors.BLACK,
                 }}
             >
                 <Stack.Screen name="signIn" options={{ title: "Авторизация" }} />

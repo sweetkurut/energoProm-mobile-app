@@ -11,435 +11,447 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
-  Image,
-  KeyboardAvoidingView,
-  NativeSyntheticEvent,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    KeyboardAvoidingView,
+    NativeSyntheticEvent,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputKeyPressEventData,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 interface CodeFormData {
-  digit0: string;
-  digit1: string;
-  digit2: string;
-  digit3: string;
-  email: string;
+    digit0: string;
+    digit1: string;
+    digit2: string;
+    digit3: string;
+    email: string;
 }
 
 export default function ConfirmCode() {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
-  const { email } = useLocalSearchParams<{ email: string }>();
+    const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { loading, error } = useAppSelector((state) => state.auth);
+    const { email } = useLocalSearchParams<{ email: string }>();
 
-  const [timer, setTimer] = useState(60);
-  const inputRefs = useRef<(TextInput | null)[]>([]);
+    const [timer, setTimer] = useState(60);
+    const inputRefs = useRef<(TextInput | null)[]>([]);
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<CodeFormData>({
-    defaultValues: {
-      digit0: "",
-      digit1: "",
-      digit2: "",
-      digit3: "",
-    },
-  });
+    const {
+        control,
+        handleSubmit,
+        watch,
+        setValue,
+        formState: { errors },
+    } = useForm<CodeFormData>({
+        defaultValues: {
+            digit0: "",
+            digit1: "",
+            digit2: "",
+            digit3: "",
+        },
+    });
 
-  const codeValues = [watch("digit0"), watch("digit1"), watch("digit2"), watch("digit3")];
-  const isCodeComplete = codeValues.every((digit) => digit !== "");
+    const codeValues = [watch("digit0"), watch("digit1"), watch("digit2"), watch("digit3")];
+    const isCodeComplete = codeValues.every((digit) => digit !== "");
 
-  useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timer]);
-
-  const handleCodeChange = (text: string, index: number) => {
-    if (text.length <= 1) {
-      const fieldName = `digit${index}` as keyof CodeFormData;
-      setValue(fieldName, text);
-
-      if (text.length === 1 && index < 3) {
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
-  };
-
-  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
-    const { key } = e.nativeEvent;
-
-    if (key === "Backspace") {
-      const currentField = `digit${index}` as keyof CodeFormData;
-      const currentValue = watch(currentField);
-
-      if (currentValue === "") {
-        if (index > 0) {
-          const prevField = `digit${index - 1}` as keyof CodeFormData;
-          setValue(prevField, "");
-          inputRefs.current[index - 1]?.focus();
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+            return () => clearInterval(interval);
         }
-      }
-    }
-  };
+    }, [timer]);
 
-  const handleContinue = async (data: CodeFormData) => {
-    const codeString = Object.values(data).join("");
+    const handleCodeChange = (text: string, index: number) => {
+        if (text.length <= 1) {
+            const fieldName = `digit${index}` as keyof CodeFormData;
+            setValue(fieldName, text);
 
-    try {
-      const verifyData: IVerifyCode = {
-        email: email!,
-        verification_code: codeString,
-      };
+            if (text.length === 1 && index < 3) {
+                inputRefs.current[index + 1]?.focus();
+            }
+        }
+    };
 
-      const result = await dispatch(fetchVerifyCode(verifyData)).unwrap();
+    const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
+        const { key } = e.nativeEvent;
 
-      if (result) {
-        router.push({
-          pathname: "/(auth)/setPassword",
-          params: { email: email! },
-        });
-      }
-    } catch (error) {
-      console.error("Ошибка при проверке кода:", error);
-    }
-  };
+        if (key === "Backspace") {
+            const currentField = `digit${index}` as keyof CodeFormData;
+            const currentValue = watch(currentField);
 
-  const resendCode = () => {
-    dispatch(fetchSignUp({ email: email! }));
-    setTimer(30);
-  };
+            if (currentValue === "") {
+                if (index > 0) {
+                    const prevField = `digit${index - 1}` as keyof CodeFormData;
+                    setValue(prevField, "");
+                    inputRefs.current[index - 1]?.focus();
+                }
+            }
+        }
+    };
 
-  const handleBack = () => {
-    router.back();
-  };
+    const handleContinue = async (data: CodeFormData) => {
+        const codeString = Object.values(data).join("");
 
-  return (
-    <LinearGradient
-      style={styles.container}
-      colors={["#ffc281", "#FFA94A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
-        </TouchableOpacity>
+        try {
+            const verifyData: IVerifyCode = {
+                email: email!,
+                verification_code: codeString,
+            };
 
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image source={require("../../assets/images/custom_icon.png")} width={170} height={116} />
-          </View>
-        </View>
+            const result = await dispatch(fetchVerifyCode(verifyData)).unwrap();
 
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Подтверждение</Text>
-          <Text style={styles.subtitle}>
-            Код подверждения отправлен. Пожалуйста введите его ниже для продолжения
-          </Text>
+            if (result) {
+                router.push({
+                    pathname: "/(auth)/setPassword",
+                    params: { email: email! },
+                });
+            }
+        } catch (error) {
+            console.error("Ошибка при проверке кода:", error);
+        }
+    };
 
-          <Text style={styles.inputLabel}>Введите код</Text>
-          <View style={styles.codeContainer}>
-            {codeValues.map((digit, index) => (
-              <View key={index} style={styles.inputWrapper}>
-                <Controller
-                  control={control}
-                  rules={{
-                    required: true,
-                    pattern: /^[0-9]$/,
-                  }}
-                  render={({ field: { onChange, value } }) => (
-                    <TextInput
-                      style={[
-                        styles.codeInput,
-                        value ? styles.filledInput : styles.emptyInput,
-                        errors[`digit${index}` as keyof CodeFormData] && styles.errorInput,
-                      ]}
-                      maxLength={1}
-                      keyboardType="number-pad"
-                      value={value}
-                      onChangeText={(text) => {
-                        onChange(text);
-                        handleCodeChange(text, index);
-                      }}
-                      onKeyPress={(e) => handleKeyPress(e, index)}
-                      ref={(el) => {
-                        inputRefs.current[index] = el;
-                      }}
-                    />
-                  )}
-                  name={`digit${index}` as keyof CodeFormData}
-                />
-              </View>
-            ))}
-          </View>
+    const resendCode = () => {
+        dispatch(fetchSignUp({ email: email! }));
+        setTimer(30);
+    };
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
+    const handleBack = () => {
+        router.back();
+    };
 
-          <TouchableOpacity
-            style={[styles.button, (!isCodeComplete || loading) && styles.buttonDisabled]}
-            onPress={handleSubmit(handleContinue)}
-            disabled={!isCodeComplete || loading}
-            activeOpacity={0.7}
-          >
-            {loading ? (
-              <ActivityIndicator color={Colors.WHITE_COLOR} />
-            ) : (
-              <Text style={styles.buttonText}>Продолжить</Text>
-            )}
-          </TouchableOpacity>
+    return (
+        <LinearGradient
+            style={styles.container}
+            colors={["#ffc281", "#FFA94A"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={Colors.ORANGE_COLOR} />
+                    </TouchableOpacity>
 
-          <View style={styles.resendContainer}>
-            <Text style={styles.resendText}>Не получили код?</Text>
-            {timer > 0 ? (
-              <Text style={styles.timerText}>Отправить повторно через {timer}с</Text>
-            ) : (
-              <TouchableOpacity onPress={resendCode}>
-                <Text style={styles.resendButton}>Отправить повторно</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+                    <View style={styles.header}>
+                        <View style={styles.logoContainer}>
+                            <Image
+                                source={require("../../assets/images/custom_icon.png")}
+                                width={170}
+                                height={116}
+                            />
+                        </View>
+                    </View>
 
-        <View style={styles.supportContainer}>
-          <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
-          <View style={styles.iconContainer}>
-            <TouchableOpacity style={styles.iconWrapper}>
-              <WhatsappIcon />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconWrapper}>
-              <InstaIcon />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconWrapper}>
-              <PhoneIcon />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </LinearGradient>
-  );
+                    <View style={styles.formContainer}>
+                        <Text style={styles.title}>Подтверждение</Text>
+                        <Text style={styles.subtitle}>
+                            Код подверждения отправлен. Пожалуйста введите его ниже для продолжения
+                        </Text>
+
+                        <Text style={styles.inputLabel}>Введите код</Text>
+                        <View style={styles.codeContainer}>
+                            {codeValues.map((digit, index) => (
+                                <View key={index} style={styles.inputWrapper}>
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: true,
+                                            pattern: /^[0-9]$/,
+                                        }}
+                                        render={({ field: { onChange, value } }) => (
+                                            <TextInput
+                                                style={[
+                                                    styles.codeInput,
+                                                    value ? styles.filledInput : styles.emptyInput,
+                                                    errors[`digit${index}` as keyof CodeFormData] &&
+                                                        styles.errorInput,
+                                                ]}
+                                                maxLength={1}
+                                                keyboardType="number-pad"
+                                                value={value}
+                                                onChangeText={(text) => {
+                                                    onChange(text);
+                                                    handleCodeChange(text, index);
+                                                }}
+                                                onKeyPress={(e) => handleKeyPress(e, index)}
+                                                ref={(el) => {
+                                                    inputRefs.current[index] = el;
+                                                }}
+                                            />
+                                        )}
+                                        name={`digit${index}` as keyof CodeFormData}
+                                    />
+                                </View>
+                            ))}
+                        </View>
+
+                        {error && <Text style={styles.errorText}>{error}</Text>}
+
+                        <TouchableOpacity
+                            style={[styles.button, (!isCodeComplete || loading) && styles.buttonDisabled]}
+                            onPress={handleSubmit(handleContinue)}
+                            disabled={!isCodeComplete || loading}
+                            activeOpacity={0.7}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color={Colors.WHITE_COLOR} />
+                            ) : (
+                                <Text style={styles.buttonText}>Продолжить</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.resendContainer}>
+                            <Text style={styles.resendText}>Не получили код?</Text>
+                            {timer > 0 ? (
+                                <Text style={styles.timerText}>Отправить повторно через {timer}с</Text>
+                            ) : (
+                                <TouchableOpacity onPress={resendCode}>
+                                    <Text style={styles.resendButton}>Отправить повторно</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={styles.supportContainer}>
+                        <Text style={styles.supportText}>Нужна помощь? Обратитесь в службу поддержки:</Text>
+                        <View style={styles.iconContainer}>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <WhatsappIcon />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <InstaIcon />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconWrapper}>
+                                <PhoneIcon />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </LinearGradient>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 30,
-    paddingHorizontal: 10,
-    // backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
-  },
+    container: {
+        flex: 1,
+        paddingTop: 30,
+        paddingHorizontal: 10,
+        // backgroundColor: Colors.MAIN_BACKGROUND_COLOR,
+    },
 
-  inputContainer: {
-    marginBottom: 16,
-  },
+    inputContainer: {
+        marginBottom: 16,
+    },
 
-  inputLabel: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "400",
-    marginBottom: 6,
-    marginLeft: 14,
-  },
+    inputLabel: {
+        fontSize: 16,
+        color: "#333",
+        fontWeight: "400",
+        marginBottom: 6,
+        marginLeft: 14,
+    },
 
-  emailInput: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#000",
-    marginHorizontal: 10,
-    // elevation: 2, // Android shadow
-    // shadowColor: "#000", // iOS shadow
-    // shadowOffset: { width: 0, height: 1 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 2,
-  },
+    emailInput: {
+        borderWidth: 1,
+        borderColor: "#ddd",
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        fontSize: 16,
+        color: "#000",
+        marginHorizontal: 10,
+        // elevation: 2, // Android shadow
+        // shadowColor: "#000", // iOS shadow
+        // shadowOffset: { width: 0, height: 1 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 2,
+    },
 
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-  },
-  backButton: {
-    marginTop: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#00000067",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  header: {
-    alignItems: "center",
-    marginTop: 20,
-    marginBottom: 40,
-  },
-  logoContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    objectFit: "contain",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: Colors.TITLE_AUTH,
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: Colors.SPAN_AUTH,
-    textAlign: "center",
-    marginBottom: 15,
-  },
-  formContainer: {
-    width: "100%",
-    backgroundColor: Colors.WHITE_COLOR,
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-    shadowColor: "#00000067",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    marginBottom: 30,
-  },
-  codeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginBottom: 30,
-    marginTop: 10,
-  },
-  inputWrapper: {
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  codeInput: {
-    width: 65,
-    height: 65,
-    textAlign: "center",
-    fontSize: 24,
-    fontWeight: "600",
-    borderRadius: 12,
-  },
-  filledInput: {
-    backgroundColor: "rgba(245, 56, 62, 0.1)",
-    borderWidth: 1,
-    borderColor: Colors.ORANGE_COLOR,
-    color: Colors.TITLE_AUTH,
-  },
-  emptyInput: {
-    borderWidth: 1,
-    borderColor: "#DDDDDD",
-    color: Colors.TITLE_AUTH,
-    backgroundColor: Colors.WHITE_COLOR,
-  },
-  errorInput: {
-    borderColor: Colors.ORANGE_COLOR,
-    borderWidth: 2,
-  },
-  errorText: {
-    color: Colors.ORANGE_COLOR,
-    fontSize: 14,
-    marginBottom: 20,
-    backgroundColor: "rgba(245, 56, 62, 0.1)",
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.ORANGE_COLOR,
-    alignSelf: "stretch",
-  },
-  button: {
-    backgroundColor: Colors.BUTTONSERVICE,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    width: "100%",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: Colors.WHITE_COLOR,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  resendContainer: {
-    alignItems: "center",
-    marginTop: 25,
-  },
-  resendText: {
-    color: Colors.SPAN_AUTH,
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  timerText: {
-    color: Colors.SPAN_AUTH,
-    fontSize: 14,
-  },
-  resendButton: {
-    color: Colors.ORANGE_COLOR,
-    fontSize: 15,
-    fontWeight: "600",
-  },
+    scrollContainer: {
+        flexGrow: 1,
+        paddingHorizontal: 20,
+        paddingBottom: 30,
+    },
+    backButton: {
+        marginTop: 16,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "#fff",
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#00000067",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 10,
+    },
+    header: {
+        alignItems: "center",
+        marginTop: 20,
+        marginBottom: 40,
+    },
+    logoContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+        objectFit: "contain",
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: Colors.TITLE_AUTH,
+        marginBottom: 5,
+        textAlign: "center",
+    },
+    subtitle: {
+        fontSize: 12,
+        fontWeight: "500",
+        color: Colors.SPAN_AUTH,
+        textAlign: "center",
+        marginBottom: 15,
+    },
+    formContainer: {
+        width: "100%",
+        backgroundColor: Colors.WHITE_COLOR,
+        padding: 12,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.05)",
+        shadowColor: "#00000067",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        marginBottom: 30,
+    },
+    codeContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "100%",
+        marginBottom: 30,
+        marginTop: 10,
+    },
+    inputWrapper: {
+        position: "relative",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    codeInput: {
+        width: 65,
+        height: 65,
+        textAlign: "center",
+        fontSize: 24,
+        fontWeight: "600",
+        borderRadius: 12,
+    },
+    filledInput: {
+        backgroundColor: "rgba(245, 56, 62, 0.1)",
+        borderWidth: 1,
+        borderColor: Colors.ORANGE_COLOR,
+        color: Colors.TITLE_AUTH,
+    },
+    emptyInput: {
+        borderWidth: 1,
+        borderColor: "#DDDDDD",
+        color: Colors.TITLE_AUTH,
+        backgroundColor: Colors.WHITE_COLOR,
+    },
+    errorInput: {
+        borderColor: Colors.ORANGE_COLOR,
+        borderWidth: 2,
+    },
+    errorText: {
+        color: Colors.ORANGE_COLOR,
+        fontSize: 14,
+        marginBottom: 20,
+        backgroundColor: "rgba(245, 56, 62, 0.1)",
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: Colors.ORANGE_COLOR,
+        alignSelf: "stretch",
+    },
+    button: {
+        backgroundColor: Colors.BUTTONSERVICE,
+        borderRadius: 12,
+        paddingVertical: 16,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+        width: "100%",
+    },
+    buttonDisabled: {
+        opacity: 0.7,
+    },
+    buttonText: {
+        color: Colors.WHITE_COLOR,
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    resendContainer: {
+        alignItems: "center",
+        marginTop: 25,
+    },
+    resendText: {
+        color: Colors.SPAN_AUTH,
+        marginBottom: 10,
+        fontSize: 14,
+    },
+    timerText: {
+        color: Colors.SPAN_AUTH,
+        fontSize: 14,
+    },
+    resendButton: {
+        color: Colors.ORANGE_COLOR,
+        fontSize: 15,
+        fontWeight: "600",
+    },
 
-  supportContainer: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: "auto",
-  },
-  supportText: {
-    color: Colors.WHITE_COLOR,
-    fontSize: 13,
-    fontWeight: "500",
-    marginBottom: 10,
-  },
+    supportContainer: {
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: "auto",
+    },
+    supportText: {
+        color: Colors.WHITE_COLOR,
+        fontSize: 13,
+        fontWeight: "500",
+        marginBottom: 10,
+    },
 
-  iconContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+    iconContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
 
-  iconWrapper: {
-    backgroundColor: "#fff",
-    borderRadius: "50%",
-    padding: 7,
-    marginBottom: 10,
-  },
+    iconWrapper: {
+        backgroundColor: "#fff",
+        borderRadius: "50%",
+        padding: 7,
+        marginBottom: 10,
+    },
 
-  icon: {
-    color: Colors.ICON,
-  },
+    icon: {
+        color: Colors.ICON,
+    },
 });
