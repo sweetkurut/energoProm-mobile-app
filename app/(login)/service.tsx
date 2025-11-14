@@ -4,6 +4,7 @@ import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchBids } from "@/store/slices/bidSlice";
 import { fetchDeals } from "@/store/slices/dealsSlice";
+import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Wrench } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -111,8 +112,6 @@ const ServiceListScreen = () => {
         );
     }
 
-    // Мемоизируем массив сделок, чтобы избежать лишних вычислений внутри FlatList
-
     // Рендер элементов списка услуг
     const renderBidItem = ({ item }: { item: Bid }) => (
         <TouchableOpacity style={styles.card} onPress={() => goToCreate(item.id)}>
@@ -132,7 +131,7 @@ const ServiceListScreen = () => {
     // Рендер элементов списка заявок
     const renderDealItem = ({ item }: { item: (typeof memoizedDeals)[0] | null }) => {
         if (!item) {
-            return null; // Если элемент почему-то null, ничего не рендерим
+            return null;
         }
 
         return (
@@ -148,6 +147,34 @@ const ServiceListScreen = () => {
             />
         );
     };
+
+    // Компонент для пустого состояния услуг
+    const EmptyServices = () => (
+        <View style={styles.noDataContainer}>
+            <View style={styles.noDataCard}>
+                <Feather name="tool" size={40} color={Colors.ORANGE_COLOR} style={styles.noDataIcon} />
+                <Text style={styles.noDataTitle}>Услуги временно недоступны</Text>
+                <Text style={styles.noDataSubtitle}>
+                    В данный момент список услуг пуст. Пожалуйста, попробуйте обновить страницу или обратитесь
+                    в поддержку для получения информации.
+                </Text>
+            </View>
+        </View>
+    );
+
+    // Компонент для пустого состояния заявок
+    const EmptyDeals = () => (
+        <View style={styles.noDataContainer}>
+            <View style={styles.noDataCard}>
+                <Feather name="file-text" size={40} color={Colors.ORANGE_COLOR} style={styles.noDataIcon} />
+                <Text style={styles.noDataTitle}>Заявки отсутствуют</Text>
+                <Text style={styles.noDataSubtitle}>
+                    У вас пока нет созданных заявок. Выберите услугу из списка и оставьте заявку для получения
+                    помощи от наших специалистов.
+                </Text>
+            </View>
+        </View>
+    );
 
     return (
         <ScrollView
@@ -183,19 +210,27 @@ const ServiceListScreen = () => {
 
             {activeTab === "services" ? (
                 <View style={styles.cards}>
-                    <FlatList
-                        data={bids}
-                        renderItem={renderBidItem}
-                        keyExtractor={(item) => item.id.toString()}
-                    />
+                    {bids && bids.length > 0 ? (
+                        <FlatList
+                            data={bids}
+                            renderItem={renderBidItem}
+                            keyExtractor={(item) => item.id.toString()}
+                        />
+                    ) : (
+                        <EmptyServices />
+                    )}
                 </View>
             ) : (
                 <View style={styles.cards}>
-                    <FlatList
-                        data={memoizedDeals}
-                        renderItem={renderDealItem}
-                        keyExtractor={(item) => item.id.toString()}
-                    />
+                    {memoizedDeals && memoizedDeals.length > 0 ? (
+                        <FlatList
+                            data={memoizedDeals}
+                            renderItem={renderDealItem}
+                            keyExtractor={(item) => item.id.toString()}
+                        />
+                    ) : (
+                        <EmptyDeals />
+                    )}
                 </View>
             )}
         </ScrollView>
@@ -204,11 +239,46 @@ const ServiceListScreen = () => {
 
 export default ServiceListScreen;
 
-const styles = StyleSheet.create({    // Добавь другие поля, если они есть
-
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 10,
+    },
+
+    noDataContainer: {
+        padding: 10,
+    },
+
+    noDataCard: {
+        backgroundColor: Colors.WHITE_COLOR,
+        borderRadius: 12,
+        padding: 24,
+        alignItems: "center",
+        shadowColor: "#00000042",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+        // marginTop: 50,
+    },
+
+    noDataIcon: {
+        marginBottom: 12,
+    },
+
+    noDataTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: Colors.GRAY_COLOR,
+        marginBottom: 8,
+        textAlign: "center",
+    },
+
+    noDataSubtitle: {
+        fontSize: 14,
+        color: "#8E8E8E",
+        textAlign: "center",
+        lineHeight: 20,
     },
 
     loader: {

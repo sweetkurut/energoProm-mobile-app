@@ -78,7 +78,7 @@ export default function HomeScreen() {
         if (house && house.length > 0) {
             const firstHouse = house[0];
             router.push({
-                pathname: "/(payment)/payment",   
+                pathname: "/(payment)/payment",
                 params: {
                     houseCardId: firstHouse.id.toString(),
                     houseCardNumber: firstHouse.house_card?.toString() || "",
@@ -123,17 +123,9 @@ export default function HomeScreen() {
                 </View>
             </View>
 
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    // justifyContent: "space-between",
-                    // marginBottom: 10,
-                    marginHorizontal: 10,
-                }}
-            >
+            <View style={styles.sectionHeader}>
                 <Feather name="bar-chart" size={24} color={Colors.ORANGE_COLOR} />
-                <Text style={styles.textCountNumber}>Мои лицевые счета</Text>
+                <Text style={styles.sectionTitle}>Мои лицевые счета</Text>
             </View>
 
             {house && house.length > 0 ? (
@@ -143,7 +135,7 @@ export default function HomeScreen() {
                         style={styles.houseCard}
                         onPress={() => goToDetail(item.house_card)}
                     >
-                        <View style={styles.houseCardHeader}>
+                        <View style={styles.cardHeader}>
                             <View style={styles.iconRow}>
                                 <Feather name="bookmark" size={16} color={Colors.ORANGE_COLOR} />
                                 <Text style={styles.accountNumber}>Л/с: {item.house_card}</Text>
@@ -155,8 +147,8 @@ export default function HomeScreen() {
                             </View>
                         </View>
 
-                        <View style={styles.houseCardBody}>
-                            <View style={styles.iconRow}>
+                        <View style={styles.cardBody}>
+                            <View style={styles.infoRow}>
                                 <Feather name="home" size={16} color={Colors.ORANGE_COLOR} />
                                 <Text style={styles.address}>
                                     {item.address?.street?.name}
@@ -165,18 +157,17 @@ export default function HomeScreen() {
                                 </Text>
                             </View>
 
-                            <View style={styles.iconRow}>
+                            <View style={styles.infoRow}>
                                 <Feather name="zap" size={16} color={Colors.ORANGE_COLOR} />
                                 <Text style={styles.indication}>
-                                    Показания:
+                                    Показания:{" "}
                                     <Text style={styles.indicationValue}>
-                                        {" "}
                                         {item.tariff?.kw_cost ?? "-"} кВт*ч
                                     </Text>
                                 </Text>
                             </View>
 
-                            <View style={styles.iconRow}>
+                            <View style={styles.infoRow}>
                                 <Feather name="calendar" size={16} color={Colors.ORANGE_COLOR} />
                                 <Text style={styles.date}>
                                     {item.contract_date
@@ -184,6 +175,22 @@ export default function HomeScreen() {
                                         : "-"}
                                 </Text>
                             </View>
+                        </View>
+
+                        <View style={styles.paymentSection}>
+                            <View style={styles.paymentInfo}>
+                                <Text style={styles.paymentTitle}>Текущий счёт</Text>
+                                <Text style={styles.paymentAmount}>
+                                    {preview.loading ? (
+                                        <ActivityIndicator size="small" color="#EA961C" />
+                                    ) : (
+                                        `${getPaymentAmount()} сом`
+                                    )}
+                                </Text>
+                            </View>
+                            <TouchableOpacity style={styles.payButton} onPress={onPay}>
+                                <Text style={styles.payButtonText}>Оплатить</Text>
+                            </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
                 ))
@@ -194,7 +201,7 @@ export default function HomeScreen() {
                             name="info"
                             size={40}
                             color={Colors.ORANGE_COLOR}
-                            style={{ marginBottom: 10 }}
+                            style={styles.noDataIcon}
                         />
                         <Text style={styles.noDataTitle}>Лицевые счета отсутствуют</Text>
                         <Text style={styles.noDataSubtitle}>
@@ -205,149 +212,15 @@ export default function HomeScreen() {
                 </View>
             )}
 
-            <View style={styles.check}>
-                <View>
-                    <Text style={styles.check_title}>Текущий счёт</Text>
-                    <Text style={styles.check_balance}>
-                        {preview.loading ? (
-                            <ActivityIndicator size="small" color="#EA961C" />
-                        ) : (
-                            `${getPaymentAmount()} сом`
-                        )}
-                    </Text>
-                    <Text style={styles.check_span}>Оплатить до 25 числа текущего месяца</Text>
-                </View>
-                <TouchableOpacity style={styles.button} onPress={onPay}>
-                    <Text style={styles.button_text}>Оплатить</Text>
-                </TouchableOpacity>
-            </View>
-
             <CardServices />
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    textCountNumber: {
-        marginTop: 10,
-        marginBottom: 5,
-        fontSize: 16,
-        color: Colors.GRAY_COLOR,
-        fontWeight: 400,
-        marginHorizontal: 10,
-    },
-
-    noDataContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
-    noDataCard: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 20,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-        width: "100%",
-    },
-    noDataTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: Colors.GRAY_COLOR,
-        marginBottom: 8,
-        textAlign: "center",
-    },
-    noDataSubtitle: {
-        fontSize: 14,
-        color: Colors.GRAY_COLOR,
-        textAlign: "center",
-    },
-
-    loader: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    houseCard: {
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 12,
-        marginVertical: 10,
-        marginHorizontal: 10,
-    },
-    // houseCard: {
-    //     backgroundColor: "#fff",
-    //     borderRadius: 12,
-    //     padding: 14,
-    //     marginVertical: 8,
-    //     marginHorizontal: 12,
-    //     shadowColor: "#000",
-    //     shadowOffset: { width: 0, height: 2 },
-    //     shadowOpacity: 0.1,
-    //     shadowRadius: 4,
-    //     elevation: 3,
-    // },
-
-    houseCardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 8,
-    },
-
-    iconRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        marginBottom: 4,
-    },
-
-    accountNumber: {
-        fontSize: 16,
-        color: Colors.GRAY_COLOR,
-        fontWeight: 400,
-    },
-
-    tariff: {
-        fontSize: 14,
-        color: Colors.ORANGE_COLOR,
-        fontWeight: 700,
-    },
-
-    houseCardBody: {
-        marginTop: 4,
-    },
-
-    address: {
-        fontSize: 15,
-        color: Colors.GRAY_COLOR,
-        fontWeight: 400,
-        marginBottom: 4,
-    },
-
-    indication: {
-        fontSize: 14,
-        color: "#666",
-    },
-
-    indicationValue: {
-        color: Colors.GRAY_COLOR,
-        fontWeight: 400,
-    },
-
-    date: {
-        fontSize: 14,
-        color: "#aaa",
-        // marginTop: 6,
-    },
-
     container: {
         flex: 1,
+        backgroundColor: "#F8F9FA",
     },
 
     header: {
@@ -356,10 +229,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         height: 120,
-        width: "auto",
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         paddingTop: 40,
-        position: "fixed",
     },
 
     headerIcons: {
@@ -370,73 +241,184 @@ const styles = StyleSheet.create({
 
     welcomeText: {
         fontSize: 14,
-        fontWeight: 400,
+        fontWeight: "400",
         color: Colors.WHITE_COLOR,
     },
 
     nameText: {
         fontSize: 24,
-        fontWeight: 600,
-        color: Colors.WHITE_COLOR,
-    },
-
-    balance: {
-        fontSize: 12,
-        fontWeight: 400,
+        fontWeight: "600",
         color: Colors.WHITE_COLOR,
     },
 
     iconWrapper: {
-        backgroundColor: "#fff",
-        borderRadius: "50%",
+        backgroundColor: Colors.WHITE_COLOR,
+        borderRadius: 20,
         padding: 10,
-        // marginBottom: 10,
         height: 40,
         width: 40,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
-    check: {
+    sectionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginHorizontal: 15,
+        marginVertical: 15,
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        color: Colors.GRAY_COLOR,
+        fontWeight: "500",
+        marginLeft: 10,
+    },
+
+    houseCard: {
         backgroundColor: Colors.WHITE_COLOR,
+        borderRadius: 12,
+        padding: 16,
         marginHorizontal: 10,
-        marginTop: 10,
+        marginVertical: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+        borderLeftWidth: 4,
+        borderLeftColor: Colors.ORANGE_COLOR,
+    },
+
+    cardHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: 15,
-        borderRadius: 10,
-        borderLeftWidth: 4,
-        borderColor: Colors.BUTTONSERVICE,
+        marginBottom: 12,
     },
 
-    check_title: {
+    iconRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+
+    accountNumber: {
+        fontSize: 16,
+        color: Colors.GRAY_COLOR,
+        fontWeight: "500",
+    },
+
+    tariff: {
+        fontSize: 14,
+        color: Colors.ORANGE_COLOR,
+        fontWeight: "700",
+    },
+
+    cardBody: {
+        marginBottom: 16,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#F0F0F0",
+    },
+
+    infoRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 8,
+    },
+
+    address: {
+        fontSize: 15,
+        color: Colors.GRAY_COLOR,
+        fontWeight: "400",
+    },
+
+    indication: {
+        fontSize: 14,
+        color: "#666",
+    },
+
+    indicationValue: {
+        color: Colors.GRAY_COLOR,
+        fontWeight: "500",
+    },
+
+    date: {
+        fontSize: 14,
+        color: "#8E8E8E",
+    },
+
+    paymentSection: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    paymentInfo: {
+        flex: 1,
+    },
+
+    paymentTitle: {
         color: Colors.GRAY_COLOR,
         fontSize: 14,
+        marginBottom: 4,
     },
 
-    check_balance: {
+    paymentAmount: {
         fontSize: 22,
-        fontWeight: 700,
+        fontWeight: "700",
         color: Colors.HEADER,
     },
 
-    check_span: {
-        color: "#9B9EA1",
-        fontSize: 12,
-    },
-
-    button: {
+    payButton: {
         backgroundColor: Colors.BUTTONSERVICE,
-        padding: 12,
-        borderRadius: 5,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 8,
+        minWidth: 100,
+        alignItems: "center",
     },
 
-    button_text: {
+    payButtonText: {
         color: Colors.WHITE_COLOR,
-        fontWeight: 500,
-        fontSize: 12,
+        fontWeight: "600",
+        fontSize: 14,
     },
 
-    buttonDisabled: {
-        opacity: 0.6,
+    noDataContainer: {
+        padding: 20,
+    },
+
+    noDataCard: {
+        backgroundColor: Colors.WHITE_COLOR,
+        borderRadius: 12,
+        padding: 24,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+
+    noDataIcon: {
+        marginBottom: 12,
+    },
+
+    noDataTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: Colors.GRAY_COLOR,
+        marginBottom: 8,
+        textAlign: "center",
+    },
+
+    noDataSubtitle: {
+        fontSize: 14,
+        color: "#8E8E8E",
+        textAlign: "center",
+        lineHeight: 20,
     },
 });

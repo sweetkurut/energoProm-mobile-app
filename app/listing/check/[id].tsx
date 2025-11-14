@@ -3,6 +3,7 @@ import { fetchLastCheck, updateCheckPhoto } from "@/store/slices/checkSlice";
 
 import Chart from "@/components/Chart";
 import Colors from "@/constants/Colors";
+import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -96,131 +97,138 @@ export default function DetailCheckScreen() {
     return (
         <ScrollView style={styles.container}>
             <View style={styles.card}>
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoText}>
-                        Л/счет: <Text style={styles.bold}>{data?.house_card.house_card}</Text>
+                {/* Основная информация */}
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Л/счет:</Text>
+                    <Text style={styles.sectionValue}>{data?.house_card.house_card}</Text>
+                </View>
+
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Инспектор:</Text>
+                    <Text style={styles.sectionValue}>{data?.house_card.route.executor.name}</Text>
+                </View>
+
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Ф.И.О.:</Text>
+                    <Text style={styles.sectionValue}>{data?.username.name}</Text>
+                </View>
+
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Маршрут:</Text>
+                    <Text style={styles.sectionValue}>{data?.house_card.route.route_number}</Text>
+                </View>
+
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Тариф:</Text>
+                    <Text style={styles.sectionValue}>
+                        {data?.tariff.name} ({data?.tariff.kw_cost} кВт*ч)
                     </Text>
                 </View>
-                <Text style={styles.infoText}>
-                    Инспектор:
-                    <Text style={styles.bold}> {data?.house_card.route.executor.name}</Text>
-                </Text>
 
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoText}>
-                        Ф.И.О.: <Text style={styles.bold}>{data?.username.name}</Text>
-                    </Text>
-                </View>
-                <Text>
-                    Маршрут:
-                    <Text style={styles.bold}> {data?.house_card.route.route_number}</Text>
-                </Text>
-                <Text style={styles.infoText}>
-                    Тариф: <Text style={styles.bold}>{data?.tariff.name}</Text> ({data?.tariff.kw_cost} кВт*ч)
-                </Text>
-
-                <Text style={styles.infoText}>
-                    Адрес:{" "}
-                    <Text style={styles.bold}>
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionLabel}>Адрес:</Text>
+                    <Text style={styles.sectionValue}>
                         {data?.house_card.address
                             ? `${data.house_card.address.street.name} ${data.house_card.address.house}, кв. ${data.house_card.address.apartment}`
                             : "Адрес не указан"}
                     </Text>
-                </Text>
+                </View>
 
-                <View style={styles.table}>
+                {/* Таблица показаний */}
+                <View style={styles.tableSection}>
                     <Text style={styles.sectionTitle}>Показания и начисления</Text>
 
-                    <View style={styles.rowHeader}>
-                        <Text style={styles.cellHeader}>Дата</Text>
-                        <Text style={styles.cellHeader}>Показ.</Text>
-                        <Text style={styles.cellHeader}>Расход</Text>
-                        <Text style={styles.cellHeader}>Сумма</Text>
-                    </View>
+                    <View style={styles.table}>
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderCell}>Дата</Text>
+                            <Text style={styles.tableHeaderCell}>Показ.</Text>
+                            <Text style={styles.tableHeaderCell}>Расход</Text>
+                            <Text style={styles.tableHeaderCell}>Сумма</Text>
+                        </View>
 
-                    <View style={styles.row}>
-                        <Text style={styles.cell}>
-                            {data?.previous_check_date
-                                ? new Date(data.previous_check_date).toLocaleDateString("ru-RU")
-                                : "-"}
-                        </Text>
-                        <Text style={styles.cell}>{data?.previous_check}</Text>
-                        <Text style={styles.cell}>{data?.consumption}</Text>
-                        <Text style={styles.cell}>
-                            {data?.consumption && data?.tariff?.kw_cost
-                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
-                                : "0.00"}
-                        </Text>
-                    </View>
+                        <View style={styles.tableRow}>
+                            <Text style={styles.tableCell}>
+                                {data?.previous_check_date
+                                    ? new Date(data.previous_check_date).toLocaleDateString("ru-RU")
+                                    : "-"}
+                            </Text>
+                            <Text style={styles.tableCell}>{data?.previous_check}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>
+                                {data?.consumption && data?.tariff?.kw_cost
+                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    : "0.00"}
+                            </Text>
+                        </View>
 
-                    <View style={styles.row}>
-                        <Text style={styles.cell}>
-                            {/* {new Date(data?.current_check_date).toLocaleDateString("ru-RU")} */}
-                            {data?.current_check_date
-                                ? new Date(data.current_check_date).toLocaleDateString("ru-RU")
-                                : "-"}
-                        </Text>
-                        <Text style={styles.cell}>{data?.current_check}</Text>
-                        <Text style={styles.cell}>{data?.consumption}</Text>
-                        <Text style={styles.cell}>
-                            {data?.consumption && data?.tariff?.kw_cost
-                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
-                                : "0.00"}
-                        </Text>
-                    </View>
+                        <View style={styles.tableRow}>
+                            <Text style={styles.tableCell}>
+                                {data?.current_check_date
+                                    ? new Date(data.current_check_date).toLocaleDateString("ru-RU")
+                                    : "-"}
+                            </Text>
+                            <Text style={styles.tableCell}>{data?.current_check}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>
+                                {data?.consumption && data?.tariff?.kw_cost
+                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    : "0.00"}
+                            </Text>
+                        </View>
 
-                    <View style={styles.rowHeader}>
-                        <Text style={styles.cellHeader}>Дни</Text>
-                        <Text style={styles.cellHeader}>Тариф</Text>
-                        <Text style={styles.cellHeader}>Расход</Text>
-                        <Text style={styles.cellHeader}>Сумма</Text>
-                    </View>
+                        <View style={styles.tableDivider} />
 
-                    <View style={styles.row}>
-                        <Text style={styles.cell}>{data?.period_day_count}</Text>
-                        <Text style={styles.cell}>{data?.tariff.kw_cost}</Text>
-                        <Text style={styles.cell}>{data?.consumption}</Text>
-                        <Text style={styles.cell}>
-                            {data?.consumption && data?.tariff?.kw_cost
-                                ? (data.consumption * data.tariff.kw_cost).toFixed(2)
-                                : "0.00"}
-                        </Text>
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderCell}>Дни</Text>
+                            <Text style={styles.tableHeaderCell}>Тариф</Text>
+                            <Text style={styles.tableHeaderCell}>Расход</Text>
+                            <Text style={styles.tableHeaderCell}>Сумма</Text>
+                        </View>
+
+                        <View style={styles.tableRow}>
+                            <Text style={styles.tableCell}>{data?.period_day_count}</Text>
+                            <Text style={styles.tableCell}>{data?.tariff.kw_cost}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>
+                                {data?.consumption && data?.tariff?.kw_cost
+                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    : "0.00"}
+                            </Text>
+                        </View>
                     </View>
                 </View>
 
+                {/* Фото счетчика или форма отправки */}
                 {data?.counter_photo ? (
-                    <View style={styles.card_consumption}>
-                        <View style={styles.photoStatus}>
-                            <View style={styles.sentPhotoContainer}>
-                                <Image
-                                    source={{
-                                        uri: data.counter_photo.startsWith("http")
-                                            ? data.counter_photo
-                                            : `https://flagman-backend.com.kg${data.counter_photo}`,
-                                    }}
-                                    style={styles.sentPhoto}
-                                    resizeMode="center"
-                                    onError={(e) => console.log("Image error:", e.nativeEvent.error)}
-                                />
-                                <View style={styles.photoOverlay}>
-                                    <Text style={styles.photoBadge}>✓ Отправлено</Text>
-                                </View>
+                    <View style={styles.photoSection}>
+                        <View style={styles.photoContainer}>
+                            <Image
+                                source={{
+                                    uri: data.counter_photo.startsWith("http")
+                                        ? data.counter_photo
+                                        : `https://flagman-backend.com.kg${data.counter_photo}`,
+                                }}
+                                style={styles.photo}
+                                resizeMode="cover"
+                                onError={(e) => console.log("Image error:", e.nativeEvent.error)}
+                            />
+                            <View style={styles.photoStatus}>
+                                <Feather name="check-circle" size={16} color="#4CAF50" />
+                                <Text style={styles.photoStatusText}>Фото отправлено</Text>
                             </View>
+                        </View>
 
-                            {/* Показываем показания из фото */}
-                            <View style={styles.photoReading}>
-                                <Text style={styles.photoReadingLabel}>Показание по фото:</Text>
-                                <Text style={styles.photoReadingValue}>1012</Text>
-                            </View>
+                        <View style={styles.readingInfo}>
+                            <Text style={styles.readingLabel}>Показание по фото:</Text>
+                            <Text style={styles.readingValue}>{data?.counter_current_check}</Text>
                         </View>
                     </View>
                 ) : (
-                    // Форма для отправки...
-                    <View style={styles.card_consumption}>
+                    <View style={styles.uploadSection}>
                         <PhotoUploader photoUrl={data?.counter_photo} onPhotoSelected={setPhotoFile} />
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Показание счетчика (кВт*ч):</Text>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>Показание счетчика (кВт*ч):</Text>
                             <TextInput
                                 style={styles.input}
                                 keyboardType="numeric"
@@ -233,161 +241,218 @@ export default function DetailCheckScreen() {
 
                         <TouchableOpacity
                             style={[
-                                styles.button,
-                                currentCheckValue ? styles.buttonActive : styles.buttonDisabled,
+                                styles.submitButton,
+                                currentCheckValue ? styles.submitButtonActive : styles.submitButtonDisabled,
                             ]}
                             onPress={handleUpdate}
                             disabled={!currentCheckValue}
                         >
-                            <Text style={styles.buttonText}>Отправить показания</Text>
+                            <Text style={styles.submitButtonText}>Отправить показания</Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
-                <View style={styles.summary}>
-                    <Text style={styles.infoText}>
-                        Показание по фото: <Text style={styles.bold}>{data?.counter_current_check}</Text>
-                    </Text>
-                    <Text style={styles.infoText}>
-                        Дата записи:{" "}
-                        {data?.created_at
-                            ? new Date(data.created_at).toLocaleString("ru-RU", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                              })
-                            : "-"}
-                    </Text>
+                {/* Сводка по оплате */}
+                <View style={styles.paymentSummary}>
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Показание по фото:</Text>
+                        <Text style={styles.summaryValue}>{data?.counter_current_check}</Text>
+                    </View>
 
-                    <Text style={styles.infoText}>
-                        Обновлено:{" "}
-                        {data?.updated_at
-                            ? new Date(data.updated_at).toLocaleString("ru-RU", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                              })
-                            : "-"}
-                    </Text>
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Дата записи:</Text>
+                        <Text style={styles.summaryValue}>
+                            {data?.created_at
+                                ? new Date(data.created_at).toLocaleString("ru-RU", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                  })
+                                : "-"}
+                        </Text>
+                    </View>
 
-                    <Text style={styles.summaryText}>
-                        Переплата(-)/Недоплата:{" "}
-                        <Text style={styles.bold}>{data?.house_card.overpayment_underpayment} сом</Text>
-                    </Text>
-                    <Text style={styles.summaryText}>
-                        К оплате за эл.эн.: <Text style={styles.bold}>{data?.pay_for_electricity} сом</Text>
-                    </Text>
-                    <Text style={styles.summaryText}>
-                        Пеня: <Text style={styles.bold}>{data?.house_card.penalty} сом</Text>
-                    </Text>
-                    <Text style={styles.total}>
-                        Итого к оплате: <Text style={styles.boldRed}>{data?.total_sum} сом</Text>
-                    </Text>
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Обновлено:</Text>
+                        <Text style={styles.summaryValue}>
+                            {data?.updated_at
+                                ? new Date(data.updated_at).toLocaleString("ru-RU", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                  })
+                                : "-"}
+                        </Text>
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Переплата(-)/Недоплата:</Text>
+                        <Text style={styles.summaryValue}>
+                            {data?.house_card.overpayment_underpayment} сом
+                        </Text>
+                    </View>
+
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>К оплате за эл.эн.:</Text>
+                        <Text style={styles.summaryValue}>{data?.pay_for_electricity} сом</Text>
+                    </View>
+
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Пеня:</Text>
+                        <Text style={styles.summaryValue}>{data?.house_card.penalty} сом</Text>
+                    </View>
+
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Итого к оплате:</Text>
+                        <Text style={styles.totalAmount}>{data?.total_sum} сом</Text>
+                    </View>
                 </View>
             </View>
-            {/* <Chart id={data?.house_card?.house_card} /> */}
-            {/* <Chart id={numericId} /> */}
+
             <Chart id={data.house_card.house_card} />
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    loader: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
     container: {
         flex: 1,
-    },
-
-    photoReading: {
         backgroundColor: "#F8F9FA",
-        padding: 16,
-        borderRadius: 12,
-        marginTop: 16,
-        borderWidth: 1,
-        borderColor: "#E9ECEF",
     },
 
-    photoReadingLabel: {
-        fontSize: 14,
-        color: "#6C757D",
-        marginBottom: 4,
-    },
-
-    photoReadingValue: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#333",
-    },
-
-    card_consumption: {
+    card: {
         backgroundColor: "#FFFFFF",
         borderRadius: 16,
         padding: 20,
+        marginHorizontal: 10,
         marginVertical: 12,
         shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 4,
+    },
+
+    infoSection: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#F0F0F0",
+    },
+
+    sectionLabel: {
+        fontSize: 14,
+        color: "#6C757D",
+        fontWeight: "500",
+        flex: 1,
+    },
+
+    sectionValue: {
+        fontSize: 14,
+        color: "#333",
+        fontWeight: "600",
+        flex: 1,
+        textAlign: "right",
+    },
+
+    tableSection: {
+        marginTop: 20,
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 12,
+    },
+
+    table: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#F0F0F0",
+        borderColor: "#E9ECEF",
+        overflow: "hidden",
+    },
+
+    tableHeader: {
+        flexDirection: "row",
+        backgroundColor: "#F8F9FA",
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#E9ECEF",
+    },
+
+    tableHeaderCell: {
+        flex: 1,
+        textAlign: "center",
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#495057",
+    },
+
+    tableRow: {
+        flexDirection: "row",
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#F8F9FA",
+    },
+
+    tableCell: {
+        flex: 1,
+        textAlign: "center",
+        fontSize: 12,
+        color: "#6C757D",
+        fontWeight: "500",
+    },
+
+    tableDivider: {
+        height: 1,
+        backgroundColor: "#E9ECEF",
+        marginVertical: 8,
+    },
+
+    photoSection: {
+        marginTop: 20,
+    },
+
+    photoContainer: {
+        borderRadius: 12,
+        overflow: "hidden",
+        borderWidth: 2,
+        borderColor: "#E8F5E8",
+        marginBottom: 16,
+    },
+
+    photo: {
+        width: "100%",
+        height: 200,
+        backgroundColor: "#F5F5F5",
     },
 
     photoStatus: {
-        width: "100%",
-    },
-
-    statusHeader: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 16,
-    },
-
-    statusIcon: {
-        fontSize: 24,
-        marginRight: 12,
-    },
-
-    statusTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#333",
-    },
-
-    successBadge: {
+        justifyContent: "center",
         backgroundColor: "#E8F5E8",
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: "#4CAF50",
+        paddingVertical: 8,
+        gap: 6,
     },
 
-    successText: {
+    photoStatusText: {
         color: "#2E7D32",
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 4,
-    },
-
-    successSubtext: {
-        color: "#4CAF50",
         fontSize: 14,
+        fontWeight: "600",
     },
 
-    currentReading: {
+    readingInfo: {
         backgroundColor: "#F8F9FA",
         padding: 16,
         borderRadius: 12,
@@ -407,12 +472,15 @@ const styles = StyleSheet.create({
         color: "#333",
     },
 
-    inputContainer: {
-        marginBottom: 16,
-        marginTop: 16,
+    uploadSection: {
+        marginTop: 20,
     },
 
-    label: {
+    inputGroup: {
+        marginBottom: 16,
+    },
+
+    inputLabel: {
         fontSize: 15,
         fontWeight: "600",
         marginBottom: 8,
@@ -430,149 +498,81 @@ const styles = StyleSheet.create({
         color: "#333",
     },
 
-    button: {
+    submitButton: {
         paddingVertical: 14,
         borderRadius: 12,
         alignItems: "center",
         marginTop: 8,
     },
 
-    buttonActive: {
+    submitButtonActive: {
         backgroundColor: Colors.BUTTONSERVICE,
     },
 
-    buttonDisabled: {
+    submitButtonDisabled: {
         backgroundColor: "#CCCCCC",
     },
 
-    buttonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "700",
-    },
-
-    sentPhotoContainer: {
-        position: "relative",
-        borderRadius: 12,
-        overflow: "hidden",
-        marginBottom: 16,
-        borderWidth: 2,
-        borderColor: "#E8F5E8",
-    },
-
-    sentPhoto: {
-        width: "100%",
-        height: 200,
-        backgroundColor: "#F5F5F5",
-    },
-
-    photoOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: "rgba(76, 175, 80, 0.9)",
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
-
-    photoBadge: {
+    submitButtonText: {
         color: "#FFFFFF",
-        fontSize: 14,
-        fontWeight: "600",
-        textAlign: "center",
-    },
-
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 10,
-        marginHorizontal: 10,
-        marginTop: 10,
-    },
-    orgName: {
         fontSize: 16,
         fontWeight: "700",
-        textAlign: "center",
-        marginBottom: 12,
-        color: "#FF7A00",
     },
-    infoRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    infoText: {
-        fontSize: 13,
-        color: "#555",
-        marginBottom: 4,
-    },
-    bold: {
-        fontWeight: "600",
-        color: "#FEA94B",
-    },
-    table: {
-        marginTop: 10,
-        backgroundColor: "#F9F9F9",
+
+    paymentSummary: {
+        marginTop: 20,
+        backgroundColor: "#F8F9FA",
         borderRadius: 12,
-        padding: 10,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: "#E9ECEF",
     },
-    sectionTitle: {
+
+    summaryRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 6,
+    },
+
+    summaryLabel: {
         fontSize: 14,
+        color: "#6C757D",
+        fontWeight: "500",
+    },
+
+    summaryValue: {
+        fontSize: 14,
+        color: "#333",
         fontWeight: "600",
-        color: "#333",
-        marginBottom: 8,
     },
-    rowHeader: {
+
+    divider: {
+        height: 1,
+        backgroundColor: "#E9ECEF",
+        marginVertical: 8,
+    },
+
+    totalRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        backgroundColor: "#F3F3F3",
-        paddingVertical: 6,
-        borderRadius: 6,
-        marginBottom: 4,
+        alignItems: "center",
+        paddingVertical: 8,
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: "#E9ECEF",
+        paddingTop: 12,
     },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 6,
-    },
-    cellHeader: {
-        flex: 1,
-        textAlign: "center",
-        fontSize: 12,
-        fontWeight: "bold",
+
+    totalLabel: {
+        fontSize: 16,
         color: "#333",
+        fontWeight: "600",
     },
-    cell: {
-        flex: 1,
-        textAlign: "center",
-        fontSize: 12,
-        color: "#444",
-    },
-    summary: {
-        marginTop: 16,
-        backgroundColor: "#F9F9F9",
-        borderRadius: 10,
-        padding: 10,
-    },
-    summaryText: {
-        fontSize: 13,
-        color: "#333",
-        marginBottom: 4,
-    },
-    total: {
-        fontSize: 14,
-        fontWeight: "bold",
-        marginTop: 4,
-    },
-    boldRed: {
-        color: "#FEA94B",
+
+    totalAmount: {
+        fontSize: 18,
+        color: Colors.ORANGE_COLOR,
         fontWeight: "700",
-    },
-    footerText: {
-        fontSize: 11,
-        textAlign: "center",
-        color: "#888",
-        marginTop: 12,
-        fontStyle: "italic",
     },
 });
