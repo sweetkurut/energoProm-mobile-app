@@ -12,7 +12,6 @@ import {
     ActivityIndicator,
     FlatList,
     RefreshControl,
-    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -102,7 +101,6 @@ const ServiceListScreen = () => {
             .filter((item): item is DealDetails => item !== null);
     }, [deals, bids]);
 
-    // Проверка на общую загрузку
     const isLoading = bidsLoading || dealsLoading;
     if (isLoading && !bids?.length && !deals?.length) {
         return (
@@ -112,7 +110,6 @@ const ServiceListScreen = () => {
         );
     }
 
-    // Рендер элементов списка услуг
     const renderBidItem = ({ item }: { item: Bid }) => (
         <TouchableOpacity style={styles.card} onPress={() => goToCreate(item.id)}>
             <View style={styles.cardTitles}>
@@ -128,7 +125,6 @@ const ServiceListScreen = () => {
         </TouchableOpacity>
     );
 
-    // Рендер элементов списка заявок
     const renderDealItem = ({ item }: { item: (typeof memoizedDeals)[0] | null }) => {
         if (!item) {
             return null;
@@ -148,7 +144,6 @@ const ServiceListScreen = () => {
         );
     };
 
-    // Компонент для пустого состояния услуг
     const EmptyServices = () => (
         <View style={styles.noDataContainer}>
             <View style={styles.noDataCard}>
@@ -162,7 +157,6 @@ const ServiceListScreen = () => {
         </View>
     );
 
-    // Компонент для пустого состояния заявок
     const EmptyDeals = () => (
         <View style={styles.noDataContainer}>
             <View style={styles.noDataCard}>
@@ -177,8 +171,33 @@ const ServiceListScreen = () => {
     );
 
     return (
-        <ScrollView
+        <FlatList
             style={styles.container}
+            data={activeTab === "services" ? bids : memoizedDeals}
+            renderItem={activeTab === "services" ? renderBidItem : renderDealItem}
+            keyExtractor={(item) => item.id.toString()}
+            ListHeaderComponent={
+                <View style={styles.tabs}>
+                    <TouchableOpacity
+                        style={[styles.tabButton, activeTab === "services" && styles.activeTab]}
+                        onPress={() => setActiveTab("services")}
+                    >
+                        <Text style={[styles.tabText, activeTab === "services" && styles.activeText]}>
+                            Услуги
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.tabButton, activeTab === "deals" && styles.activeTab]}
+                        onPress={() => setActiveTab("deals")}
+                    >
+                        <Text style={[styles.tabText, activeTab === "deals" && styles.activeText]}>
+                            Мои заявки
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            }
+            ListEmptyComponent={activeTab === "services" ? <EmptyServices /> : <EmptyDeals />}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -187,53 +206,7 @@ const ServiceListScreen = () => {
                     tintColor="#EA961C"
                 />
             }
-        >
-            <View style={styles.tabs}>
-                <TouchableOpacity
-                    style={[styles.tabButton, activeTab === "services" && styles.activeTab]}
-                    onPress={() => setActiveTab("services")}
-                >
-                    <Text style={[styles.tabText, activeTab === "services" && styles.activeText]}>
-                        Услуги
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.tabButton, activeTab === "deals" && styles.activeTab]}
-                    onPress={() => setActiveTab("deals")}
-                >
-                    <Text style={[styles.tabText, activeTab === "deals" && styles.activeText]}>
-                        Мои заявки
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            {activeTab === "services" ? (
-                <View style={styles.cards}>
-                    {bids && bids.length > 0 ? (
-                        <FlatList
-                            data={bids}
-                            renderItem={renderBidItem}
-                            keyExtractor={(item) => item.id.toString()}
-                        />
-                    ) : (
-                        <EmptyServices />
-                    )}
-                </View>
-            ) : (
-                <View style={styles.cards}>
-                    {memoizedDeals && memoizedDeals.length > 0 ? (
-                        <FlatList
-                            data={memoizedDeals}
-                            renderItem={renderDealItem}
-                            keyExtractor={(item) => item.id.toString()}
-                        />
-                    ) : (
-                        <EmptyDeals />
-                    )}
-                </View>
-            )}
-        </ScrollView>
+        />
     );
 };
 
@@ -329,9 +302,12 @@ const styles = StyleSheet.create({
     },
 
     cards: {
-        marginTop: 15,
+        marginTop: 45,
         flexDirection: "column",
         gap: 10,
+        // paddingHorizontal: 10,
+        // marginHorizontal: 10,
+        // backgroundColor: "#000",
     },
 
     card: {
@@ -342,6 +318,8 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 15,
         marginBottom: 10,
+        paddingHorizontal: 10,
+        marginTop: 15,
     },
 
     cardTitles: {

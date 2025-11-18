@@ -8,7 +8,17 @@ import { fetchGetProfile } from "@/store/slices/profileSlice";
 import { router, useLocalSearchParams } from "expo-router";
 import { CalendarFold } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const CreateRequestScreen = () => {
@@ -62,98 +72,110 @@ const CreateRequestScreen = () => {
             await dispatch(createDeal(dealData)).unwrap();
             setModalVisible(true);
         } catch (error) {
-            // Добавление обратной связи для пользователя
             Alert.alert("Ошибка", "Не удалось отправить заявку. Попробуйте еще раз.");
             console.error("Ошибка при отправке заявки:", error);
         }
     }, [address, phone, description, selectedDate, bidDetails, parsedBidId, userId, dispatch]);
 
     return (
-        <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-            <View style={styles.formContainer}>
-                <Text style={styles.title}>Заполнение данных</Text>
+        <View style={styles.container}>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.formContainer}>
+                        <Text style={styles.title}>Заполнение данных</Text>
 
-                <View style={styles.selectedService}>
-                    <View style={styles.circleCheck}>
-                        <CheckCircleIcon />
+                        <View style={styles.selectedService}>
+                            <View style={styles.circleCheck}>
+                                <CheckCircleIcon />
+                            </View>
+                            <View>
+                                <Text style={styles.serviceLabel}>Выбрана услуга</Text>
+                                <Text style={styles.serviceName}>
+                                    {bidDetails ? bidDetails.name : "Загрузка..."}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <Text style={styles.label}>Введите адрес</Text>
+                        <TextInput
+                            placeholder="ул.Киевская 45,кв. 12"
+                            placeholderTextColor="#CCCCCC"
+                            style={styles.input}
+                            value={address}
+                            onChangeText={setAddress}
+                        />
+
+                        <Text style={styles.label}>Номер телефона</Text>
+                        <TextInput
+                            placeholder="+996 XXX XXX XXX"
+                            placeholderTextColor="#CCCCCC"
+                            keyboardType="phone-pad"
+                            style={styles.input}
+                            value={phone}
+                            onChangeText={setPhone}
+                        />
+
+                        <Text style={styles.label}>Выберите дату</Text>
+                        <TouchableOpacity
+                            style={styles.dateInput}
+                            onPress={() => setDatePickerVisibility(true)}
+                        >
+                            <Text style={styles.dateText}>{selectedDate.toLocaleDateString("ru-RU")}</Text>
+                            <CalendarFold size={20} color="#CCCCCC" />
+                        </TouchableOpacity>
+
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={handleConfirm}
+                            onCancel={() => setDatePickerVisibility(false)}
+                            minimumDate={new Date()}
+                        />
+
+                        <Text style={styles.label}>Описание проблемы/задачи</Text>
+                        <TextInput
+                            placeholder="Укажите, что нужно сделать. Например: «Установить новый счётчик в подъезде №3»."
+                            placeholderTextColor="#BBBBBB"
+                            style={[styles.input, styles.textArea]}
+                            multiline
+                            numberOfLines={5}
+                            value={description}
+                            onChangeText={setDescription}
+                        />
                     </View>
-                    <View>
-                        <Text style={styles.serviceLabel}>Выбрана услуга</Text>
-                        <Text style={styles.serviceName}>{bidDetails ? bidDetails.name : "Загрузка..."}</Text>
+
+                    <View style={styles.infoBox}>
+                        <View style={styles.infoHeader}>
+                            <ExclamationIcon />
+                            <Text style={styles.infoTitle}> Важная информация</Text>
+                        </View>
+                        <Text style={styles.infoText}>
+                            • Специалист свяжется с вами в течение 24 часов{"\n"}• Стоимость услуг может
+                            варьироваться в зависимости от сложности
+                        </Text>
                     </View>
-                </View>
 
-                <Text style={styles.label}>Введите адрес</Text>
-                <TextInput
-                    placeholder="ул.Киевская 45,кв. 12"
-                    placeholderTextColor="#CCCCCC"
-                    style={styles.input}
-                    value={address}
-                    onChangeText={setAddress}
-                />
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                        <Text style={styles.submitButtonText}>Отправить заявку</Text>
+                    </TouchableOpacity>
 
-                <Text style={styles.label}>Номер телефона</Text>
-                <TextInput
-                    placeholder="+996 XXX XXX XXX"
-                    placeholderTextColor="#CCCCCC"
-                    keyboardType="phone-pad"
-                    style={styles.input}
-                    value={phone}
-                    onChangeText={setPhone}
-                />
-
-                <Text style={styles.label}>Выберите дату</Text>
-                <TouchableOpacity style={styles.dateInput} onPress={() => setDatePickerVisibility(true)}>
-                    <Text style={styles.dateText}>{selectedDate.toLocaleDateString("ru-RU")}</Text>
-                    <CalendarFold size={20} color="#CCCCCC" />
-                </TouchableOpacity>
-
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={() => setDatePickerVisibility(false)}
-                    minimumDate={new Date()}
-                />
-
-                <Text style={styles.label}>Описание проблемы/задачи</Text>
-                <TextInput
-                    placeholder="Укажите, что нужно сделать. Например: «Установить новый счётчик в подъезде №3»."
-                    placeholderTextColor="#BBBBBB"
-                    style={[styles.input, styles.textArea]}
-                    multiline
-                    numberOfLines={5}
-                    value={description}
-                    onChangeText={setDescription}
-                />
-            </View>
-
-            <View style={styles.infoBox}>
-                <View style={styles.infoHeader}>
-                    <ExclamationIcon />
-                    <Text style={styles.infoTitle}> Важная информация</Text>
-                </View>
-                <Text style={styles.infoText}>
-                    • Специалист свяжется с вами в течение 24 часов{"\n"}• Стоимость услуг может варьироваться
-                    в зависимости от сложности
-                </Text>
-            </View>
-
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Отправить заявку</Text>
-            </TouchableOpacity>
-
-            <ConfirmModal
-                visible={modalVisible}
-                onConfirm={() => router.back()}
-                onCancel={() => setModalVisible(false)}
-                title="Заявка оформлена"
-                message="Ожидайте звонка — мы свяжемся с вами за день до визита для уточнения деталей."
-                confirmColor="#4CAF50"
-                confirmText="Хорошо"
-                cancelText=""
-            />
-        </ScrollView>
+                    <ConfirmModal
+                        visible={modalVisible}
+                        onConfirm={() => router.back()}
+                        onCancel={() => setModalVisible(false)}
+                        title="Заявка оформлена"
+                        message="Ожидайте звонка — мы свяжемся с вами за день до визита для уточнения деталей."
+                        confirmColor="#4CAF50"
+                        confirmText="Хорошо"
+                        cancelText=""
+                    />
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 
