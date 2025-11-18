@@ -49,11 +49,12 @@ export default function DetailCheckScreen() {
                 house_card_id: data.house_card?.id,
                 house_card_data: data.house_card,
                 house_card_number: data.house_card?.house_card,
+                has_route: !!data.house_card?.route,
+                route_data: data.house_card?.route,
             });
         }
     }, [data]);
 
-    // /===================
     const handleUpdate = async () => {
         if (!data || !currentCheckValue) {
             Alert.alert("Ошибка", "Заполните показания счетчика.");
@@ -103,33 +104,48 @@ export default function DetailCheckScreen() {
                     <Text style={styles.sectionValue}>{data?.house_card.house_card}</Text>
                 </View>
 
+                {/* Инспектор - с проверкой на null */}
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionLabel}>Инспектор:</Text>
-                    <Text style={styles.sectionValue}>{data?.house_card.route.executor.name}</Text>
+                    <Text style={styles.sectionValue}>
+                        {data?.house_card.route?.executor?.name
+                            ? data.house_card.route.executor.name
+                            : "Не назначен"}
+                    </Text>
                 </View>
 
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionLabel}>Ф.И.О.:</Text>
-                    <Text style={styles.sectionValue}>{data?.username.name}</Text>
+                    <Text style={styles.sectionValue}>{data?.username?.name || "Не указано"}</Text>
                 </View>
 
+                {/* Маршрут - с проверкой на null */}
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionLabel}>Маршрут:</Text>
-                    <Text style={styles.sectionValue}>{data?.house_card.route.route_number}</Text>
+                    <Text style={styles.sectionValue}>
+                        {data?.house_card.route?.route_number
+                            ? `№ ${data.house_card.route.route_number}`
+                            : "Не назначен"}
+                    </Text>
                 </View>
 
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionLabel}>Тариф:</Text>
                     <Text style={styles.sectionValue}>
-                        {data?.tariff.name} ({data?.tariff.kw_cost} кВт*ч)
+                        {data?.tariff?.name
+                            ? `${data.tariff.name} (${data.tariff.kw_cost} кВт*ч)`
+                            : "Тариф не установлен"}
                     </Text>
                 </View>
 
+                {/* Адрес - с проверкой на наличие адреса */}
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionLabel}>Адрес:</Text>
                     <Text style={styles.sectionValue}>
                         {data?.house_card.address
-                            ? `${data.house_card.address.street.name} ${data.house_card.address.house}, кв. ${data.house_card.address.apartment}`
+                            ? `${data.house_card.address.street?.name || "Улица не указана"} ${
+                                  data.house_card.address.house || ""
+                              }, кв. ${data.house_card.address.apartment || ""}`
                             : "Адрес не указан"}
                     </Text>
                 </View>
@@ -152,11 +168,13 @@ export default function DetailCheckScreen() {
                                     ? new Date(data.previous_check_date).toLocaleDateString("ru-RU")
                                     : "-"}
                             </Text>
-                            <Text style={styles.tableCell}>{data?.previous_check}</Text>
-                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>{data?.previous_check || "-"}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption || "0.00"}</Text>
                             <Text style={styles.tableCell}>
                                 {data?.consumption && data?.tariff?.kw_cost
-                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    ? (
+                                          parseFloat(data.consumption) * parseFloat(data.tariff.kw_cost)
+                                      ).toFixed(2)
                                     : "0.00"}
                             </Text>
                         </View>
@@ -167,11 +185,13 @@ export default function DetailCheckScreen() {
                                     ? new Date(data.current_check_date).toLocaleDateString("ru-RU")
                                     : "-"}
                             </Text>
-                            <Text style={styles.tableCell}>{data?.current_check}</Text>
-                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>{data?.current_check || "-"}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption || "0.00"}</Text>
                             <Text style={styles.tableCell}>
                                 {data?.consumption && data?.tariff?.kw_cost
-                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    ? (
+                                          parseFloat(data.consumption) * parseFloat(data.tariff.kw_cost)
+                                      ).toFixed(2)
                                     : "0.00"}
                             </Text>
                         </View>
@@ -186,12 +206,14 @@ export default function DetailCheckScreen() {
                         </View>
 
                         <View style={styles.tableRow}>
-                            <Text style={styles.tableCell}>{data?.period_day_count}</Text>
-                            <Text style={styles.tableCell}>{data?.tariff.kw_cost}</Text>
-                            <Text style={styles.tableCell}>{data?.consumption}</Text>
+                            <Text style={styles.tableCell}>{data?.period_day_count || "0"}</Text>
+                            <Text style={styles.tableCell}>{data?.tariff?.kw_cost || "0.00"}</Text>
+                            <Text style={styles.tableCell}>{data?.consumption || "0.00"}</Text>
                             <Text style={styles.tableCell}>
                                 {data?.consumption && data?.tariff?.kw_cost
-                                    ? (data.consumption * data.tariff.kw_cost).toFixed(2)
+                                    ? (
+                                          parseFloat(data.consumption) * parseFloat(data.tariff.kw_cost)
+                                      ).toFixed(2)
                                     : "0.00"}
                             </Text>
                         </View>
@@ -220,7 +242,9 @@ export default function DetailCheckScreen() {
 
                         <View style={styles.readingInfo}>
                             <Text style={styles.readingLabel}>Показание по фото:</Text>
-                            <Text style={styles.readingValue}>{data?.counter_current_check}</Text>
+                            <Text style={styles.readingValue}>
+                                {data?.counter_current_check || "Не указано"}
+                            </Text>
                         </View>
                     </View>
                 ) : (
@@ -256,7 +280,7 @@ export default function DetailCheckScreen() {
                 <View style={styles.paymentSummary}>
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Показание по фото:</Text>
-                        <Text style={styles.summaryValue}>{data?.counter_current_check}</Text>
+                        <Text style={styles.summaryValue}>{data?.counter_current_check || "Не указано"}</Text>
                     </View>
 
                     <View style={styles.summaryRow}>
@@ -294,33 +318,44 @@ export default function DetailCheckScreen() {
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Переплата(-)/Недоплата:</Text>
                         <Text style={styles.summaryValue}>
-                            {data?.house_card.overpayment_underpayment} сом
+                            {data?.house_card.overpayment_underpayment || "0"} сом
                         </Text>
                     </View>
 
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>К оплате за эл.эн.:</Text>
-                        <Text style={styles.summaryValue}>{data?.pay_for_electricity} сом</Text>
+                        <Text style={styles.summaryValue}>{data?.pay_for_electricity || "0.00"} сом</Text>
                     </View>
 
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Пеня:</Text>
-                        <Text style={styles.summaryValue}>{data?.house_card.penalty} сом</Text>
+                        <Text style={styles.summaryValue}>{data?.house_card.penalty || "0"} сом</Text>
                     </View>
 
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Итого к оплате:</Text>
-                        <Text style={styles.totalAmount}>{data?.total_sum} сом</Text>
+                        <Text style={styles.totalAmount}>{data?.total_sum || "0.00"} сом</Text>
                     </View>
                 </View>
             </View>
 
-            <Chart id={data.house_card.house_card} />
+            {/* График - только если есть house_card */}
+            {data.house_card?.house_card && <Chart id={data.house_card.house_card} />}
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+    noDataText: {
+        color: "#666",
+        fontStyle: "italic",
+        fontSize: 14,
+    },
+    warningText: {
+        color: "#FF8C00",
+        fontSize: 14,
+    },
+
     container: {
         flex: 1,
         backgroundColor: "#F8F9FA",
