@@ -14,22 +14,50 @@ const initialState: InfoState = {
     check: null,
 };
 
+// export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue: string }>(
+//     "lastcheck/fetchLastCheck",
+//     async (houseCardId, { rejectWithValue }) => {
+//         try {
+//             console.log("🔍 fetchLastCheck - houseCardId:", houseCardId, "type:", typeof houseCardId);
+//             const res = await storesApi.getLastCheck(houseCardId);
+//             console.log("✅ fetchLastCheck response:", res.data);
+
+//             if (res.status !== 200) {
+//                 return rejectWithValue(`Ошибка сервера: ${res.status}`);
+//             }
+
+//             return res.data as LastCheck;
+//         } catch (error: any) {
+//             console.error("❌ fetchLastCheck error:", error);
+//             return rejectWithValue(`Ошибка: ${error?.message || error}`);
+//         }
+//     }
+// );
+
 export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue: string }>(
     "lastcheck/fetchLastCheck",
     async (houseCardId, { rejectWithValue }) => {
         try {
-            console.log("🔍 fetchLastCheck - houseCardId:", houseCardId, "type:", typeof houseCardId);
+            console.log("🔍 fetchLastCheck - houseCardId:", houseCardId);
+
             const res = await storesApi.getLastCheck(houseCardId);
             console.log("✅ fetchLastCheck response:", res.data);
 
-            if (res.status !== 200) {
-                return rejectWithValue(`Ошибка сервера: ${res.status}`);
-            }
-
             return res.data as LastCheck;
         } catch (error: any) {
-            console.error("❌ fetchLastCheck error:", error);
-            return rejectWithValue(`Ошибка: ${error?.message || error}`);
+            console.error("❌ fetchLastCheck error details:", {
+                message: error.message,
+                status: error.response?.status,
+                data: error.response?.data,
+                params: error.config?.params,
+            });
+
+            if (error.response?.status === 404) {
+                const errorDetail = error.response?.data?.detail;
+                return rejectWithValue(errorDetail || `Лицевой счет ${houseCardId} не найден`);
+            }
+
+            return rejectWithValue(error.response?.data?.detail || error.message);
         }
     }
 );

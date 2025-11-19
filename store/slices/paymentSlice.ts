@@ -1,12 +1,19 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { storesApi } from "../api";
-import { PaymentPreviewResponse, PaymentResponse, PaymentState } from "../types";
+import {
+    PaymentHistory,
+    PaymentHistoryParams,
+    PaymentPreviewResponse,
+    PaymentResponse,
+    PaymentState,
+} from "../types";
 
 const initialState: PaymentState = {
     error: null,
     loading: false,
     paymentMethods: [],
     requisite: "",
+    payments: [],
     sum: "",
     preview: {
         loading: false,
@@ -15,16 +22,16 @@ const initialState: PaymentState = {
     },
 };
 
-// Создание платежа и получение методов оплаты
+// Создание платежа и получение методов оплаты - ТЕПЕРЬ С checkId
 export const createPayment = createAsyncThunk<
     PaymentResponse,
-    { houseCardId: number; requisite: string; sum: string },
+    { checkId: number; requisite: string; sum: string },
     { rejectValue: string }
->("payment/createPayment", async ({ houseCardId, requisite, sum }, { rejectWithValue }) => {
+>("payment/createPayment", async ({ checkId, requisite, sum }, { rejectWithValue }) => {
     try {
-        console.log("💰 createPayment - houseCardId:", houseCardId, "requisite:", requisite, "sum:", sum);
+        console.log("💰 createPayment - checkId:", checkId, "requisite:", requisite, "sum:", sum);
 
-        const res = await storesApi.createPayment(houseCardId, requisite, sum);
+        const res = await storesApi.createPayment(checkId, requisite, sum);
         console.log("✅ createPayment response:", res.data);
 
         if (res.status !== 200 && res.status !== 201) {
@@ -38,16 +45,16 @@ export const createPayment = createAsyncThunk<
     }
 });
 
-// Предпросмотр платежа - ТЕПЕРЬ С ПРАВИЛЬНЫМИ ТИПАМИ
+// Предпросмотр платежа - ТЕПЕРЬ С checkId
 export const previewPayment = createAsyncThunk<
     PaymentPreviewResponse,
-    { houseCardId: number; requisite: string; sum: string },
+    { checkId: number; requisite: string; sum: string },
     { rejectValue: string }
->("payment/previewPayment", async ({ houseCardId, requisite, sum }, { rejectWithValue }) => {
+>("payment/previewPayment", async ({ checkId, requisite, sum }, { rejectWithValue }) => {
     try {
-        console.log("👀 previewPayment - houseCardId:", houseCardId, "requisite:", requisite, "sum:", sum);
+        console.log("👀 previewPayment - checkId:", checkId, "requisite:", requisite, "sum:", sum);
 
-        const res = await storesApi.previewPayment(houseCardId, requisite, sum);
+        const res = await storesApi.previewPayment(checkId, requisite, sum);
         console.log("✅ previewPayment response:", res.data);
 
         if (res.status !== 200) {
@@ -61,14 +68,14 @@ export const previewPayment = createAsyncThunk<
     }
 });
 
-// Получение PDF чека
+// Получение PDF чека - ТЕПЕРЬ С checkId
 export const fetchPaymentPdf = createAsyncThunk<any, number, { rejectValue: string }>(
     "payment/fetchPaymentPdf",
-    async (houseCardId, { rejectWithValue }) => {
+    async (checkId, { rejectWithValue }) => {
         try {
-            console.log("📄 fetchPaymentPdf - houseCardId:", houseCardId);
+            console.log("📄 fetchPaymentPdf - checkId:", checkId);
 
-            const res = await storesApi.getPaymentPdf(houseCardId);
+            const res = await storesApi.getPaymentPdf(checkId);
             console.log("✅ fetchPaymentPdf response:", res.data);
 
             if (res.status !== 200) {
@@ -83,27 +90,28 @@ export const fetchPaymentPdf = createAsyncThunk<any, number, { rejectValue: stri
     }
 );
 
-// Получение истории платежей
-export const fetchPaymentsHistory = createAsyncThunk<any[], number, { rejectValue: string }>(
-    "payment/fetchPaymentsHistory",
-    async (houseCardId, { rejectWithValue }) => {
-        try {
-            console.log("📊 fetchPaymentsHistory - houseCardId:", houseCardId);
+// Получение истории платежей - остается без изменений
+export const fetchPaymentsHistory = createAsyncThunk<
+    PaymentHistory[],
+    PaymentHistoryParams,
+    { rejectValue: string }
+>("payment/fetchPaymentsHistory", async ({ checkId, userId }, { rejectWithValue }) => {
+    try {
+        console.log("📊 fetchPaymentsHistory - houseCardId:", checkId, "userId:", userId);
 
-            const res = await storesApi.getPaymentsHistory(houseCardId);
-            console.log("✅ fetchPaymentsHistory response:", res.data);
+        const res = await storesApi.getPaymentsHistory(checkId, userId);
+        console.log("✅ fetchPaymentsHistory response:", res.data);
 
-            if (res.status !== 200) {
-                return rejectWithValue(`Ошибка сервера: ${res.status}`);
-            }
-
-            return res.data;
-        } catch (error: any) {
-            console.error("❌ fetchPaymentsHistory error:", error);
-            return rejectWithValue(`Ошибка: ${error?.message || error}`);
+        if (res.status !== 200) {
+            return rejectWithValue(`Ошибка сервера: ${res.status}`);
         }
+
+        return res.data;
+    } catch (error: any) {
+        console.error("❌ fetchPaymentsHistory error:", error);
+        return rejectWithValue(`Ошибка: ${error?.message || error}`);
     }
-);
+});
 
 const paymentSlice = createSlice({
     name: "payment",
@@ -173,8 +181,9 @@ const paymentSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchPaymentsHistory.fulfilled, (state) => {
+            .addCase(fetchPaymentsHistory.fulfilled, (state, action) => {
                 state.loading = false;
+                state.payments = action.payload;
             })
             .addCase(fetchPaymentsHistory.rejected, (state, action) => {
                 state.loading = false;

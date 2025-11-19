@@ -85,10 +85,18 @@ export const storesApi = {
     },
 
     // чеки
-    getLastCheck(houseCardId: number) {
-        return instance.get("check/last-check/", {
+    // getLastCheck(houseCardId: number) {
+    //     return instance.get("check/last-check/", {
+    //         params: {
+    //             house_card: houseCardId,
+    //         },
+    //     });
+    // },
+
+    getLastCheck: (houseCardId: number) => {
+        return instance.get("/check/last-check/", {
             params: {
-                house_card: houseCardId,
+                house_card: houseCardId, // Именно такой параметр ждет API
             },
         });
     },
@@ -138,30 +146,35 @@ export const storesApi = {
         return instance.get(`bid/bid/${id}/`);
     },
 
+    // storesApi.ts
     // платежка
-    // Создание платежа
-    createPayment: (houseCardId: number, requisite: string, sum: string) => {
-        return instance.post(`/check/${houseCardId}/payment/create/`, {
+    // Создание платежа - теперь использует checkId
+    createPayment: (checkId: number, requisite: string, sum: string) => {
+        return instance.post(`/check/${checkId}/payment/create/`, {
             requisite,
             sum,
         });
     },
 
-    // Получение PDF чека
-    getPaymentPdf: (houseCardId: number) => {
-        return instance.get(`/check/${houseCardId}/payment/pdf/`);
+    // Получение PDF чека - теперь использует checkId
+    getPaymentPdf: (checkId: number) => {
+        return instance.get(`/check/${checkId}/payment/pdf/`);
     },
 
-    // Предпросмотр платежа
-    previewPayment: (houseCardId: number, requisite: string, sum: string) => {
-        return instance.post(`/check/${houseCardId}/payment/preview/`, {
+    // Предпросмотр платежа - теперь использует checkId
+    previewPayment: (checkId: number, requisite: string, sum: string) => {
+        return instance.post(`/check/${checkId}/payment/preview/`, {
             requisite,
             sum,
         });
     },
 
-    // История платежей
-    getPaymentsHistory: (houseCardId: number) => {
-        return instance.get(`/check/${houseCardId}/payments/`);
+    // История платежей - остается без изменений, так как использует query параметры
+    getPaymentsHistory: (houseCardId?: number, userId?: number) => {
+        const params: any = {};
+        if (houseCardId) params.house_card_id = houseCardId;
+        if (userId) params.user_id = userId;
+
+        return instance.get(`/check/payments/history/`, { params });
     },
 };

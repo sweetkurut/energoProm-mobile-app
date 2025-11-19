@@ -16,6 +16,7 @@ import {
     View,
 } from "react-native";
 
+import { fetchLastCheck } from "@/store/slices/checkSlice";
 import { previewPayment } from "@/store/slices/paymentSlice";
 import dayjs from "dayjs";
 
@@ -25,6 +26,7 @@ export default function HomeScreen() {
     const { house, loading } = useAppSelector((state) => state.house);
     const { profile } = useAppSelector((state) => state.profile);
     const { preview } = useAppSelector((state) => state.payment);
+    const { data: lastCheck, loading: lastCheckLoading } = useAppSelector((state) => state.check);
 
     useEffect(() => {
         dispatch(fetchHouseCard());
@@ -33,6 +35,8 @@ export default function HomeScreen() {
     useEffect(() => {
         if (house && house.length > 0) {
             loadPaymentPreview();
+
+            loadLastCheck();
         }
     }, [house]);
 
@@ -43,7 +47,7 @@ export default function HomeScreen() {
             const firstHouse = house[0];
             await dispatch(
                 previewPayment({
-                    houseCardId: firstHouse.id, //
+                    houseCardId: firstHouse.id,
                     requisite: firstHouse.house_card?.toString() || "",
                     sum: firstHouse.house_card,
                 })
@@ -51,6 +55,13 @@ export default function HomeScreen() {
         } catch (error) {
             console.error("Ошибка загрузки предпросмотра платежа:", error);
         }
+    };
+
+    const loadLastCheck = () => {
+        if (!house || house.length === 0) return;
+
+        const firstHouse = house[0];
+        dispatch(fetchLastCheck(firstHouse.id));
     };
 
     const goToNotification = () => {
@@ -62,6 +73,7 @@ export default function HomeScreen() {
         dispatch(fetchHouseCard())
             .then(() => {
                 loadPaymentPreview();
+                loadLastCheck();
                 setRefreshing(false);
             })
             .catch(() => setRefreshing(false));
@@ -71,7 +83,7 @@ export default function HomeScreen() {
         if (preview.previewData) {
             return preview.previewData.total_with_comission.toString();
         }
-        return "0"; // Пока не загрузилось
+        return "0";
     };
 
     const onPay = () => {
@@ -82,14 +94,59 @@ export default function HomeScreen() {
                 params: {
                     houseCardId: firstHouse.id.toString(),
                     houseCardNumber: firstHouse.house_card?.toString() || "",
-                    // НЕ передаем amount - он загрузится через preview
                 },
             });
         }
     };
 
-    const goToDetail = (id: number) => {
-        router.push(`/listing/check/${id}`);
+    const goToDetail = (houseCardNumber: string) => {
+        // Переходим на экран с деталями проверки
+        router.push(`/listing/check/${houseCardNumber}`);
+    };
+
+    const goToLastCheckDetails = () => {
+        if (lastCheck && house && house.length > 0) {
+            const firstHouse = house[0];
+            router.push(`/listing/check/${firstHouse.house_card}`);
+        }
+    };
+
+    // Функция для отображения статуса последней проверки
+    const renderLastCheckStatus = () => {
+        if (lastCheckLoading) {
+            return (
+                <View style={styles.lastCheckContainer}>
+                    <ActivityIndicator size="small" color="#EA961C" />
+                    <Text style={styles.lastCheckText}>Загрузка данных проверки...</Text>
+                </View>
+            );
+        }
+
+        if (lastCheck) {
+            return (
+                <TouchableOpacity
+                    style={[styles.lastCheckContainer, styles.lastCheckSuccess]}
+                    onPress={goToLastCheckDetails}
+                >
+                    <Feather name="check-circle" size={16} color="#28a745" />
+                    <Text style={styles.lastCheckText}>
+                        Последняя проверка: {dayjs(lastCheck.created_at).format("DD.MM.YYYY")}
+                    </Text>
+                    <Feather name="chevron-right" size={16} color="#666" />
+                </TouchableOpacity>
+            );
+        }
+
+        if (!lastCheckLoading && house && house.length > 0) {
+            return (
+                <View style={[styles.lastCheckContainer, styles.lastCheckEmpty]}>
+                    <Feather name="alert-circle" size={16} color="#ffc107" />
+                    <Text style={styles.lastCheckText}>Проверки не проводились</Text>
+                </View>
+            );
+        }
+
+        return null;
     };
 
     if (loading)
@@ -122,6 +179,9 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Секция статуса последней проверки */}
+            {house && house.length > 0 && renderLastCheckStatus()}
 
             <View style={styles.sectionHeader}>
                 <Feather name="bar-chart" size={24} color={Colors.ORANGE_COLOR} />

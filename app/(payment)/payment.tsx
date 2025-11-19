@@ -23,8 +23,11 @@ export default function Payment() {
     const houseCardId = params.houseCardId as string;
     const houseCardNumber = params.houseCardNumber as string;
 
+    const { check } = useAppSelector((state) => state.check);
+    const checkId = check?.id;
+
     const [selectedMethod, setSelectedMethod] = useState<string>();
-    const [step, setStep] = useState<"preview" | "banks">("preview"); // Добавляем шаги
+    const [step, setStep] = useState<"preview" | "banks">("preview");
     const dispatch = useAppDispatch();
     const {
         paymentMethods,
@@ -34,19 +37,26 @@ export default function Payment() {
     } = useAppSelector((state) => state.payment);
 
     useEffect(() => {
-        if (houseCardId) {
+        if (checkId) {
             loadPaymentPreview();
+        } else {
+            console.warn("⚠️ checkId не найден, невозможно загрузить предпросмотр");
         }
-    }, [houseCardId]);
+    }, [checkId]);
 
-    // 1. Загружаем предпросмотр платежа
+    // 1. Загружаем предпросмотр платежа с checkId вместо houseCardId
     const loadPaymentPreview = async () => {
+        if (!checkId) {
+            Alert.alert("Ошибка", "Данные проверки не загружены");
+            return;
+        }
+
         try {
             await dispatch(
                 previewPayment({
-                    houseCardId: parseInt(houseCardId),
+                    checkId: checkId, // Используем checkId вместо houseCardId
                     requisite: houseCardNumber || houseCardId,
-                    sum: "9678", // Можно сделать динамическим
+                    sum: "0",
                 })
             ).unwrap();
         } catch (error) {
@@ -55,13 +65,17 @@ export default function Payment() {
         }
     };
 
-    // 2. Загружаем методы оплаты (банки)
     const loadPaymentMethods = async () => {
+        if (!checkId) {
+            Alert.alert("Ошибка", "Данные проверки не загружены");
+            return;
+        }
+
         try {
             setStep("banks");
             await dispatch(
                 createPayment({
-                    houseCardId: parseInt(houseCardId),
+                    checkId: checkId, // Используем checkId вместо houseCardId
                     requisite: houseCardNumber || houseCardId,
                     sum: preview.previewData?.total_with_comission.toString() || "9678",
                 })
@@ -72,6 +86,7 @@ export default function Payment() {
         }
     };
 
+    // Остальной код остается без изменений...
     const getBankIcon = (bankName: string) => {
         const icons: any = {
             Мбанк: <FontAwesome5 name="mobile-alt" size={24} color="#FF8C00" />,
@@ -145,6 +160,7 @@ export default function Payment() {
                 invoice: `TXN${Date.now()}`,
                 status: "Успешно",
                 houseCardId: houseCardId,
+                checkId: checkId?.toString() || "", // Добавляем checkId в параметры
             },
         });
     };
@@ -167,6 +183,7 @@ export default function Payment() {
                             <Text style={styles.subtitle}>
                                 Лицевой счет: {houseCardNumber || houseCardId}
                             </Text>
+                            {checkId && <Text style={styles.subtitle}>ID проверки: {checkId}</Text>}
                         </View>
                     </View>
 
@@ -199,8 +216,10 @@ export default function Payment() {
                                 </Text>
                             </View>
                         </View>
+                    ) : !checkId ? (
+                        <Text style={styles.errorText}>Данные проверки не загружены</Text>
                     ) : (
-                        <Text style={styles.errorText}>Не удалось загрузить данные</Text>
+                        <Text style={styles.errorText}>Не удалось загрузить данные платежа</Text>
                     )}
                 </View>
 
@@ -219,10 +238,10 @@ export default function Payment() {
                     <TouchableOpacity
                         style={[
                             styles.payButton,
-                            (preview.loading || !preview.previewData) && styles.payButtonDisabled,
+                            (preview.loading || !preview.previewData || !checkId) && styles.payButtonDisabled,
                         ]}
                         onPress={loadPaymentMethods}
-                        disabled={preview.loading || !preview.previewData}
+                        disabled={preview.loading || !preview.previewData || !checkId}
                     >
                         <Text style={styles.payButtonText}>
                             {preview.loading ? "Загрузка..." : "Перейти к оплате"}

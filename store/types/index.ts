@@ -141,20 +141,34 @@ export interface IHouseCardResponse {
 // новый тип для нового запроса housecard
 export interface HouseCard {
     id: number;
-    house_card: number;
+    house_card: string;
     address: {
         street: {
             name: string;
         };
         house: string;
         liter: string;
-        apartment: number;
+        apartment: string;
         apartment_liter: string;
     };
     tariff: {
-        kw_cost: number;
+        id: number;
+        name: string;
+        NDS: number;
+        NSP: number;
+        kw_cost: string;
+        pricing_type: string;
+        tariff_band: {
+            id: number;
+            min_kwh: string;
+            max_kwh: string | null;
+            price_per_kwh: string;
+            order: number;
+        }[];
+        created_at: string;
+        updated_at: string;
     };
-    contract_date: string; // формат ISO: 'YYYY-MM-DD'
+    contract_date: string;
 }
 
 // house card detail
@@ -393,7 +407,6 @@ export interface UpdateCheckUser {
 }
 
 // create payment
-
 export type CommissionType = "percent" | "fixed";
 
 export interface PaymentMethod {
@@ -408,15 +421,6 @@ export interface PaymentResponse {
     requisite: string;
     sum: string;
     urls: PaymentMethod[];
-}
-
-export interface PaymentState {
-    loading: boolean;
-    error: null | string;
-    paymentMethods: PaymentMethod[];
-    requisite: string;
-    sum: string;
-    preview: PaymentPreviewState;
 }
 
 export interface PaymentPreviewResponse {
@@ -434,4 +438,52 @@ export interface PaymentPreviewState {
     loading: boolean;
     error: null | string;
     previewData: PaymentPreviewResponse | null;
+}
+
+export interface PaymentHistory {
+    id: number;
+    check_id: number;
+    house_card_id: number;
+    user_id: string;
+    requisite: string;
+    txn_id: string;
+    source: string;
+    amount: string;
+    paid_date: string;
+    created_at: string;
+}
+
+// Интерфейс для параметров запроса
+export interface PaymentHistoryParams {
+    checkId?: number;
+    userId?: number;
+}
+
+// ОБЪЕДИНЕННЫЙ интерфейс для состояния платежей
+export interface PaymentState {
+    // Основные поля для создания платежа
+    loading: boolean;
+    error: null | string;
+    paymentMethods: PaymentMethod[];
+    requisite: string;
+    sum: string;
+
+    // Поля для истории платежей
+    payments: PaymentHistory[]; // ДОБАВЛЕНО
+
+    // Поля для превью
+    preview: PaymentPreviewState;
+}
+
+// Старый интерфейс можно удалить или оставить как alias
+export type PaymentHistoryState = PaymentState;
+
+export interface PaymentsApi {
+    getPaymentsHistory: (
+        checkId?: number,
+        userId?: number
+    ) => Promise<{
+        data: PaymentHistory[];
+        status: number;
+    }>;
 }
