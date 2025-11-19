@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchSignUp } from "@/store/slices/authSlice";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -30,6 +30,7 @@ interface ISignUpEmail {
 export default function SignUp() {
     const { loading, error } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
+    const router = useRouter(); // Добавьте useRouter
 
     const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -45,8 +46,10 @@ export default function SignUp() {
 
     const handleRegister = async (data: ISignUpEmail) => {
         try {
-            setValidationError(null); // сброс ошибки перед новым запросом
+            setValidationError(null);
             const result = await dispatch(fetchSignUp(data)).unwrap();
+
+            // УСПЕШНАЯ регистрация - переходим на подтверждение кода
             if (result) {
                 router.push({
                     pathname: "/(auth)/confirmCode",
@@ -71,10 +74,6 @@ export default function SignUp() {
 
     const handleLogin = () => {
         router.push("/(auth)/signIn");
-    };
-
-    const goToConfirm = () => {
-        router.push("/(auth)/confirmCode");
     };
 
     return (
@@ -136,7 +135,12 @@ export default function SignUp() {
                                 />
                             </View>
                             {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-                            {validationError && <Text style={styles.errorText}>{validationError}</Text>}
+                            {validationError && (
+                                <View style={styles.loginErrorContainer}>
+                                    <Ionicons name="warning-outline" size={20} color="#D32F2F" />
+                                    <Text style={styles.loginErrorText}>{validationError}</Text>
+                                </View>
+                            )}
                         </View>
 
                         <TouchableOpacity
@@ -371,5 +375,24 @@ const styles = StyleSheet.create({
 
     icon: {
         color: Colors.ICON,
+    },
+
+    loginErrorContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#FFEBEE",
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: "#D32F2F",
+        marginTop: 10,
+        marginBottom: 5,
+    },
+    loginErrorText: {
+        color: "#D32F2F",
+        fontSize: 14,
+        fontWeight: "500",
+        marginLeft: 8,
+        flex: 1,
     },
 });

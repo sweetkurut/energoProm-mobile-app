@@ -32,7 +32,7 @@ export default function SignIn() {
     const { loading, error } = useAppSelector((state) => state.auth);
 
     const [showPassword, setShowPassword] = useState(false);
-    const [isChecked, setChecked] = useState(false);
+    // const [isChecked, setChecked] = useState(false);
 
     const {
         control,
@@ -153,10 +153,6 @@ export default function SignIn() {
                                     control={control}
                                     rules={{
                                         required: "Пароль обязателен",
-                                        minLength: {
-                                            value: 6,
-                                            message: "Пароль должен содержать минимум 6 символов",
-                                        },
                                     }}
                                     render={({ field: { onChange, onBlur, value } }) => (
                                         <TextInput
@@ -195,21 +191,18 @@ export default function SignIn() {
                                 marginTop: -15,
                             }}
                         >
-                            {/* <View style={styles.checkboxContainer}>
-                                <Checkbox
-                                    style={styles.checkbox}
-                                    value={isChecked}
-                                    onValueChange={setChecked}
-                                />
-                                <Text style={styles.label}>Запомнить меня</Text>
-                            </View> */}
-
                             <TouchableOpacity style={styles.forgotPasswordLink} onPress={goToForgotPassword}>
                                 <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
                             </TouchableOpacity>
                         </View>
 
-                        {error && <Text style={styles.errorText}>{error}</Text>}
+                        {/* Красивое отображение ошибки входа */}
+                        {error && (
+                            <View style={styles.loginErrorContainer}>
+                                <Ionicons name="warning-outline" size={20} color="#D32F2F" />
+                                <Text style={styles.loginErrorText}>Неверный email или пароль</Text>
+                            </View>
+                        )}
 
                         <TouchableOpacity
                             style={[styles.button, loading && styles.buttonDisabled]}
@@ -333,6 +326,26 @@ const styles = StyleSheet.create({
     eyeIcon: {
         padding: 8,
     },
+
+    loginErrorContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#FFEBEE",
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: "#D32F2F",
+        marginTop: 10,
+        marginBottom: 5,
+    },
+    loginErrorText: {
+        color: "#D32F2F",
+        fontSize: 14,
+        fontWeight: "500",
+        marginLeft: 8,
+        flex: 1,
+    },
+
     errorText: {
         color: Colors.ORANGE_COLOR,
         fontSize: 12,
@@ -341,8 +354,8 @@ const styles = StyleSheet.create({
     },
     forgotPasswordLink: {
         alignSelf: "flex-end",
-        marginBottom: 30,
-        paddingTop: 10,
+        marginBottom: 10,
+        // paddingTop: 10,
     },
     forgotPasswordText: {
         color: Colors.ORANGE_COLOR,

@@ -111,7 +111,6 @@ export default function HomeScreen() {
         }
     };
 
-    // Функция для отображения статуса последней проверки
     const renderLastCheckStatus = () => {
         if (lastCheckLoading) {
             return (
@@ -181,7 +180,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Секция статуса последней проверки */}
-            {house && house.length > 0 && renderLastCheckStatus()}
+            {/* {house && house.length > 0 && renderLastCheckStatus()} */}
 
             <View style={styles.sectionHeader}>
                 <Feather name="bar-chart" size={24} color={Colors.ORANGE_COLOR} />
@@ -480,5 +479,30 @@ const styles = StyleSheet.create({
         color: "#8E8E8E",
         textAlign: "center",
         lineHeight: 20,
+    },
+
+    lastCheckContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
+        marginHorizontal: 16,
+        marginBottom: 16,
+        borderRadius: 8,
+        backgroundColor: "#f8f9fa",
+        borderWidth: 1,
+    },
+    lastCheckSuccess: {
+        borderColor: "#28a745",
+        backgroundColor: "#f8fff9",
+    },
+    lastCheckEmpty: {
+        borderColor: "#ffc107",
+        backgroundColor: "#fffef0",
+    },
+    lastCheckText: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 14,
+        color: "#333",
     },
 });
