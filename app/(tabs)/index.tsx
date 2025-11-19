@@ -18,6 +18,7 @@ import {
 
 import { fetchLastCheck } from "@/store/slices/checkSlice";
 import { previewPayment } from "@/store/slices/paymentSlice";
+import { fetchGetProfile } from "@/store/slices/profileSlice";
 import dayjs from "dayjs";
 
 export default function HomeScreen() {
@@ -27,6 +28,10 @@ export default function HomeScreen() {
     const { profile } = useAppSelector((state) => state.profile);
     const { preview } = useAppSelector((state) => state.payment);
     const { data: lastCheck, loading: lastCheckLoading } = useAppSelector((state) => state.check);
+
+    useEffect(() => {
+        dispatch(fetchGetProfile());
+    }, [dispatch]);
 
     useEffect(() => {
         dispatch(fetchHouseCard());
