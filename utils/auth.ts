@@ -72,3 +72,11 @@ export const verifyAuthWithDelay = async (minDelay: number = 500): Promise<boole
         return false;
     }
 };
+
+export const clearTokens = async (): Promise<void> => {
+    try {
+        await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
+    } catch (error) {
+        console.error("Ошибка при очистке токенов:", error);
+    }
+};

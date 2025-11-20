@@ -4,6 +4,8 @@ import WhatsappIcon from "@/assets/icons/WhatsappIcon";
 import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchSignUp } from "@/store/slices/authSlice";
+import { clearTokens } from "@/utils/auth";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -30,7 +32,7 @@ interface ISignUpEmail {
 export default function SignUp() {
     const { loading, error } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
-    const router = useRouter(); // Добавьте useRouter
+    const router = useRouter();
 
     const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -47,6 +49,10 @@ export default function SignUp() {
     const handleRegister = async (data: ISignUpEmail) => {
         try {
             setValidationError(null);
+
+            // Очищаем токены перед регистрацией
+            await clearTokens();
+
             const result = await dispatch(fetchSignUp(data)).unwrap();
 
             // УСПЕШНАЯ регистрация - переходим на подтверждение кода
@@ -59,7 +65,6 @@ export default function SignUp() {
         } catch (err: any) {
             console.error("Ошибка при регистрации:", err);
 
-            // Пример проверки ошибок из ответа сервера:
             if (typeof err === "string") {
                 setValidationError(err);
             } else if (err?.email && err.email.length > 0) {

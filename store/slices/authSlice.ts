@@ -123,6 +123,10 @@ const AuthSlice = createSlice({
         setError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
         },
+
+        setLogin: (state, action: PayloadAction<ILoginResponse>) => {
+            state.login = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -186,12 +190,12 @@ const AuthSlice = createSlice({
             })
             .addCase(fetchSetPassword.fulfilled, (state, action) => {
                 state.loading = false;
-                state.login = {
-                    id: action.payload.id || 0,
-                    email: action.payload.user || "",
-                    access: action.payload.access,
-                    refresh: action.payload.refresh,
-                };
+                // state.login = {
+                //     id: action.payload.id || 0,
+                //     email: action.payload.user || "",
+                //     access: action.payload.access,
+                //     refresh: action.payload.refresh,
+                // };
             })
             .addCase(fetchSetPassword.rejected, (state, action) => {
                 state.loading = false;

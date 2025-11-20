@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors";
 import { sendPushTokenToServer } from "@/sendPushTokenToServer";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchLogin, setError } from "@/store/slices/authSlice";
-import { hasTokens, saveTokens } from "@/utils/auth";
+import { saveTokens } from "@/utils/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -52,10 +52,10 @@ export default function SignIn() {
                 await sendPushTokenToServer();
 
                 // Проверяем сохранённые токены
-                const hasStoredTokens = await hasTokens();
-                if (hasStoredTokens) {
-                    router.replace("/(tabs)");
-                }
+                // const hasStoredTokens = await hasTokens();
+                // if (hasStoredTokens) {
+                //     router.replace("/(tabs)");
+                // }
             } catch (error) {
                 console.error("Ошибка при инициализации уведомлений:", error);
             }

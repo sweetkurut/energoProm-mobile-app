@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchResetPassword, setError } from "@/store/slices/authSlice";
 import { IResetPassword } from "@/store/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -11,7 +12,6 @@ import {
     Image,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -99,7 +99,12 @@ export default function ResetPassword() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <LinearGradient
+            style={styles.container}
+            colors={["#ffc281", "#FFA94A"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
                 <ScrollView
                     // contentContainerStyle={styles.scrollContainer}
@@ -126,12 +131,6 @@ export default function ResetPassword() {
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Код подтверждения</Text>
                             <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="keypad-outline"
-                                    size={20}
-                                    color={Colors.SPAN_AUTH}
-                                    style={styles.inputIcon}
-                                />
                                 <Controller
                                     control={control}
                                     rules={{
@@ -162,12 +161,6 @@ export default function ResetPassword() {
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Новый пароль</Text>
                             <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="lock-closed-outline"
-                                    size={20}
-                                    color={Colors.SPAN_AUTH}
-                                    style={styles.inputIcon}
-                                />
                                 <Controller
                                     control={control}
                                     rules={{
@@ -210,12 +203,6 @@ export default function ResetPassword() {
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Повторите пароль</Text>
                             <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="shield-checkmark-outline"
-                                    size={20}
-                                    color={Colors.SPAN_AUTH}
-                                    style={styles.inputIcon}
-                                />
                                 <Controller
                                     control={control}
                                     rules={{
@@ -277,7 +264,7 @@ export default function ResetPassword() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </LinearGradient>
     );
 }
 
@@ -292,17 +279,18 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
     },
     backButton: {
-        marginTop: 16,
+        marginTop: 50,
         width: 40,
         height: 40,
         borderRadius: 20,
         backgroundColor: "#F0F0F0",
         justifyContent: "center",
         alignItems: "center",
+        marginHorizontal: 10,
     },
     header: {
         alignItems: "center",
-        marginTop: 20,
+        marginTop: 60,
         marginBottom: 40,
     },
     logoContainer: {
@@ -327,7 +315,18 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     formContainer: {
-        width: "100%",
+        width: "auto",
+        backgroundColor: Colors.WHITE_COLOR,
+        padding: 12,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.05)",
+        shadowColor: "#00000067",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+        marginHorizontal: 10,
     },
     inputContainer: {
         marginBottom: 24,
