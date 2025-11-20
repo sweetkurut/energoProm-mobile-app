@@ -96,7 +96,7 @@ export const storesApi = {
     getLastCheck: (houseCardId: number) => {
         return instance.get("/check/last-check/", {
             params: {
-                house_card: houseCardId, // Именно такой параметр ждет API
+                house_card: houseCardId,
             },
         });
     },

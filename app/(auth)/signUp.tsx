@@ -49,7 +49,7 @@ export default function SignUp() {
     const handleRegister = async (data: ISignUpEmail) => {
         try {
             setValidationError(null);
-
+            
             // Очищаем токены перед регистрацией
             await clearTokens();
 

@@ -28,16 +28,17 @@ export default function Chart({ id }: ChartProps) {
     const { graphic, loading } = useAppSelector((state) => state.graphic);
     const dispatch = useAppDispatch();
 
+    console.log("====================================");
+    console.log(graphic, "график");
+    console.log("====================================");
+
     const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number | null } | null>(null);
 
     useEffect(() => {
-        const numericId = Number(id);
-        console.log("🔍 Chart - house_card_id:", id, "numericId:", numericId);
+        console.log("🎯 Chart received house_card ID:", id);
 
-        if (numericId && !isNaN(numericId)) {
-            dispatch(fetchGraphic(numericId));
-        } else {
-            console.log("❌ Chart - invalid house_card_id:", id);
+        if (id) {
+            dispatch(fetchGraphic(id));
         }
     }, [id, dispatch]);
 
@@ -69,10 +70,7 @@ export default function Chart({ id }: ChartProps) {
         );
     }
 
-    // ИСПРАВЛЕННОЕ ПРЕОБРАЗОВАНИЕ ДАННЫХ
-    const consumptionData = graphic.graphic_evaluate.map(
-        (item) => parseFloat(item.consumption) || 0 // ИСПРАВЛЕНО: parseFloat вместо Number
-    );
+    const consumptionData = graphic.graphic_evaluate.map((item) => parseFloat(item.consumption) || 0);
 
     const chartLabels = graphic.graphic_evaluate.map((item) => item.month_name ?? "");
 

@@ -94,6 +94,11 @@ const graphicSlice = createSlice({
             .addCase(fetchGraphic.fulfilled, (state, action) => {
                 state.loading = false;
                 state.graphic = action.payload;
+                console.log("✅ Graphic data saved to Redux:", {
+                    house_card_id: action.meta.arg,
+                    data_received: action.payload,
+                    points_count: action.payload.graphic_evaluate?.length,
+                });
             })
             .addCase(fetchGraphic.rejected, (state) => {
                 state.loading = false;
