@@ -24,6 +24,8 @@ export default function DetailCheckScreen() {
     const numericId = Number(id);
     const { check, loading } = useAppSelector((state) => state.check);
     const data = check;
+    console.log(data);
+
     const dispatch = useAppDispatch();
 
     const [currentCheckValue, setCurrentCheckValue] = useState<string>("");
