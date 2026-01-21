@@ -93,7 +93,7 @@ export const storesApi = {
     //     });
     // },
 
-    getLastCheck: (houseCardId: number) => {
+    getLastCheck: (houseCardId: string | number) => {
         return instance.get("/check/last-check/", {
             params: {
                 house_card: houseCardId,

@@ -55,7 +55,7 @@ export default function HomeScreen() {
                     houseCardId: firstHouse.id,
                     requisite: firstHouse.house_card?.toString() || "",
                     sum: firstHouse.house_card,
-                })
+                }),
             ).unwrap();
         } catch (error) {
             console.error("Ошибка загрузки предпросмотра платежа:", error);

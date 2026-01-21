@@ -34,7 +34,7 @@ const initialState: InfoState = {
 //     }
 // );
 
-export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue: string }>(
+export const fetchLastCheck = createAsyncThunk<LastCheck, string | number, { rejectValue: string }>(
     "lastcheck/fetchLastCheck",
     async (houseCardId, { rejectWithValue }) => {
         try {
@@ -59,7 +59,7 @@ export const fetchLastCheck = createAsyncThunk<LastCheck, number, { rejectValue:
 
             return rejectWithValue(error.response?.data?.detail || error.message);
         }
-    }
+    },
 );
 
 export const updateCheckPhoto = createAsyncThunk(
@@ -75,7 +75,7 @@ export const updateCheckPhoto = createAsyncThunk(
             console.error(error);
             return rejectWithValue(`Ошибка: ${error?.message || error}`);
         }
-    }
+    },
 );
 
 const checkSlice = createSlice({

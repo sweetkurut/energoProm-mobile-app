@@ -28,6 +28,8 @@ export default function Chart({ id }: ChartProps) {
     const { graphic, loading } = useAppSelector((state) => state.graphic);
     const dispatch = useAppDispatch();
 
+    console.log("Chart rendered with id:", id, "type:", typeof id);
+
     console.log("====================================");
     console.log(graphic, "график");
     console.log("====================================");

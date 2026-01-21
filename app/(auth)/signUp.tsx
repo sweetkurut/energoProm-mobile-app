@@ -49,7 +49,7 @@ export default function SignUp() {
     const handleRegister = async (data: ISignUpEmail) => {
         try {
             setValidationError(null);
-            
+
             // Очищаем токены перед регистрацией
             await clearTokens();
 
@@ -119,10 +119,10 @@ export default function SignUp() {
                                     control={control}
                                     rules={{
                                         required: "Email обязателен",
-                                        pattern: {
-                                            value: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
-                                            message: "Введите корректный Gmail адрес",
-                                        },
+                                        // pattern: {
+                                        //     value: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+                                        //     message: "Введите корректный Gmail адрес",
+                                        // },
                                     }}
                                     render={({ field: { onChange, onBlur, value } }) => (
                                         <TextInput

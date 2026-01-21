@@ -133,7 +133,7 @@ export default function ProfileScreen() {
                         <View style={styles.iconRow}>
                             <MaterialIcons name="phone" size={25} color="#555" />
                         </View>
-                        <Text style={styles.rowText}>+996 XXX XXX XXX</Text>
+                        <Text style={styles.rowText}>0707363707</Text>
                     </View>
                     <View style={styles.row}>
                         <View style={styles.iconRow}>

@@ -1,8 +1,6 @@
+import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchLastCheck, updateCheckPhoto } from "@/store/slices/checkSlice";
-
-import Chart from "@/components/Chart";
-import Colors from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -21,7 +19,7 @@ import { PhotoUploader } from "./PhotoUploader";
 
 export default function DetailCheckScreen() {
     const { id } = useLocalSearchParams();
-    const numericId = Number(id);
+    // const numericId = Number(id);
     const { check, loading } = useAppSelector((state) => state.check);
     const data = check;
     console.log(data);
@@ -341,8 +339,29 @@ export default function DetailCheckScreen() {
                 </View>
             </View>
 
+            {/* {data.house_card?.house_card && (
+                <>
+                    <Text style={{ color: "red", margin: 16 }}>
+                        Передаём в график: {data.house_card.house_card} (тип:{" "}
+                        {typeof data.house_card.house_card})
+                    </Text>
+                    <Chart id={data.house_card.id} />
+                </>
+            )} */}
             {/* График - только если есть house_card */}
-            {data.house_card?.house_card && <Chart id={data.house_card.house_card} />}
+            {/* {data.house_card?.house_card && <Chart id={data.house_card.id} />} */}
+            {/* {data?.house_card?.id ? (
+                <Chart id={data.house_card.id} />
+            ) : data?.house_card ? (
+                <View style={{ padding: 20, backgroundColor: "#fff3cd", borderRadius: 8, margin: 16 }}>
+                    <Text style={{ color: "#856404" }}>
+                        Нет подходящего ID для графика{"\n"}
+                        Доступные поля в house_card:{"\n"}
+                        {Object.keys(data.house_card).join(", ")}
+                    </Text>
+                </View>
+            ) : null} */}
+            {/* <Chart id={data.house_card.house_card} /> */}
         </ScrollView>
     );
 }
