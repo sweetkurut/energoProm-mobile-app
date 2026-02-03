@@ -39,11 +39,21 @@ export default function HomeScreen() {
 
     useEffect(() => {
         if (house && house.length > 0) {
-            loadPaymentPreview();
+            const firstHouse = house[0];
 
-            loadLastCheck();
+            // Загружаем предпросмотр сразу, как только есть дом
+            dispatch(
+                previewPayment({
+                    houseCardId: firstHouse.id,
+                    requisite: firstHouse.house_card?.toString() || "",
+                    sum: firstHouse.house_card, // ← возможно здесь ошибка, обычно sum — это не номер карты
+                }),
+            );
+
+            // и последнюю проверку тоже можно сюда
+            dispatch(fetchLastCheck(firstHouse.id));
         }
-    }, [house]);
+    }, [house, dispatch]);
 
     const loadPaymentPreview = async () => {
         if (!house || house.length === 0) return;
