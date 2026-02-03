@@ -29,9 +29,6 @@ const CardServices = () => {
                 style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    // justifyContent: "space-between",
-                    // marginBottom: 10,
-                    // marginHorizontal: 10,
                 }}
             >
                 <Feather name="server" size={20} color={Colors.ORANGE_COLOR} />
@@ -95,6 +92,10 @@ const styles = StyleSheet.create({
         padding: 24,
         alignItems: "center",
         borderRadius: 10,
+        shadowColor: "#0000006e",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
     },
     card_title: {
         textAlign: "center",
