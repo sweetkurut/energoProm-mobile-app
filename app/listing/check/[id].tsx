@@ -63,24 +63,21 @@ export default function DetailCheckScreen() {
 
         try {
             const formData = new FormData();
-            formData.append("counter_current_check", Number(currentCheckValue));
+
+            formData.append("counter_current_check", currentCheckValue.toString());
 
             if (photoFile) {
                 formData.append("counter_photo", {
                     uri: photoFile.uri,
-                    name: photoFile.name,
-                    type: photoFile.type,
+                    name: photoFile.name || "counter.jpg",
+                    type: photoFile.type || "image/jpeg",
                 } as any);
-            } else {
-                formData.append("counter_photo", "");
             }
 
             await dispatch(updateCheckPhoto({ id: data.id, formData })).unwrap();
 
             Alert.alert("Успех", "Данные успешно отправлены!");
-            setTimeout(() => {
-                router.back();
-            }, 500);
+            setTimeout(() => router.back(), 500);
         } catch (error) {
             console.error("Ошибка обновления данных:", error);
             Alert.alert("Ошибка", "Не удалось обновить данные.");

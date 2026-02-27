@@ -67,13 +67,12 @@ export const updateCheckPhoto = createAsyncThunk(
     async ({ id, formData }: { id: number; formData: FormData }, { rejectWithValue }) => {
         try {
             const res = await storesApi.updatePhoto(id, formData);
-            if (res.status !== 200) {
-                return rejectWithValue(`Ошибка сервера: ${res.status}`);
-            }
-            return await res.data;
+
+            return res.data;
         } catch (error: any) {
-            console.error(error);
-            return rejectWithValue(`Ошибка: ${error?.message || error}`);
+            console.error("❌ updateCheckPhoto error:", error?.response?.data || error);
+
+            return rejectWithValue(error?.response?.data || "Ошибка сервера");
         }
     },
 );
