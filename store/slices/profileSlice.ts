@@ -28,7 +28,7 @@ export const fetchGetProfile = createAsyncThunk<IProfile, void, { rejectValue: s
         } catch (error) {
             return rejectWithValue("Server Error");
         }
-    }
+    },
 );
 
 export const fetchUpdateProfile = createAsyncThunk<IProfile, IProfileUpdate, { rejectValue: string }>(
@@ -43,7 +43,7 @@ export const fetchUpdateProfile = createAsyncThunk<IProfile, IProfileUpdate, { r
         } catch (error: any) {
             return rejectWithValue(`Ошибка: ${error}`);
         }
-    }
+    },
 );
 
 export const fetchUpdateProfilePassword = createAsyncThunk<
@@ -76,7 +76,7 @@ export const fetchDeleteProfile = createAsyncThunk<void, void, { rejectValue: st
             console.error(error);
             return rejectWithValue(`Ошибка: ${error}`);
         }
-    }
+    },
 );
 
 // export const fetchLogout = createAsyncThunk<void, void, { rejectValue: string }>(
@@ -109,7 +109,7 @@ export const fetchVerifyEmailUpdate = createAsyncThunk<IProfile, { code: string 
             console.error(error);
             return rejectWithValue(`Ошибка: ${error}`);
         }
-    }
+    },
 );
 
 export const fetchResendEmailUpdateCode = createAsyncThunk<void, { email: string }, { rejectValue: string }>(
@@ -125,7 +125,7 @@ export const fetchResendEmailUpdateCode = createAsyncThunk<void, { email: string
             console.error(error);
             return rejectWithValue(`Ошибка: ${error}`);
         }
-    }
+    },
 );
 
 const ProfileSlice = createSlice({
@@ -182,6 +182,18 @@ const ProfileSlice = createSlice({
         addCase(fetchResendEmailUpdateCode.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload ? String(action.payload) : "Ошибка при отправке кода подтверждения";
+        });
+        addCase(fetchDeleteProfile.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        addCase(fetchDeleteProfile.fulfilled, (state) => {
+            state.loading = false;
+            state.profile = null;
+        });
+        addCase(fetchDeleteProfile.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload ? String(action.payload) : "Ошибка при удалении профиля";
         });
     },
 });

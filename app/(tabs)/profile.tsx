@@ -2,7 +2,7 @@ import NotificationIcon from "@/assets/icons/NotificationIcon";
 import ConfirmModal from "@/components/Modal";
 import Colors from "@/constants/Colors";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { fetchGetProfile } from "@/store/slices/profileSlice";
+import { fetchDeleteProfile, fetchGetProfile } from "@/store/slices/profileSlice";
 import { removeTokens } from "@/utils/auth";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -29,6 +29,7 @@ export default function ProfileScreen() {
     const [isEnabled, setIsEnabled] = useState(true);
     const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
     // Мемоизированная функция для получения инициалов
     const getInitials = useCallback((fullName?: string | null): string => {
@@ -37,6 +38,19 @@ export default function ProfileScreen() {
         if (names.length === 1) return names[0][0]?.toUpperCase() ?? "??";
         return (names[0]?.[0] + names[1]?.[0])?.toUpperCase() ?? "??";
     }, []);
+
+    const handleDeleteProfile = useCallback(async () => {
+        try {
+            await dispatch(fetchDeleteProfile()).unwrap();
+            await removeTokens();
+            updateAuthState(false);
+            router.replace("/(auth)/signIn");
+        } catch (e) {
+            console.error("Ошибка удаления профиля:", e);
+        } finally {
+            setIsDeleteModalVisible(false);
+        }
+    }, [dispatch, updateAuthState]);
 
     // Мемоизированный обработчик обновления
     const onRefresh = useCallback(async () => {
@@ -183,6 +197,12 @@ export default function ProfileScreen() {
                     <Text style={styles.logoutText}>Выйти из аккаунта</Text>
                     <Ionicons name="chevron-forward" size={20} color="#666360" />
                 </TouchableOpacity>
+
+                {/* delete */}
+                <TouchableOpacity style={styles.deleteButton} onPress={() => setIsDeleteModalVisible(true)}>
+                    <Text style={styles.deleteText}>Удалить аккаунт</Text>
+                    <Ionicons name="trash-outline" size={20} color="#E74C3D" />
+                </TouchableOpacity>
             </View>
 
             <ConfirmModal
@@ -195,11 +215,35 @@ export default function ProfileScreen() {
                 cancelText="Отмена"
                 confirmColor="#E74C3D"
             />
+
+            <ConfirmModal
+                visible={isDeleteModalVisible}
+                onConfirm={handleDeleteProfile}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                title="Удаление аккаунта"
+                message="Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить."
+                confirmText="Удалить"
+                cancelText="Отмена"
+                confirmColor="#E74C3D"
+            />
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+    deleteButton: {
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 12,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 10,
+    },
+
+    deleteText: {
+        color: "#E74C3D",
+        fontSize: 14,
+    },
     iconRow: {
         backgroundColor: "#FFF8F0",
         padding: 7,
