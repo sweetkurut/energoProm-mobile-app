@@ -2,7 +2,7 @@
     "expo": {
         "name": "Energo",
         "slug": "Energo",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon1024.png",
         "scheme": "energoprommobileapp",
@@ -17,7 +17,7 @@
             "supportsTablet": true,
             "icon": "./assets/images/icon1024.png",
             "bundleIdentifier": "com.devxwc.energo",
-            "buildNumber": "1",
+            "buildNumber": "2",
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false
             }
